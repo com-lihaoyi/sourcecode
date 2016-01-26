@@ -7,7 +7,8 @@
 ```
 
 `sourcecode` is a small Scala library for that provides common "source code"
-context to your program at runtime. For example, you can ask for the file-name
+context to your program at runtime, similar to Python's `__name__`, C++'s
+`__LINE__` or Ruby's `__FILE__`'. For example, you can ask for the file-name
 and line number of the current file:
 
 ```scala
@@ -110,7 +111,7 @@ assert(MyEnum.firstItem.toString == "firstItem")
 assert(MyEnum.secondItem.toString == "secondItem")
 ```
 
-This is very handy, and this sort of behavior is used in a number of libraries
+This is very handy, and this functionality is used in a number of libraries
 such as [FastParse](http://lihaoyi.github.io/fastparse/) and
 [Scalatags](http://lihaoyi.github.io/scalatags/#CSSStylesheets) to provide
 a boilerplate-free experience while still providing good debuggability
