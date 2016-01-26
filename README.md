@@ -8,7 +8,7 @@ SourceCode [![Build Status](https://travis-ci.org/lihaoyi/sourcecode.svg?branch=
 
 `sourcecode` is a small Scala library for that provides common "source code"
 context to your program at runtime, similar to Python's `__name__`, C++'s
-`__LINE__` or Ruby's `__FILE__`'. For example, you can ask for the file-name
+`__LINE__` or Ruby's `__FILE__`. For example, you can ask for the file-name
 and line number of the current file:
 
 ```scala
