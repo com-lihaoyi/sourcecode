@@ -3,6 +3,5 @@ script:
 - sbt ++$TRAVIS_SCALA_VERSION sourcecodeJVM/test:run sourcecodeJS/test:run
 scala:
   - 2.10.4
-  - 2.11.3
   - 2.11.7
 sudo: false
