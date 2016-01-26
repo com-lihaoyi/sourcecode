@@ -117,6 +117,12 @@ such as [FastParse](http://lihaoyi.github.io/fastparse/) and
 a boilerplate-free experience while still providing good debuggability
 and convenience.
 
+Sometimes you want to make sure that different enum values in differently
+named enums (or even an enum of the same name in a different package!) are
+given unique names. In that case, you can use `sourcecode.FullName` or
+`sourcecode.Enclosing` to capture the full path e.g.
+`"com.mypkg.MyEnum.firstItem"` and `"com.mypkg.MyEnum.secondItem"`
+
 Debug Prints
 ------------
 
