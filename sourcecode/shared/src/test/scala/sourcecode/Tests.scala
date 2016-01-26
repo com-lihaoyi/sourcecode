@@ -2,37 +2,37 @@ package sourcecode
 
 object Tests{
   def applyRun() = {
-    val nameA = sourcecode.Name()
-    assert(nameA == "sourceContextA")
+    val name = sourcecode.Name()
+    assert(name == "name")
 
-    val fullNameA = sourcecode.FullName()
-    assert(fullNameA == "sourcecode.Tests.sourceContextA")
+    val fullName = sourcecode.FullName()
+    assert(fullName == "sourcecode.Tests.fullName")
 
-    val fileA = sourcecode.File()
-    assert(fileA.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Tests.scala"))
+    val file = sourcecode.File()
+    assert(file.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Tests.scala"))
 
-    val lineA = sourcecode.Line()
-    assert(lineA == 16)
+    val line = sourcecode.Line()
+    assert(line == 14)
 
-    val enclosingA = sourcecode.Enclosing()
-    assert(enclosingA == "sourcecode.Tests.run sourceContextA")
+    val enclosing = sourcecode.Enclosing()
+    assert(enclosing == "sourcecode.Tests.applyRun enclosing")
 
     lazy val myLazy = {
       trait Bar{
-        val nameA = sourcecode.Name()
-        assert(nameA == "sourceContextA")
+        val name = sourcecode.Name()
+        assert(name == "name")
 
-        val fullNameA = sourcecode.FullName()
-        assert(fullNameA == "sourcecode.Tests.sourceContextA")
+        val fullName = sourcecode.FullName()
+        assert(fullName == "sourcecode.Tests.Bar.fullName")
 
-        val fileA = sourcecode.File()
-        assert(fileA.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Tests.scala"))
+        val file = sourcecode.File()
+        assert(file.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Tests.scala"))
 
-        val lineA = sourcecode.Line()
-        assert(lineA == 16)
+        val line = sourcecode.Line()
+        assert(line == 31)
 
-        val enclosingA = sourcecode.Enclosing()
-        assert(enclosingA == "sourcecode.Tests.applyRun myLazy Bar#sourceContextA")
+        val enclosing = sourcecode.Enclosing()
+        assert(enclosing == "sourcecode.Tests.applyRun myLazy$lzy Bar#enclosing")
       }
       val b = new Bar{}
     }
@@ -40,44 +40,83 @@ object Tests{
   }
 
   def implicitRun() = {
-    val nameA = implicitly[sourcecode.Name]
-    assert(nameA.value == "sourceContextA")
+    val name = implicitly[sourcecode.Name]
+    assert(name.value == "name")
 
-    val fullNameA = implicitly[sourcecode.FullName]
-    assert(fullNameA.value == "sourcecode.Tests.sourceContextA")
+    val fullName = implicitly[sourcecode.FullName]
+    assert(fullName.value == "sourcecode.Tests.fullName")
 
-    val fileA = implicitly[sourcecode.File]
-    assert(fileA.value.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Tests.scala"))
+    val file = implicitly[sourcecode.File]
+    assert(file.value.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Tests.scala"))
 
-    val lineA = implicitly[sourcecode.Line]
-    assert(lineA.value == 16)
+    val line = implicitly[sourcecode.Line]
+    assert(line.value == 52)
 
-    val enclosingA = implicitly[sourcecode.Enclosing]
-    assert(enclosingA.value == "sourcecode.Tests.run sourceContextA")
+    val enclosing = implicitly[sourcecode.Enclosing]
+    assert(enclosing.value == "sourcecode.Tests.implicitRun enclosing")
 
     lazy val myLazy = {
       trait Bar{
-        val nameA = implicitly[sourcecode.Name]
-        assert(nameA.value == "sourceContextA")
+        val name = implicitly[sourcecode.Name]
+        assert(name.value == "name")
 
-        val fullNameA = implicitly[sourcecode.FullName]
-        assert(fullNameA.value == "sourcecode.Tests.sourceContextA")
+        val fullName = implicitly[sourcecode.FullName]
+        assert(fullName.value == "sourcecode.Tests.Bar.fullName")
 
-        val fileA = implicitly[sourcecode.File]
-        assert(fileA.value.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Tests.scala"))
+        val file = implicitly[sourcecode.File]
+        assert(file.value.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Tests.scala"))
 
-        val lineA = implicitly[sourcecode.Line]
-        assert(lineA.value == 16)
+        val line = implicitly[sourcecode.Line]
+        assert(line.value == 69)
 
-        val enclosingA = implicitly[sourcecode.Enclosing]
-        assert(enclosingA.value == "sourcecode.Tests.run myLazy Bar#sourceContextA")
+        val enclosing = implicitly[sourcecode.Enclosing]
+        assert(enclosing.value == "sourcecode.Tests.implicitRun myLazy$lzy Bar#enclosing")
       }
       val b = new Bar{}
     }
     myLazy
   }
+
+  def logRun() = {
+    def log(foo: String)(implicit line: sourcecode.Line, file: sourcecode.File) = {
+      println(s"${file.value}:${line.value} $foo")
+    }
+    log("Foooooo") // sourcecode/shared/src/test/scala/sourcecode/Tests.scala:86 Fooooo
+  }
+  def enumRun() = {
+
+    case class EnumValue(name: String){
+      override def toString = name
+    }
+    class Enum{
+      def value(implicit name: sourcecode.Name) = EnumValue(name.value)
+    }
+    object MyEnum extends Enum{
+      val firstItem = value
+      val secondItem = value
+    }
+    assert(MyEnum.firstItem.toString == "firstItem")
+    assert(MyEnum.secondItem.toString == "secondItem")
+  }
+
+  def debugRun() = {
+    def debug(msg: String)(implicit enclosing: sourcecode.Enclosing) = {
+      println(enclosing.value + ": " + msg)
+    }
+
+    debug("Hello!") // sourcecode.Tests.debugRun: Hello!
+    class Foo(arg: Int){
+      def bar(param: String) = {
+        debug(arg + " " + param)
+      }
+    }
+    new Foo(123).bar("lol")  // sourcecode.Tests.debugRun Foo#bar: 123 lol
+  }
   def run() = {
     applyRun()
     implicitRun()
+    logRun()
+    enumRun()
+    debugRun()
   }
 }
