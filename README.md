@@ -51,6 +51,12 @@ def foo(arg: String)(implicit file: sourcecode.File) = {
 foo("hello") // the implicit sourcecode.File is filled in automatically
 ```
 
+`sourcecode` does not rely on runtime reflection or stack inspection, and
+is done at compile-time using macros. This means that it is both orders of
+magnitude faster than e.g. getting file-name and line-numbers using stack
+inspection, and also works on Scala.js where reflection and stack inspection
+can't be used.
+
 Use Cases
 =========
 
@@ -79,7 +85,8 @@ log("Foooooo") // sourcecode/shared/src/test/scala/sourcecode/Tests.scala:86 Foo
 This can be handy for letting you see where the log lines are coming from,
 without tediously tagging every log statement with a unique prefix.
 Furthermore, this happens at compile time, and is thus orders of magnitude
-faster than getting this information by generating stack traces.
+faster than getting this information by generating stack traces, and works
+on Scala.js where stack-inspection does not.
 
 Enums
 -----
