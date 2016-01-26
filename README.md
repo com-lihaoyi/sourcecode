@@ -146,4 +146,11 @@ class Foo(arg: Int){
 new Foo(123).bar("lol")  // sourcecode.Tests.debugRun Foo#bar: 123 lol
 ```
 
+Version History
+---------------
+
+0.1.0
+=====
+
+- First release
 
