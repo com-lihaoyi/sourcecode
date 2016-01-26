@@ -130,7 +130,7 @@ How many times have you written tedious code like
 ```scala
 object Bar{
   def foo(arg: String) = {
-    println("Foo.bar: " + arg)
+    println("Bar.foo: " + arg)
   }
 }
 ```
