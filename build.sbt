@@ -21,7 +21,29 @@ lazy val sourcecode = crossProject.settings(
   unmanagedSourceDirectories in Compile ++= {
     if (scalaVersion.value startsWith "2.10.") Seq(baseDirectory.value / ".."/"shared"/"src"/ "main" / "scala-2.10")
     else Seq(baseDirectory.value / ".."/"shared" / "src" / "main" / "scala-2.11")
-  }
+  },
+  version := "0.1.0",
+  publishTo := Some("releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2"),
+
+  pomExtra :=
+    <url>https://github.com/lihaoyi/sourcecode</url>
+    <licenses>
+      <license>
+        <name>MIT license</name>
+        <url>http://www.opensource.org/licenses/mit-license.php</url>
+      </license>
+    </licenses>
+    <scm>
+      <url>git://github.com/lihaoyi/sourcecode.git</url>
+      <connection>scm:git://github.com/lihaoyi/sourcecode.git</connection>
+    </scm>
+    <developers>
+      <developer>
+        <id>lihaoyi</id>
+        <name>Li Haoyi</name>
+        <url>https://github.com/lihaoyi</url>
+      </developer>
+    </developers>
 )
 
 lazy val js = sourcecode.js
