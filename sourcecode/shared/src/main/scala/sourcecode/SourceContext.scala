@@ -1,7 +1,11 @@
 package sourcecode
 
 import language.experimental.macros
-
+object Util{
+  def isSynthetic(s: String) = {
+    s == "<init>" || (s.startsWith("<local ") && s.endsWith(">"))
+  }
+}
 abstract class SourceValue[T]{
   def value: T
 }
@@ -15,12 +19,11 @@ object Name extends SourceCompanion[String, Name]{
   implicit def wrap(s: String): Name = Name(s)
   def impl(c: Compat.Context): c.Expr[sourcecode.Name] = {
     import c.universe._
-    val owner = Compat.enclosingOwner(c)
+    var owner = Compat.enclosingOwner(c)
     def getName(s: Symbol): String = s.name.decoded.toString.trim
+    while(Util.isSynthetic(getName(owner))) owner = owner.owner
     val simpleName = getName(owner)
-
-    val name = q"$simpleName"
-    c.Expr[sourcecode.Name](q"""_root_.sourcecode.Name($name)""")
+    c.Expr[sourcecode.Name](q"""_root_.sourcecode.Name($simpleName)""")
   }
 
 }
@@ -81,19 +84,21 @@ object Enclosing extends SourceCompanion[String, Enclosing]{
     var current = owner
     var path = List.empty[Tree]
     while(current != NoSymbol && current.toString != "package <root>"){
-      val pre = q"_root_.sourcecode.Chunk"
-      val chunk = current match{
-        case x if x.isPackage => "Pkg"
-        case x if x.isModuleClass => "Obj"
-        case x if x.isClass && x.asClass.isTrait => "Trt"
-        case x if x.isClass => "Cls"
-        case x if x.isMethod => "Def"
-        case x if x.isTerm && x.asTerm.isVar => "Var"
-        case x if x.isTerm && x.asTerm.isLazy => "Lzy"
-        case x if x.isTerm && x.asTerm.isVal => "Val"
-      }
+      if (!Util.isSynthetic(getName(current))) {
+        val pre = q"_root_.sourcecode.Chunk"
+        val chunk = current match {
+          case x if x.isPackage => "Pkg"
+          case x if x.isModuleClass => "Obj"
+          case x if x.isClass && x.asClass.isTrait => "Trt"
+          case x if x.isClass => "Cls"
+          case x if x.isMethod => "Def"
+          case x if x.isTerm && x.asTerm.isVar => "Var"
+          case x if x.isTerm && x.asTerm.isLazy => "Lzy"
+          case x if x.isTerm && x.asTerm.isVal => "Val"
+        }
 
-      path = q"$pre.${newTermName(chunk)}(${getName(current)})" :: path
+        path = q"$pre.${newTermName(chunk)}(${getName(current)})" :: path
+      }
       current = current.owner
     }
     c.Expr[sourcecode.Enclosing](q"""_root_.sourcecode.Enclosing(Vector(..$path))""")
@@ -111,4 +116,18 @@ object Chunk{
   case class Lzy(name: String) extends Chunk
   case class Def(name: String) extends Chunk
 
+}
+case class Text[T](value: T, source: String)
+object Text{
+  implicit def generate[T](v: T): Text[T] = macro impl[T]
+  def apply[T](v: T): Text[T] = macro impl[T]
+  def impl[T: c.WeakTypeTag](c: Compat.Context)(v: c.Expr[T]): c.Expr[sourcecode.Text[T]] = {
+    import c.universe._
+
+    // If the source positions don't have a full range, then fall back to `showCode`
+    val txt =
+      if (v.tree.pos.end <= v.tree.pos.start) c.universe.showCode(v.tree)
+      else v.tree.pos.source.content.slice(v.tree.pos.start, v.tree.pos.end).mkString
+    c.Expr[sourcecode.Text[T]](q"""_root_.sourcecode.Text($v, $txt)""")
+  }
 }

@@ -1,13 +1,11 @@
 package sourcecode
 
-/**
-  * Created by haoyi on 3/6/16.
-  */
+
 object ManualImplicit {
   def apply() = {
     assert(foo() == "apply")
     assert(foo()("cow") == "cow")
-    assert(bar() == 10)
+    assert(bar() == 8)
     assert(bar()(123) == 123)
     assert(bar()(123) == 123)
     assert(baz() == "sourcecode.ManualImplicit.apply")

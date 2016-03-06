@@ -37,6 +37,13 @@ The kinds of compilation-time data that `sourcecode` provides are:
 - `sourcecode.Enclosing`: the name of the nearest enclosing definition: `val`,
   `class`, whatever, prefixed by the names of all enclosing `class`s, `trait`s,
   `object`s or `package`s, `def`s, `val`s, `var`s or `lazy val`s`
+- `sourcecode.Text[T]`: when you want to take a value of type `T`, but also 
+  want to get the "source text" of that particular value. Note that the text 
+  may not line up 100% with the original code if you do not compile with the 
+  `-Yrangepos` compiler flag: it might contain implicits, extra `.`s before and
+  `()`s around each method call from the desugaring of the source code. Also, 
+  if you have multiple statements in a `{}` block, `sourcecode.Text` will only
+  capture the source code for the last expression that gets returned.
 
 All these are available both via `()` and as implicits, e.g. `sourcecode.File`
 can be summoned via `sourcecode.File()` or `implicitly[sourcecode.File].value`.
@@ -121,7 +128,18 @@ Sometimes you want to make sure that different enum values in differently
 named enums (or even an enum of the same name in a different package!) are
 given unique names. In that case, you can use `sourcecode.FullName` or
 `sourcecode.Enclosing` to capture the full path e.g.
-`"com.mypkg.MyEnum.firstItem"` and `"com.mypkg.MyEnum.secondItem"`
+`"com.mypkg.MyEnum.firstItem"` and `"com.mypkg.MyEnum.secondItem"`. You can
+also use `sourcecode.Name` in an constructor, in which case it'll be picked
+up during inheritance:
+
+```scala
+class EnumValue(implicit name: sourcecode.Name){
+  override def toString = name.value
+}
+object Foo extends EnumValue
+println(Foo.toString)
+assert(Foo.toString == "Foo")
+```
 
 Debug Prints
 ------------
@@ -140,21 +158,33 @@ classes, objects or functions to make sure you can find your print output
 2-3 minutes later? With `source.Enclosing`, you can get this for free:
 
 ```scala
-def debug(msg: String)(implicit enclosing: sourcecode.Enclosing) = {
-  println(enclosing.value + ": " + msg)
+def debug[V](value: sourcecode.Text[V])(implicit enclosing: sourcecode.Enclosing) = {
+  println(enclosing.value + " [" + value.source + "]: " + value.value)
 }
 
-debug("Hello!") // sourcecode.Tests.debugRun: Hello!
 class Foo(arg: Int){
+  debug(arg) // sourcecode.DebugRun.main Foo [arg]: 123
   def bar(param: String) = {
-    debug(arg + " " + param)
+    debug(arg -> param)
   }
 }
-new Foo(123).bar("lol")  // sourcecode.Tests.debugRun Foo#bar: 123 lol
+new Foo(123).bar("lol")  // sourcecode.DebugRun.main Foo#bar [arg -> param]: (123,lol)
 ```
+
 
 Version History
 ---------------
+0.1.1
+=====
+
+- Ignore `<local foo>` and `<init>` symbols when determining `sourcecode.Name`, 
+`sourcecode.FullName` or `sourcecode.Enclosing`
+- Add `sourcecode.Text` implicit to capture source code of an expression
+- Add implicit conversions to `sourcecode.*`, so you can pass in a `String`
+  to manually satisfy and implicit wanting a `sourcecode.Name` or 
+  `sourcecode.FullName` or `sourcecode.File`, an `Int` to satisfy an implicit 
+  asking for `sourcecode.Line` or a `Seq[Chunk]` to satisfy an implicit asking
+  for a `sourcecode.Enclosing`
 
 0.1.0
 =====

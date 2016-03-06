@@ -98,26 +98,29 @@ object Tests{
     assert(MyEnum.firstItem.toString == "firstItem")
     assert(MyEnum.secondItem.toString == "secondItem")
   }
-
-  def debugRun() = {
-    def debug(msg: String)(implicit enclosing: sourcecode.Enclosing) = {
-      println(enclosing.value + ": " + msg)
+  def enum2Run() = {
+    class EnumValue(implicit name: sourcecode.Name){
+      override def toString = name.value
     }
+    object Foo extends EnumValue
+    println(Foo.toString)
+    assert(Foo.toString == "Foo")
 
-    debug("Hello!") // sourcecode.Tests.debugRun: Hello!
-    class Foo(arg: Int){
-      def bar(param: String) = {
-        debug(arg + " " + param)
-      }
+    object Bar{
+      assert(sourcecode.Name() == "Bar")
     }
-    new Foo(123).bar("lol")  // sourcecode.Tests.debugRun Foo#bar: 123 lol
+    Bar
   }
+
+
   def run() = {
     applyRun()
     implicitRun()
     logRun()
     enumRun()
-    debugRun()
+    enum2Run()
+    DebugRun.main()
     ManualImplicit()
+    TextTests()
   }
 }
