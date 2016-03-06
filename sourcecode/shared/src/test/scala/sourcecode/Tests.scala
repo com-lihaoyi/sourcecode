@@ -118,5 +118,6 @@ object Tests{
     logRun()
     enumRun()
     debugRun()
+    ManualImplicit()
   }
 }

@@ -12,6 +12,7 @@ abstract class SourceCompanion[T, V <: SourceValue[T]]{
 case class Name(value: String) extends SourceValue[String]
 object Name extends SourceCompanion[String, Name]{
   implicit def generate: sourcecode.Name = macro impl
+  implicit def wrap(s: String): Name = Name(s)
   def impl(c: Compat.Context): c.Expr[sourcecode.Name] = {
     import c.universe._
     val owner = Compat.enclosingOwner(c)
@@ -26,6 +27,7 @@ object Name extends SourceCompanion[String, Name]{
 case class FullName(value: String) extends SourceValue[String]
 object FullName extends SourceCompanion[String, FullName]{
   implicit def generate: sourcecode.FullName = macro impl
+  implicit def wrap(s: String): FullName = FullName(s)
 
   def impl(c: Compat.Context): c.Expr[sourcecode.FullName] = {
     import c.universe._
@@ -37,6 +39,8 @@ object FullName extends SourceCompanion[String, FullName]{
 case class File(value: String) extends SourceValue[String]
 object File extends SourceCompanion[String, File]{
   implicit def generate: sourcecode.File = macro impl
+  implicit def wrap(s: String): File = File(s)
+
   def impl(c: Compat.Context): c.Expr[sourcecode.File] = {
     import c.universe._
     val file = c.enclosingPosition.source.path
@@ -45,7 +49,8 @@ object File extends SourceCompanion[String, File]{
 }
 case class Line(value: Int) extends SourceValue[Int]
 object Line extends SourceCompanion[Int, Line]{
-  implicit def generate: sourcecode.Line= macro impl
+  implicit def generate: sourcecode.Line = macro impl
+  implicit def wrap(i: Int): Line = Line(i)
   def impl(c: Compat.Context): c.Expr[sourcecode.Line] = {
     import c.universe._
     val line = c.enclosingPosition.line
@@ -68,6 +73,7 @@ case class Enclosing(rawPath: Vector[Chunk]) extends SourceValue[String]{
 
 object Enclosing extends SourceCompanion[String, Enclosing]{
   implicit def generate: sourcecode.Enclosing = macro impl
+  implicit def wrap(s: Seq[Chunk]): Enclosing = Enclosing(s.toVector)
   def impl(c: Compat.Context): c.Expr[sourcecode.Enclosing] = {
     import c.universe._
     val owner = Compat.enclosingOwner(c)
