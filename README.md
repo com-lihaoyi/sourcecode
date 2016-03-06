@@ -170,6 +170,85 @@ class Foo(arg: Int){
 new Foo(123).bar("lol")  // sourcecode.DebugRun.main Foo#bar [arg -> param]: (123,lol)
 ```
 
+Embedding Domain-Specific Languages
+-----------------------------------
+
+The Scala programming is a popular choice to embed domain-specific languages:
+that means that you start with some external language, e.g. this 
+[MathProg] example
+
+```scala
+param m;
+param n;
+param l;
+
+set I := 1 .. m;
+set J := 1 .. n;
+set K := 1 .. l;
+
+param c{J};
+param d{K};
+param a{I, J};
+
+var x{J} integer, >= 0;
+var y{K} >= 0;
+```
+
+The linked slides has more detail about what exactly this language does (it
+describes mathematical optimization problems). For a variety of reasons, you 
+may prefer to write this as part of a Scala program instead: for example you
+may want Scala's IDE support, or its ability to define functions that help
+reduce boilerplate, or maybe you like the way the compiler provides type errors
+when you do the wrong thing.
+
+A first attempt at converting this to Scala may look like this:
+
+```scala
+val m = param("m")
+val n = param("n")
+val l = param("l")
+
+val I = set("I") := 1 to m
+val J = set("J") := 1 to m
+val K = set("K") := 1 to m
+
+val c = param("c", J)
+val d = param("d", K)
+val a = param("a", I, J)
+
+val x = xvar("x", J).integer >= 0
+val y = xvar("y", K) >= 0
+```
+
+There's a bunch of duplication around the names of the `val`s: each `val`
+has its name repeated in a string that gets passed to the expression on the
+right. This is for the program to use the name of the `val` later: for example
+when printing error messages, or the results of the computation, you want to
+see which `val`s are involved! Thus you end up duplicating the names over and
+over and over.
+
+With sourcecode, you can easily define `param` `set` and `xvar` as taking 
+`sourcecode.Name`, thus eliminating all the boilerplate involved in duplicating
+names:
+
+```scala
+val m = param
+val n = param
+val l = param
+
+val I = set := 1 to m
+val J = set := 1 to m
+val K = set := 1 to m
+
+val c = param(J)
+val d = param(K)
+val a = param(I, J)
+
+val x = xvar(J).integer >= 0
+val y = xvar(K) >= 0
+```
+
+
 
 Version History
 ---------------
@@ -190,3 +269,4 @@ Version History
 
 - First release
 
+[MathProg]: http://www.slideshare.net/gerferra/an-embedded-dsl-to-manipulate-mathprog-mixed-integer-programming-models-within-scala
