@@ -119,15 +119,30 @@ object Chunk{
 }
 case class Text[T](value: T, source: String)
 object Text{
-  implicit def generate[T](v: T): Text[T] = macro impl[T]
-  def apply[T](v: T): Text[T] = macro impl[T]
-  def impl[T: c.WeakTypeTag](c: Compat.Context)(v: c.Expr[T]): c.Expr[sourcecode.Text[T]] = {
+  implicit def generate[T](v: T): Text[T] = macro Impls.treeImpl[T]
+  def apply[T](v: T): Text[T] = macro Impls.treeImpl[T]
+
+}
+object Impls{
+  def treeImpl[T: c.WeakTypeTag](c: Compat.Context)(v: c.Expr[T]): c.Expr[sourcecode.Text[T]] = {
+    val generate = () // shadow the implicit so we don't accidentally use it in here
     import c.universe._
 
     // If the source positions don't have a full range, then fall back to `showCode`
-    val txt =
-      if (v.tree.pos.end <= v.tree.pos.start) c.universe.showCode(v.tree)
-      else v.tree.pos.source.content.slice(v.tree.pos.start, v.tree.pos.end).mkString
-    c.Expr[sourcecode.Text[T]](q"""_root_.sourcecode.Text($v, $txt)""")
+    val txt: String =
+      if (v.tree.pos.end <= v.tree.pos.start) {
+        c.abort(
+          c.enclosingPosition,
+          "sourcecode.Text could not find the range position of your snippet " +
+            s"${v.tree}; this probably means you need to enable the `-Yrangepos` " +
+            "flag in your Scala compiler settings."
+        )
+      } else {
+        v.tree.pos.source.content.slice(v.tree.pos.start, v.tree.pos.end).mkString
+      }
+
+    val tree = q"""_root_.sourcecode.Text(${v.tree}, $txt)"""
+
+    c.Expr[sourcecode.Text[T]](tree)
   }
 }

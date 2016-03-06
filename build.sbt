@@ -22,7 +22,8 @@ lazy val sourcecode = crossProject.settings(
     if (scalaVersion.value startsWith "2.10.") Seq(baseDirectory.value / ".."/"shared"/"src"/ "main" / "scala-2.10")
     else Seq(baseDirectory.value / ".."/"shared" / "src" / "main" / "scala-2.11")
   },
-  scalacOptions += "-Yrangepos",
+  // needs to be `in Test` otherwise 2.10 quasiquote compilation fails in Main
+  (scalacOptions in Test) += "-Yrangepos",
   version := "0.1.0",
   publishTo := Some("releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2"),
 
