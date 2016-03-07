@@ -4,8 +4,8 @@ import language.experimental.macros
 
 
 object Util{
-  def isSynthetic(c: Compat.Context)(s: c.Symbol) = {
-    val name = getName(c)(s)
+  def isSynthetic(c: Compat.Context)(s: c.Symbol) = isSyntheticName(getName(c)(s))
+  def isSyntheticName(name: String) = {
     name == "<init>" || (name.startsWith("<local ") && name.endsWith(">"))
   }
   def getName(c: Compat.Context)(s: c.Symbol) = s.name.decoded.toString.trim
@@ -26,7 +26,7 @@ object Name extends SourceCompanion[String, Name](new Name(_)){
     var owner = Compat.enclosingOwner(c)
     while(Util.isSynthetic(c)(owner)) owner = owner.owner
     val simpleName = Util.getName(c)(owner)
-    c.Expr[sourcecode.Name](q"""_root_.sourcecode.Name($simpleName)""")
+    c.Expr[sourcecode.Name](q"""${c.prefix}($simpleName)""")
   }
   case class Machine(value: String) extends SourceValue[String]
   object Machine extends SourceCompanion[String, Machine](new Machine(_)){
@@ -35,7 +35,7 @@ object Name extends SourceCompanion[String, Name](new Name(_)){
       import c.universe._
       val owner = Compat.enclosingOwner(c)
       val simpleName = Util.getName(c)(owner)
-      c.Expr[Machine](q"""_root_.sourcecode.Name.Machine($simpleName)""")
+      c.Expr[Machine](q"""${c.prefix}($simpleName)""")
     }
   }
 }
@@ -46,8 +46,23 @@ object FullName extends SourceCompanion[String, FullName](new FullName(_)){
   def impl(c: Compat.Context): c.Expr[FullName] = {
     import c.universe._
     val owner = Compat.enclosingOwner(c)
-    val fullName = owner.fullName.trim
-    c.Expr[sourcecode.FullName](q"""_root_.sourcecode.FullName($fullName)""")
+    val fullName =
+      owner.fullName.trim
+           .split("\\.", -1)
+           .filterNot(Util.isSyntheticName)
+           .mkString(".")
+    c.Expr[sourcecode.FullName](q"""${c.prefix}($fullName)""")
+  }
+  case class Machine(value: String) extends SourceValue[String]
+  object Machine extends SourceCompanion[String, Machine](new Machine(_)){
+    implicit def generate: Machine = macro impl
+
+    def impl(c: Compat.Context): c.Expr[Machine] = {
+      import c.universe._
+      val owner = Compat.enclosingOwner(c)
+      val fullName = owner.fullName.trim
+      c.Expr[Machine](q"""${c.prefix}($fullName)""")
+    }
   }
 }
 case class File(value: String) extends SourceValue[String]
@@ -57,7 +72,7 @@ object File extends SourceCompanion[String, File](new File(_)){
   def impl(c: Compat.Context): c.Expr[sourcecode.File] = {
     import c.universe._
     val file = c.enclosingPosition.source.path
-    c.Expr[sourcecode.File](q"""_root_.sourcecode.File($file)""")
+    c.Expr[sourcecode.File](q"""${c.prefix}($file)""")
   }
 }
 case class Line(value: Int) extends SourceValue[Int]
@@ -66,32 +81,29 @@ object Line extends SourceCompanion[Int, Line](new Line(_)){
   def impl(c: Compat.Context): c.Expr[sourcecode.Line] = {
     import c.universe._
     val line = c.enclosingPosition.line
-    c.Expr[sourcecode.Line](q"""_root_.sourcecode.Line($line)""")
+    c.Expr[sourcecode.Line](q"""${c.prefix}($line)""")
   }
 }
 case class Enclosing(value: String) extends SourceValue[String]
 
 object Enclosing extends SourceCompanion[String, Enclosing](new Enclosing(_)){
   implicit def generate: Enclosing = macro impl
-  def impl(c: Compat.Context): c.Expr[Enclosing] = Impls.enclosing[Enclosing](c)(true)
+  def impl(c: Compat.Context): c.Expr[Enclosing] = Impls.enclosing[Enclosing](c)(
+    !Util.isSynthetic(c)(_)
+  )
   case class Machine(value: String) extends SourceValue[String]
   object Machine extends SourceCompanion[String, Machine](new Machine(_)){
     implicit def generate: Machine = macro impl
-    def impl(c: Compat.Context): c.Expr[Machine] = Impls.enclosing[Machine](c)(false)
+    def impl(c: Compat.Context): c.Expr[Machine] = Impls.enclosing[Machine](c)(_ => true)
+  }
+
+  case class Pkg(value: String) extends SourceValue[String]
+  object Pkg extends SourceCompanion[String, Pkg](new Pkg(_)){
+    implicit def generate: Pkg = macro impl
+    def impl(c: Compat.Context): c.Expr[Pkg] = Impls.enclosing[Pkg](c)(_.isPackage)
   }
 }
-sealed trait Chunk
-object Chunk{
-  case class Pkg(name: String) extends Chunk
-  case class Obj(name: String) extends Chunk
-  case class Cls(name: String) extends Chunk
-  case class Trt(name: String) extends Chunk
-  case class Val(name: String) extends Chunk
-  case class Var(name: String) extends Chunk
-  case class Lzy(name: String) extends Chunk
-  case class Def(name: String) extends Chunk
 
-}
 case class Text[T](value: T, source: String)
 object Text{
   implicit def generate[T](v: T): Text[T] = macro Impls.text[T]
@@ -108,16 +120,29 @@ object Impls{
     parser.expr()
     val end = parser.in.lastOffset
     val txt = fileContent.slice(start, start + end)
-    val tree = q"""_root_.sourcecode.Text(${v.tree}, $txt)"""
+    val tree = q"""${c.prefix}(${v.tree}, $txt)"""
     c.Expr[sourcecode.Text[T]](tree)
   }
+  sealed trait Chunk
+  object Chunk{
+    case class Pkg(name: String) extends Chunk
+    case class Obj(name: String) extends Chunk
+    case class Cls(name: String) extends Chunk
+    case class Trt(name: String) extends Chunk
+    case class Val(name: String) extends Chunk
+    case class Var(name: String) extends Chunk
+    case class Lzy(name: String) extends Chunk
+    case class Def(name: String) extends Chunk
 
-  def enclosing[T](c: Compat.Context)(filterSynthetic: Boolean): c.Expr[T] = {
+  }
+
+  def enclosing[T](c: Compat.Context)(filter: c.Symbol => Boolean): c.Expr[T] = {
+
     import c.universe._
     var current = Compat.enclosingOwner(c)
     var path = List.empty[Chunk]
     while(current != NoSymbol && current.toString != "package <root>"){
-      if (!filterSynthetic || !Util.isSynthetic(c)(current)) {
+      if (filter(current)) {
 
         import Chunk._
         val chunk = current match {

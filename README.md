@@ -43,10 +43,11 @@ The kinds of compilation-time data that `sourcecode` provides are:
   compile otherwise. Also, if you have multiple statements in a `{}` block, 
   `sourcecode.Text` will only capture the source code for the last expression 
   that gets returned.
-- `sourcecode.Name.Machine` and `sourcecode.Enclosing.Machine` which are similar
-  to `sourcecode.Name` and `sourcecode.Enclosing` except they do not filter
+- `sourcecode.Name.Machine`, `sourcecode.FullName.Machine` and 
+  `sourcecode.Enclosing.Machine` which are similar to `sourcecode.Name`,
+  `sourcecode.FullName` and `sourcecode.Enclosing` except they do not filter
   out synthetic method names; e.g. if you want to see the `<init>` names or
-  `<local foo>` names as part of the path, use these
+  `<local foo>` names as part of the path, use these instead.
 
 All these are available both via `()` and as implicits, e.g. `sourcecode.File`
 can be summoned via `sourcecode.File()` or `implicitly[sourcecode.File].value`.
@@ -260,13 +261,24 @@ Version History
 =====
 
 - Ignore `<local foo>` and `<init>` symbols when determining `sourcecode.Name`, 
-`sourcecode.FullName` or `sourcecode.Enclosing`
+  `sourcecode.FullName` or `sourcecode.Enclosing`. If you want these, use the
+  `sourcecode.Name.Machine`/`sourcecode.FullName.Machine`/`sourcecode.Enclosing.Machine`
+  implicits instead.
+   
 - Add `sourcecode.Text` implicit to capture source code of an expression
+
 - Add implicit conversions to `sourcecode.*`, so you can pass in a `String`
   to manually satisfy and implicit wanting a `sourcecode.Name` or 
   `sourcecode.FullName` or `sourcecode.File`, an `Int` to satisfy an implicit 
-  asking for `sourcecode.Line` or a `Seq[Chunk]` to satisfy an implicit asking
-  for a `sourcecode.Enclosing`
+  asking for `sourcecode.Line` 
+
+- `sourcecode.Enclosing` has been simplified to take a single `String` rather
+  than the previous `Vector[Chunk]`.
+  
+- Added the `sourcecode.Enclosing.Pkg` implicit, which provides the current 
+  enclosing package without any of the `class`s/`object`s/`def`s/etc.. Can be 
+  subtracted from `sourcecode.Enclosing` if you *only* want the 
+  `class`s/`object`s/`def`s/etc.
 
 0.1.0
 =====
