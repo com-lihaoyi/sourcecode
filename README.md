@@ -38,11 +38,10 @@ The kinds of compilation-time data that `sourcecode` provides are:
   `class`, whatever, prefixed by the names of all enclosing `class`s, `trait`s,
   `object`s or `package`s, `def`s, `val`s, `var`s or `lazy val`s`
 - `sourcecode.Text[T]`: when you want to take a value of type `T`, but also 
-  want to get the "source text" of that particular value. Note that this 
-  implicit requires the `-Yrangepos` compiler flag to work, and will fail to
-  compile otherwise. Also, if you have multiple statements in a `{}` block, 
-  `sourcecode.Text` will only capture the source code for the last expression 
-  that gets returned.
+  want to get the "source text" of that particular value. Note that if 
+  you have multiple statements in a `{}` block, `sourcecode.Text` will only 
+  capture the source code for the last expression that gets returned. This
+  implicit is slightly experimental; be sure to report any bugs you find!
 - `sourcecode.Name.Machine`, `sourcecode.FullName.Machine` and 
   `sourcecode.Enclosing.Machine` which are similar to `sourcecode.Name`,
   `sourcecode.FullName` and `sourcecode.Enclosing` except they do not filter
