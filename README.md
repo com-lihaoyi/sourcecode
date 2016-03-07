@@ -519,8 +519,8 @@ see which `val`s are involved! Thus you end up duplicating the names over and
 over and over.
 
 With sourcecode, you can easily define `param` `set` and `xvar` as taking 
-`sourcecode.Name`, thus eliminating all the boilerplate involved in duplicating
-names:
+implicit `sourcecode.Name`s, thus eliminating all the boilerplate involved in 
+duplicating names:
 
 ```scala
 val m = param
