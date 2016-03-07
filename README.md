@@ -36,6 +36,7 @@ Table of Contents
     - [Enums](#enums)
     - [Debug Prints](#debug-prints)
     - [Embedding Domain-Specific Languages](#embedding-domain-specific-languages)
+- [Version History](#version-history)
 
 Overview
 ========
