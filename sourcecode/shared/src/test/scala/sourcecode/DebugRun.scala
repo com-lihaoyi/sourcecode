@@ -9,9 +9,9 @@ object DebugRun {
     class Foo(arg: Int){
       debug(arg) // sourcecode.DebugRun.main Foo [arg]: 123
       def bar(param: String) = {
-        debug(arg -> param)
+        debug(param -> arg)
       }
     }
-    new Foo(123).bar("lol")  // sourcecode.DebugRun.main Foo#bar [arg -> param]: (123,lol)
+    new Foo(123).bar("lol")  // sourcecode.DebugRun.main Foo#bar [param]: lol
   }
 }

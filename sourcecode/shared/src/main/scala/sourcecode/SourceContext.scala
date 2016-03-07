@@ -1,38 +1,49 @@
 package sourcecode
 
 import language.experimental.macros
+
+
 object Util{
-  def isSynthetic(s: String) = {
-    s == "<init>" || (s.startsWith("<local ") && s.endsWith(">"))
+  def isSynthetic(c: Compat.Context)(s: c.Symbol) = {
+    val name = getName(c)(s)
+    name == "<init>" || (name.startsWith("<local ") && name.endsWith(">"))
   }
+  def getName(c: Compat.Context)(s: c.Symbol) = s.name.decoded.toString.trim
 }
 abstract class SourceValue[T]{
   def value: T
 }
-abstract class SourceCompanion[T, V <: SourceValue[T]]{
+abstract class SourceCompanion[T, V <: SourceValue[T]](build: T => V){
   def apply()(implicit s: V): T = s.value
+  implicit def wrap(s: T): V = build(s)
 }
-
 case class Name(value: String) extends SourceValue[String]
-object Name extends SourceCompanion[String, Name]{
-  implicit def generate: sourcecode.Name = macro impl
-  implicit def wrap(s: String): Name = Name(s)
-  def impl(c: Compat.Context): c.Expr[sourcecode.Name] = {
+object Name extends SourceCompanion[String, Name](new Name(_)){
+  implicit def generate: Name = macro impl
+
+  def impl(c: Compat.Context): c.Expr[Name] = {
     import c.universe._
     var owner = Compat.enclosingOwner(c)
-    def getName(s: Symbol): String = s.name.decoded.toString.trim
-    while(Util.isSynthetic(getName(owner))) owner = owner.owner
-    val simpleName = getName(owner)
+    while(Util.isSynthetic(c)(owner)) owner = owner.owner
+    val simpleName = Util.getName(c)(owner)
     c.Expr[sourcecode.Name](q"""_root_.sourcecode.Name($simpleName)""")
   }
-
+  case class Machine(value: String) extends SourceValue[String]
+  object Machine extends SourceCompanion[String, Machine](new Machine(_)){
+    implicit def generate: Machine = macro impl
+    def impl(c: Compat.Context): c.Expr[Machine] = {
+      import c.universe._
+      val owner = Compat.enclosingOwner(c)
+      val simpleName = Util.getName(c)(owner)
+      c.Expr[Machine](q"""_root_.sourcecode.Name.Machine($simpleName)""")
+    }
+  }
 }
 case class FullName(value: String) extends SourceValue[String]
-object FullName extends SourceCompanion[String, FullName]{
-  implicit def generate: sourcecode.FullName = macro impl
-  implicit def wrap(s: String): FullName = FullName(s)
+object FullName extends SourceCompanion[String, FullName](new FullName(_)){
+  implicit def generate: FullName = macro impl
 
-  def impl(c: Compat.Context): c.Expr[sourcecode.FullName] = {
+  def impl(c: Compat.Context): c.Expr[FullName] = {
     import c.universe._
     val owner = Compat.enclosingOwner(c)
     val fullName = owner.fullName.trim
@@ -40,9 +51,8 @@ object FullName extends SourceCompanion[String, FullName]{
   }
 }
 case class File(value: String) extends SourceValue[String]
-object File extends SourceCompanion[String, File]{
+object File extends SourceCompanion[String, File](new File(_)){
   implicit def generate: sourcecode.File = macro impl
-  implicit def wrap(s: String): File = File(s)
 
   def impl(c: Compat.Context): c.Expr[sourcecode.File] = {
     import c.universe._
@@ -51,59 +61,24 @@ object File extends SourceCompanion[String, File]{
   }
 }
 case class Line(value: Int) extends SourceValue[Int]
-object Line extends SourceCompanion[Int, Line]{
+object Line extends SourceCompanion[Int, Line](new Line(_)){
   implicit def generate: sourcecode.Line = macro impl
-  implicit def wrap(i: Int): Line = Line(i)
   def impl(c: Compat.Context): c.Expr[sourcecode.Line] = {
     import c.universe._
     val line = c.enclosingPosition.line
     c.Expr[sourcecode.Line](q"""_root_.sourcecode.Line($line)""")
   }
 }
-case class Enclosing(rawPath: Vector[Chunk]) extends SourceValue[String]{
-  override def toString = value
-  def value = rawPath.map{
-    case Chunk.Pkg(s) => s + "."
-    case Chunk.Obj(s) => s + "."
-    case Chunk.Cls(s) => s + "#"
-    case Chunk.Trt(s) => s + "#"
-    case Chunk.Val(s) => s + " "
-    case Chunk.Var(s) => s + " "
-    case Chunk.Lzy(s) => s + " "
-    case Chunk.Def(s) => s + " "
-  }.mkString.dropRight(1)
-}
+case class Enclosing(value: String) extends SourceValue[String]
 
-object Enclosing extends SourceCompanion[String, Enclosing]{
-  implicit def generate: sourcecode.Enclosing = macro impl
-  implicit def wrap(s: Seq[Chunk]): Enclosing = Enclosing(s.toVector)
-  def impl(c: Compat.Context): c.Expr[sourcecode.Enclosing] = {
-    import c.universe._
-    val owner = Compat.enclosingOwner(c)
-    def getName(s: Symbol): String = s.name.decoded.toString.trim
-    var current = owner
-    var path = List.empty[Tree]
-    while(current != NoSymbol && current.toString != "package <root>"){
-      if (!Util.isSynthetic(getName(current))) {
-        val pre = q"_root_.sourcecode.Chunk"
-        val chunk = current match {
-          case x if x.isPackage => "Pkg"
-          case x if x.isModuleClass => "Obj"
-          case x if x.isClass && x.asClass.isTrait => "Trt"
-          case x if x.isClass => "Cls"
-          case x if x.isMethod => "Def"
-          case x if x.isTerm && x.asTerm.isVar => "Var"
-          case x if x.isTerm && x.asTerm.isLazy => "Lzy"
-          case x if x.isTerm && x.asTerm.isVal => "Val"
-        }
-
-        path = q"$pre.${newTermName(chunk)}(${getName(current)})" :: path
-      }
-      current = current.owner
-    }
-    c.Expr[sourcecode.Enclosing](q"""_root_.sourcecode.Enclosing(Vector(..$path))""")
+object Enclosing extends SourceCompanion[String, Enclosing](new Enclosing(_)){
+  implicit def generate: Enclosing = macro impl
+  def impl(c: Compat.Context): c.Expr[Enclosing] = Impls.enclosing[Enclosing](c)(true)
+  case class Machine(value: String) extends SourceValue[String]
+  object Machine extends SourceCompanion[String, Machine](new Machine(_)){
+    implicit def generate: Machine = macro impl
+    def impl(c: Compat.Context): c.Expr[Machine] = Impls.enclosing[Machine](c)(false)
   }
-
 }
 sealed trait Chunk
 object Chunk{
@@ -119,30 +94,57 @@ object Chunk{
 }
 case class Text[T](value: T, source: String)
 object Text{
-  implicit def generate[T](v: T): Text[T] = macro Impls.treeImpl[T]
-  def apply[T](v: T): Text[T] = macro Impls.treeImpl[T]
+  implicit def generate[T](v: T): Text[T] = macro Impls.text[T]
+  def apply[T](v: T): Text[T] = macro Impls.text[T]
 
 }
 object Impls{
-  def treeImpl[T: c.WeakTypeTag](c: Compat.Context)(v: c.Expr[T]): c.Expr[sourcecode.Text[T]] = {
-    val generate = () // shadow the implicit so we don't accidentally use it in here
+  def text[T: c.WeakTypeTag](c: Compat.Context)(v: c.Expr[T]): c.Expr[sourcecode.Text[T]] = {
     import c.universe._
-
-    // If the source positions don't have a full range, then fall back to `showCode`
-    val txt: String =
-      if (v.tree.pos.end <= v.tree.pos.start) {
-        c.abort(
-          c.enclosingPosition,
-          "sourcecode.Text could not find the range position of your snippet " +
-            s"${v.tree}; this probably means you need to enable the `-Yrangepos` " +
-            "flag in your Scala compiler settings."
-        )
-      } else {
-        v.tree.pos.source.content.slice(v.tree.pos.start, v.tree.pos.end).mkString
-      }
-
+    val fileContent = new String(v.tree.pos.source.content)
+    val start = v.tree.collect{case tree => tree.pos.startOrPoint}.min
+    val g = c.asInstanceOf[reflect.macros.runtime.Context].global
+    val parser = g.newUnitParser(fileContent.drop(start))
+    parser.expr()
+    val end = parser.in.lastOffset
+    val txt = fileContent.slice(start, start + end)
     val tree = q"""_root_.sourcecode.Text(${v.tree}, $txt)"""
-
     c.Expr[sourcecode.Text[T]](tree)
+  }
+
+  def enclosing[T](c: Compat.Context)(filterSynthetic: Boolean): c.Expr[T] = {
+    import c.universe._
+    var current = Compat.enclosingOwner(c)
+    var path = List.empty[Chunk]
+    while(current != NoSymbol && current.toString != "package <root>"){
+      if (!filterSynthetic || !Util.isSynthetic(c)(current)) {
+
+        import Chunk._
+        val chunk = current match {
+          case x if x.isPackage => Pkg
+          case x if x.isModuleClass => Obj
+          case x if x.isClass && x.asClass.isTrait => Trt
+          case x if x.isClass => Cls
+          case x if x.isMethod => Def
+          case x if x.isTerm && x.asTerm.isVar => Var
+          case x if x.isTerm && x.asTerm.isLazy => Lzy
+          case x if x.isTerm && x.asTerm.isVal => Val
+        }
+
+        path = chunk(Util.getName(c)(current)) :: path
+      }
+      current = current.owner
+    }
+    val renderedPath = path.map{
+      case Chunk.Pkg(s) => s + "."
+      case Chunk.Obj(s) => s + "."
+      case Chunk.Cls(s) => s + "#"
+      case Chunk.Trt(s) => s + "#"
+      case Chunk.Val(s) => s + " "
+      case Chunk.Var(s) => s + " "
+      case Chunk.Lzy(s) => s + " "
+      case Chunk.Def(s) => s + " "
+    }.mkString.dropRight(1)
+    c.Expr[T](q"""${c.prefix}($renderedPath)""")
   }
 }

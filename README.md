@@ -43,6 +43,10 @@ The kinds of compilation-time data that `sourcecode` provides are:
   compile otherwise. Also, if you have multiple statements in a `{}` block, 
   `sourcecode.Text` will only capture the source code for the last expression 
   that gets returned.
+- `sourcecode.Name.Machine` and `sourcecode.Enclosing.Machine` which are similar
+  to `sourcecode.Name` and `sourcecode.Enclosing` except they do not filter
+  out synthetic method names; e.g. if you want to see the `<init>` names or
+  `<local foo>` names as part of the path, use these
 
 All these are available both via `()` and as implicits, e.g. `sourcecode.File`
 can be summoned via `sourcecode.File()` or `implicitly[sourcecode.File].value`.

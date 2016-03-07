@@ -98,7 +98,7 @@ object Tests{
     assert(MyEnum.firstItem.toString == "firstItem")
     assert(MyEnum.secondItem.toString == "secondItem")
   }
-  def enum2Run() = {
+  def enumInheritRun() = {
     class EnumValue(implicit name: sourcecode.Name){
       override def toString = name.value
     }
@@ -108,17 +108,36 @@ object Tests{
 
     object Bar{
       assert(sourcecode.Name() == "Bar")
+      assert(sourcecode.Enclosing() == "sourcecode.Tests.enumInheritRun Bar")
     }
     Bar
   }
 
+  def enumMachineRun() = {
+    class EnumValue(implicit name: sourcecode.Name.Machine){
+      override def toString = name.value
+    }
+    object Foo extends EnumValue
+
+    assert(Foo.toString == "<init>")
+
+    object Bar{
+      assert(sourcecode.Name.Machine() == "<local Bar>", sourcecode.Name())
+      assert(
+        sourcecode.Enclosing.Machine() == "sourcecode.Tests.enumMachineRun Bar.<local Bar>",
+        sourcecode.Enclosing.Machine()
+      )
+    }
+    Bar
+  }
 
   def run() = {
     applyRun()
     implicitRun()
     logRun()
     enumRun()
-    enum2Run()
+    enumInheritRun()
+    enumMachineRun()
     DebugRun.main()
     ManualImplicit()
     TextTests()

@@ -16,7 +16,7 @@ object ManualImplicit {
     enc()
     def enc2() =
       assert(
-        qux()(Seq(Chunk.Pkg("sourcecode"), Chunk.Obj("ManualImplicit")))
+        qux()("sourcecode.ManualImplicit")
         == "sourcecode.ManualImplicit"
       )
 
