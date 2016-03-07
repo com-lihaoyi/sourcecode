@@ -10,7 +10,7 @@ def macroDependencies(version: String) =
       Seq(compilerPlugin("org.scalamacros" % s"paradise" % "2.0.0" cross CrossVersion.full),
         "org.scalamacros" %% s"quasiquotes" % "2.0.0")
     else
-      Seq())0.
+      Seq())
 
 lazy val sourcecode = crossProject.settings(
   version := "0.1.1",
