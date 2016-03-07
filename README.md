@@ -227,6 +227,11 @@ object Synthetic {
 }
 ```
 
+Hopefully this has given you a reasonable feel for *what** sourcecode does. You
+may still be wondering *why* we would want any of this: what could we possibly 
+use these things for? Why would we want to write code that depends on our 
+package paths or variable names? The section below will provide use cases that
+you will hopefully be able to relate to. 
 
 Use Cases
 =========
@@ -257,7 +262,10 @@ This can be handy for letting you see where the log lines are coming from,
 without tediously tagging every log statement with a unique prefix.
 Furthermore, this happens at compile time, and is thus orders of magnitude
 faster than getting this information by generating stack traces, and works
-on Scala.js where stack-inspection does not.
+on Scala.js where stack-inspection does not. Lastly, if you want additional 
+information such as method names, class names, or packages to be provided to
+your logging function, you can easily do so by asking for the `sourcecode.Name`
+or `sourcecode.FullName` or `sourcecode.Pkg` implicits.
 
 Enums
 -----
@@ -267,18 +275,24 @@ that automatically assigns names to the enum values based on the name of the
 `val` that it is assigned to
 
 ```scala
-case class EnumValue(name: String){
-  override def toString = name
+package sourcecode
+
+object EnumExample {
+  def run() = {
+    case class EnumValue(name: String){
+      override def toString = name
+    }
+    class Enum{
+      def value(implicit name: sourcecode.Name) = EnumValue(name.value)
+    }
+    object MyEnum extends Enum{
+      val firstItem = value
+      val secondItem = value
+    }
+    assert(MyEnum.firstItem.toString == "firstItem")
+    assert(MyEnum.secondItem.toString == "secondItem")
+  }
 }
-class Enum{
-  def value(implicit name: sourcecode.Name) = EnumValue(name.value)
-}
-object MyEnum extends Enum{
-  val firstItem = value // No need to pass in "firstItem" as a string!
-  val secondItem = value
-}
-assert(MyEnum.firstItem.toString == "firstItem")
-assert(MyEnum.secondItem.toString == "secondItem")
 ```
 
 This is very handy, and this functionality is used in a number of libraries
@@ -291,9 +305,30 @@ Sometimes you want to make sure that different enum values in differently
 named enums (or even an enum of the same name in a different package!) are
 given unique names. In that case, you can use `sourcecode.FullName` or
 `sourcecode.Enclosing` to capture the full path e.g.
-`"com.mypkg.MyEnum.firstItem"` and `"com.mypkg.MyEnum.secondItem"`. You can
-also use `sourcecode.Name` in an constructor, in which case it'll be picked
-up during inheritance:
+`"com.mypkg.MyEnum.firstItem"` and `"com.mypkg.MyEnum.secondItem"`:
+ 
+```scala
+package sourcecode
+
+object EnumFull {
+  def run() = {
+    case class EnumValue(name: String){
+      override def toString = name
+    }
+    class Enum{
+      def value(implicit name: sourcecode.FullName) = EnumValue(name.value)
+    }
+    object MyEnum extends Enum{
+      val firstItem = value
+      val secondItem = value
+    }
+    assert(MyEnum.firstItem.toString == "sourcecode.EnumFull.MyEnum.firstItem")
+    assert(MyEnum.secondItem.toString == "sourcecode.EnumFull.MyEnum.secondItem")
+  }
+}
+```
+You can also use `sourcecode.Name` in an constructor, in which case it'll be 
+picked up during inheritance:
 
 ```scala
 class EnumValue(implicit name: sourcecode.Name){
@@ -333,6 +368,45 @@ class Foo(arg: Int){
 }
 new Foo(123).bar("lol")  // sourcecode.DebugRun.main Foo#bar [arg -> param]: (123,lol)
 ```
+
+You can easily vary the amount of verbosity, e.g. by swapping the 
+`sourcecode.Enclosing` for a `sourcecode.Name if you think it's too verbose:
+
+```scala
+def debug[V](value: sourcecode.Text[V])(implicit name: sourcecode.Name) = {
+  println(name.value + " [" + value.source + "]: " + value.value)
+}
+
+class Foo(arg: Int){
+  debug(arg) // Foo [arg]: 123
+  def bar(param: String) = {
+    debug(param -> arg)
+  }
+}
+new Foo(123).bar("lol")  // bar [param]: lol
+```
+
+Or leaving it out entirely:
+
+```scala
+def debug[V](value: sourcecode.Text[V]) = {
+  println("[" + value.source + "]: " + value.value)
+}
+
+class Foo(arg: Int){
+  debug(arg) // [arg]: 123
+  def bar(param: String) = {
+    debug(param -> arg)
+  }
+}
+new Foo(123).bar("lol")  // [param]: lol
+```
+
+Thus you can easily configure how much information your `debug` helper method
+needs, at its definition, without having to hunt all over your codebase for the
+various `debug` call-sites you left lying around and manually tweaking the 
+verbosity of each one. Furthermore, if you want additional information like
+`sourcecode.Line` or `sourcecode.File`, that's all just one implicit away.
 
 Embedding Domain-Specific Languages
 -----------------------------------
@@ -412,7 +486,32 @@ val x = xvar(J).integer >= 0
 val y = xvar(K) >= 0
 ```
 
+The popular [FastParse](http://www.lihaoyi.com/fastparse/) parser-combinator
+library uses sourcecode for exactly this use case
 
+```scala
+import fastparse.all._
+val A = P( "aa" )
+val B = P( "bb" )
+val C = P( (A | B).rep(1) )
+
+C.parse("aabb") // Success((), 4)
+C.parse("X") // Failure((A | B):1:1 ..."X")
+```
+
+As you can see, the names of the rules `A` and `B` are embedded in the error
+messages for parse failures. This makes debugging parsers far easier, while 
+saving you the effort of duplicating the name of the parser in possibly 
+hundreds of rules in a large parser. In this case, it is the `P(...)` function
+which takes an implicit `sourcecode.Name` that does this work:
+
+```scala
+def P[T](p: => Parser[T])(implicit name: sourcecode.Name): Parser[T] =
+    parsers.Combinators.Rule(name.value, () => p)
+```
+
+And forwards the name on to the actual `Rule` object, which can make use of it
+in its `.toString` method.
 
 Version History
 ---------------

@@ -9,5 +9,4 @@ object TextTests {
     assert(foo{println("Hello"); 'lol.toString * 2} == ("'lol'lol", "'lol.toString * 2"))
   }
   def foo[T](v: sourcecode.Text[T]) = (v.value, v.source)
-
 }
