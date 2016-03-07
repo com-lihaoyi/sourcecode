@@ -69,6 +69,165 @@ magnitude faster than e.g. getting file-name and line-numbers using stack
 inspection, and also works on Scala.js where reflection and stack inspection
 can't be used.
 
+Examples
+========
+
+Here are a few examples of `sourcecode`'s core functions being used in a 
+variety of contexts. Hopefully they will give you an idea of how the various
+implicits behave:
+
+```scala
+package sourcecode
+
+object Implicits {
+  def implicitRun() = {
+    val name = implicitly[sourcecode.Name]
+    assert(name.value == "name")
+
+    val fullName = implicitly[sourcecode.FullName]
+    assert(fullName.value == "sourcecode.Implicits.fullName")
+
+    val enclosing = implicitly[sourcecode.Enclosing]
+    assert(enclosing.value == "sourcecode.Implicits.implicitRun enclosing")
+
+    val pkg = implicitly[sourcecode.Pkg]
+    assert(pkg.value == "sourcecode")
+
+    val file = implicitly[sourcecode.File]
+    assert(file.value.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Implicits.scala"))
+
+    val line = implicitly[sourcecode.Line]
+    assert(line.value == 20)
+
+    lazy val myLazy = {
+      trait Bar{
+        val name = implicitly[sourcecode.Name]
+        assert(name.value == "name")
+
+        val fullName = implicitly[sourcecode.FullName]
+        assert(fullName.value == "sourcecode.Implicits.Bar.fullName")
+
+        val file = implicitly[sourcecode.File]
+        assert(file.value.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Implicits.scala"))
+
+        val line = implicitly[sourcecode.Line]
+        assert(line.value == 34)
+
+        val enclosing = implicitly[sourcecode.Enclosing]
+        assert(enclosing.value == "sourcecode.Implicits.implicitRun myLazy$lzy Bar#enclosing")
+      }
+      val b = new Bar{}
+    }
+    myLazy
+  }
+}
+```
+
+Note that in "normal" usage you would not directly call `implicitly` to summon 
+up `sourcecode` values; rather, you would add implicit parameters of these 
+types to your functions. That would make these values automatically available
+to your functions without needing to manually keep passing them in. Apart from
+summoning them via implicits, you can also use the `apply` method on each type
+to pull them in using the `()` syntax:
+
+```scala
+package sourcecode
+
+object Apply {
+  def applyRun() = {
+    val name = sourcecode.Name()
+    assert(name == "name")
+
+    val fullName = sourcecode.FullName()
+    assert(fullName == "sourcecode.Apply.fullName")
+
+    val enclosing = sourcecode.Enclosing()
+    assert(enclosing == "sourcecode.Apply.applyRun enclosing")
+
+    val pkg = sourcecode.Pkg()
+    assert(pkg == "sourcecode")
+
+    val file = sourcecode.File()
+    assert(file.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Apply.scala"))
+
+    val line = sourcecode.Line()
+    assert(line == 20)
+
+    lazy val myLazy = {
+      trait Bar{
+        val name = sourcecode.Name()
+        assert(name == "name")
+
+        val fullName = sourcecode.FullName()
+        assert(fullName == "sourcecode.Apply.Bar.fullName")
+
+        val file = sourcecode.File()
+        assert(file.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Apply.scala"))
+
+        val line = sourcecode.Line()
+        assert(line == 34)
+
+        val enclosing = sourcecode.Enclosing()
+        assert(enclosing == "sourcecode.Apply.applyRun myLazy$lzy Bar#enclosing")
+      }
+      val b = new Bar{}
+    }
+    myLazy
+  }
+}
+```
+
+By default, the various implicits all ignore any synthetic `<init>` or 
+`<local Foo>` methods that might be present:
+
+```scala
+package sourcecode
+
+object NoSynthetic {
+  def run() = {
+    class EnumValue(implicit name: sourcecode.Name){
+      override def toString = name.value
+    }
+    object Foo extends EnumValue
+
+    assert(Foo.toString == "Foo")
+
+    object Bar{
+      assert(sourcecode.Name() == "Bar")
+      assert(sourcecode.FullName() == "sourcecode.NoSynthetic.Bar")
+      assert(sourcecode.Enclosing() == "sourcecode.NoSynthetic.run Bar")
+    }
+    Bar
+  }
+}
+```
+
+If you want these synthetic methods to be shown, use the `.Machine` versions
+of each of these instead:
+
+```scala
+package sourcecode
+
+object Synthetic {
+  def run() = {
+    class EnumValue(implicit name: sourcecode.Name.Machine){
+      override def toString = name.value
+    }
+    object Foo extends EnumValue
+
+    assert(Foo.toString == "<init>")
+
+    object Bar{
+      assert(sourcecode.Name.Machine() == "<local Bar>", sourcecode.Name())
+      assert(sourcecode.FullName.Machine() == "sourcecode.Synthetic.Bar.<local Bar>")
+      assert(sourcecode.Enclosing.Machine() == "sourcecode.Synthetic.run Bar.<local Bar>")
+    }
+    Bar
+  }
+}
+```
+
+
 Use Cases
 =========
 
@@ -275,7 +434,7 @@ Version History
 - `sourcecode.Enclosing` has been simplified to take a single `String` rather
   than the previous `Vector[Chunk]`.
   
-- Added the `sourcecode.Enclosing.Pkg` implicit, which provides the current 
+- Added the `sourcecode.Pkg` implicit, which provides the current 
   enclosing package without any of the `class`s/`object`s/`def`s/etc.. Can be 
   subtracted from `sourcecode.Enclosing` if you *only* want the 
   `class`s/`object`s/`def`s/etc.

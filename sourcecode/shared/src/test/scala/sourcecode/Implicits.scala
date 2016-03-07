@@ -11,11 +11,14 @@ object Implicits {
     val enclosing = implicitly[sourcecode.Enclosing]
     assert(enclosing.value == "sourcecode.Implicits.implicitRun enclosing")
 
+    val pkg = implicitly[sourcecode.Pkg]
+    assert(pkg.value == "sourcecode")
+
     val file = implicitly[sourcecode.File]
     assert(file.value.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Implicits.scala"))
 
     val line = implicitly[sourcecode.Line]
-    assert(line.value == 17)
+    assert(line.value == 20)
 
     lazy val myLazy = {
       trait Bar{
@@ -29,7 +32,7 @@ object Implicits {
         assert(file.value.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Implicits.scala"))
 
         val line = implicitly[sourcecode.Line]
-        assert(line.value == 31)
+        assert(line.value == 34)
 
         val enclosing = implicitly[sourcecode.Enclosing]
         assert(enclosing.value == "sourcecode.Implicits.implicitRun myLazy$lzy Bar#enclosing")
@@ -38,5 +41,4 @@ object Implicits {
     }
     myLazy
   }
-
 }

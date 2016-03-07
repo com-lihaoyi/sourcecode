@@ -96,12 +96,13 @@ object Enclosing extends SourceCompanion[String, Enclosing](new Enclosing(_)){
     implicit def generate: Machine = macro impl
     def impl(c: Compat.Context): c.Expr[Machine] = Impls.enclosing[Machine](c)(_ => true)
   }
+}
 
-  case class Pkg(value: String) extends SourceValue[String]
-  object Pkg extends SourceCompanion[String, Pkg](new Pkg(_)){
-    implicit def generate: Pkg = macro impl
-    def impl(c: Compat.Context): c.Expr[Pkg] = Impls.enclosing[Pkg](c)(_.isPackage)
-  }
+
+case class Pkg(value: String) extends SourceValue[String]
+object Pkg extends SourceCompanion[String, Pkg](new Pkg(_)){
+  implicit def generate: Pkg = macro impl
+  def impl(c: Compat.Context): c.Expr[Pkg] = Impls.enclosing[Pkg](c)(_.isPackage)
 }
 
 case class Text[T](value: T, source: String)
@@ -144,16 +145,15 @@ object Impls{
     while(current != NoSymbol && current.toString != "package <root>"){
       if (filter(current)) {
 
-        import Chunk._
         val chunk = current match {
-          case x if x.isPackage => Pkg
-          case x if x.isModuleClass => Obj
-          case x if x.isClass && x.asClass.isTrait => Trt
-          case x if x.isClass => Cls
-          case x if x.isMethod => Def
-          case x if x.isTerm && x.asTerm.isVar => Var
-          case x if x.isTerm && x.asTerm.isLazy => Lzy
-          case x if x.isTerm && x.asTerm.isVal => Val
+          case x if x.isPackage => Chunk.Pkg
+          case x if x.isModuleClass => Chunk.Obj
+          case x if x.isClass && x.asClass.isTrait => Chunk.Trt
+          case x if x.isClass => Chunk.Cls
+          case x if x.isMethod => Chunk.Def
+          case x if x.isTerm && x.asTerm.isVar => Chunk.Var
+          case x if x.isTerm && x.asTerm.isLazy => Chunk.Lzy
+          case x if x.isTerm && x.asTerm.isVal => Chunk.Val
         }
 
         path = chunk(Util.getName(c)(current)) :: path

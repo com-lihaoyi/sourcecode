@@ -23,55 +23,16 @@ object Tests{
     assert(MyEnum.firstItem.toString == "firstItem")
     assert(MyEnum.secondItem.toString == "secondItem")
   }
-  def enumInheritRun() = {
-    class EnumValue(implicit name: sourcecode.Name){
-      override def toString = name.value
-    }
-    object Foo extends EnumValue
-    println(Foo.toString)
-    assert(Foo.toString == "Foo")
 
-    object Bar{
-      assert(sourcecode.Name() == "Bar")
-      assert(
-        sourcecode.FullName() == "sourcecode.Tests.Bar",
-        sourcecode.FullName()
-      )
-      assert(sourcecode.Enclosing() == "sourcecode.Tests.enumInheritRun Bar")
 
-    }
-    Bar
-  }
-
-  def enumMachineRun() = {
-    class EnumValue(implicit name: sourcecode.Name.Machine){
-      override def toString = name.value
-    }
-    object Foo extends EnumValue
-
-    assert(Foo.toString == "<init>")
-
-    object Bar{
-      assert(sourcecode.Name.Machine() == "<local Bar>", sourcecode.Name())
-      assert(
-        sourcecode.Enclosing.Machine() == "sourcecode.Tests.enumMachineRun Bar.<local Bar>",
-        sourcecode.Enclosing.Machine()
-      )
-      assert(
-        sourcecode.FullName.Machine() == "sourcecode.Tests.Bar.<local Bar>",
-        sourcecode.FullName.Machine()
-      )
-    }
-    Bar
-  }
 
   def run() = {
     Apply.applyRun()
     Implicits.implicitRun()
     logRun()
     enumRun()
-    enumInheritRun()
-    enumMachineRun()
+    NoSynthetic.run()
+    Synthetic.run()
     DebugRun.main()
     ManualImplicit()
     TextTests()
