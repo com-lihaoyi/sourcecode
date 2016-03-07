@@ -9,21 +9,36 @@ SourceCode [![Build Status](https://travis-ci.org/lihaoyi/sourcecode.svg?branch=
 `sourcecode` is a small Scala library for that provides common "source code"
 context to your program at runtime, similar to Python's `__name__`, C++'s
 `__LINE__` or Ruby's `__FILE__`. For example, you can ask for the file-name
-and line number of the current file:
+and line number of the current file, either through the `()` syntax or via an
+implicit:
 
 ```scala
 val file = sourcecode.File()
 assert(file.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Tests.scala"))
 
-val line = sourcecode.Line()
+val line = implicitly[sourcecode.Line]
 assert(line == 16)
 ```
 
 This might not be something you want to use for "business logic", but is very
-helpful for debugging, logging and providing automatic diagnostics. This
-information is also available via an `implicit`, letting you write functions
+helpful for things like [debugging](#debug-prints), [logging](#logging) or 
+providing automatic diagnostics for [DSLs](#embedding-domain-specific-languages). 
+This information is also available via an `implicit`, letting you write functions
 that automatically pull it in.
 
+Table of Contents
+=================
+
+- [Overview](#overview)
+- [Examples](#examples)
+- [Use Cases](#use-cases)
+    - [Logging](#logging)
+    - [Enums](#enums)
+    - [Debug Prints](#debug-prints)
+    - [Embedding Domain-Specific Languages](#embedding-domain-specific-languages)
+
+Overview
+========
 The kinds of compilation-time data that `sourcecode` provides are:
 
 - `sourcecode.File`: full path of the current file where the call occurs
@@ -407,6 +422,42 @@ various `debug` call-sites you left lying around and manually tweaking the
 verbosity of each one. Furthermore, if you want additional information like
 `sourcecode.Line` or `sourcecode.File`, that's all just one implicit away.
 
+The [PPrint](http://www.lihaoyi.com/upickle-pprint/pprint/#GettingStarted) 
+library provides a `pprint.log` method that does exactly this: prints out the
+value provided (in this case pretty-printing it with colors and nice formatting
+& indentation) together with the enclosing context and line number, so you
+can easily distinguish your individual prints later:
+
+```scala
+scala> class Foo{
+     |   def bar(grid: Seq[Seq[Int]]) = {
+     |     // automatically capture and print out source context 
+     |     pprint.log(grid, tag="grid") 
+     |   }
+     | }
+defined class Foo
+
+scala> new Foo().bar(Seq(0 until 10, 10 until 20, 20 until 30))
+pkg.Foo#bar "grid":12
+List(
+  Range(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
+  Range(10, 11, 12, 13, 14, 15, 16, 17, 18, 19),
+  Range(20, 21, 22, 23, 24, 25, 26, 27, 28, 29)
+)
+```
+
+`pprint.log` is itself defined as 
+
+```scala
+def log[T: PPrint](value: T, tag: String = "")
+                  (implicit cfg: Config = Config.Colors.PPrintConfig,
+                   path: sourcecode.Enclosing,
+                   line: sourcecode.Line) = ...
+```
+
+Using `sourcecode.Enclosing` and `sourcecode.Line` to provide the context to
+be printed. 
+
 Embedding Domain-Specific Languages
 -----------------------------------
 
@@ -513,9 +564,9 @@ And forwards the name on to the actual `Rule` object, which can make use of it
 in its `.toString` method.
 
 Version History
----------------
+===============
 0.1.1
-=====
+-----
 
 - Ignore `<local foo>` and `<init>` symbols when determining `sourcecode.Name`, 
   `sourcecode.FullName` or `sourcecode.Enclosing`. If you want these, use the
@@ -538,7 +589,7 @@ Version History
   `class`s/`object`s/`def`s/etc.
 
 0.1.0
-=====
+-----
 
 - First release
 
