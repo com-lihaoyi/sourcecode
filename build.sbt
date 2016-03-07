@@ -10,7 +10,7 @@ def macroDependencies(version: String) =
       Seq(compilerPlugin("org.scalamacros" % s"paradise" % "2.0.0" cross CrossVersion.full),
         "org.scalamacros" %% s"quasiquotes" % "2.0.0")
     else
-      Seq())
+      Seq())0.
 
 lazy val sourcecode = crossProject.settings(
   version := "0.1.1",
@@ -22,7 +22,6 @@ lazy val sourcecode = crossProject.settings(
     if (scalaVersion.value startsWith "2.10.") Seq(baseDirectory.value / ".."/"shared"/"src"/ "main" / "scala-2.10")
     else Seq(baseDirectory.value / ".."/"shared" / "src" / "main" / "scala-2.11")
   },
-  version := "0.1.0",
   publishTo := Some("releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2"),
 
   pomExtra :=
