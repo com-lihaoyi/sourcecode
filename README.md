@@ -456,7 +456,9 @@ def log[T: PPrint](value: T, tag: String = "")
 ```
 
 Using `sourcecode.Enclosing` and `sourcecode.Line` to provide the context to
-be printed. 
+be printed. You can, or course, define your own `log` method in the same way,
+customizing it to print or not-print exactly what you want to see via the 
+implicits that `sourcecode` provides!
 
 Embedding Domain-Specific Languages
 -----------------------------------
