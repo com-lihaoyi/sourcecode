@@ -423,7 +423,7 @@ various `debug` call-sites you left lying around and manually tweaking the
 verbosity of each one. Furthermore, if you want additional information like
 `sourcecode.Line` or `sourcecode.File`, that's all just one implicit away.
 
-The [PPrint](http://www.lihaoyi.com/upickle-pprint/pprint/#GettingStarted) 
+The [PPrint](http://www.lihaoyi.com/upickle-pprint/pprint) 
 library provides a `pprint.log` method that does exactly this: prints out the
 value provided (in this case pretty-printing it with colors and nice formatting
 & indentation) together with the enclosing context and line number, so you
