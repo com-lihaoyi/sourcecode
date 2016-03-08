@@ -24,7 +24,9 @@ This might not be something you want to use for "business logic", but is very
 helpful for things like [debugging](#debug-prints), [logging](#logging) or 
 providing automatic diagnostics for [DSLs](#embedding-domain-specific-languages). 
 This information is also available via an `implicit`, letting you write functions
-that automatically pull it in. Using SourceCode on heavily abstracted code can
+that automatically pull it in. 
+
+Using SourceCode on heavily abstracted code can
 help change what you see in debug printouts from this:
 
 ![Before](docs/Before.png)
