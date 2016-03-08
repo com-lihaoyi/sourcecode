@@ -26,8 +26,8 @@ providing automatic diagnostics for [DSLs](#embedding-domain-specific-languages)
 This information is also available via an `implicit`, letting you write functions
 that automatically pull it in. 
 
-Using SourceCode on heavily abstracted code can
-help change what you see in debug printouts from this:
+Using SourceCode on code dealing with lots of anonymous functions or anonymous
+classes can easily turn what you see in your debug printouts from this:
 
 ![Before](docs/Before.png)
 
@@ -35,8 +35,10 @@ To this:
 
 ![After](docs/After.png)
 
-By automatically capturing source information you can use to give your objects
-and function meaningful names that tell you where they were defined.
+By capturing source information you can use to give your objects and function 
+meaningful names that tell you where they were defined, automatically without 
+needing you to manually assign a string-ID to every anonymous function or 
+anonymous class you define all over your code bas. 
 
 Table of Contents
 =================
