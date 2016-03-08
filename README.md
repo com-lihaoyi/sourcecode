@@ -24,7 +24,17 @@ This might not be something you want to use for "business logic", but is very
 helpful for things like [debugging](#debug-prints), [logging](#logging) or 
 providing automatic diagnostics for [DSLs](#embedding-domain-specific-languages). 
 This information is also available via an `implicit`, letting you write functions
-that automatically pull it in.
+that automatically pull it in. Using SourceCode on heavily abstracted code can
+help change what you see in debug printouts from this:
+
+![Before](docs/Before.png)
+
+To this:
+
+![After](docs/After.png)
+
+By automatically capturing source information you can use to give your objects
+and function meaningful names that tell you where they were defined.
 
 Table of Contents
 =================
