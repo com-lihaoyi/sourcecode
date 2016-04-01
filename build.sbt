@@ -1,6 +1,8 @@
 
 crossScalaVersions := Seq("2.10.4", "2.11.7")
 
+scalacOptions in ThisBuild ++= Seq("-unchecked", "-deprecation", "-feature", "-Xlint", "-Xfatal-warnings", "-Yinline-warnings", "-Ywarn-inaccessible", "-Ywarn-infer-any", "-Ywarn-nullary-override", "-Ywarn-nullary-unit")
+
 def macroDependencies(version: String) =
   Seq(
     "org.scala-lang" % "scala-reflect" % version % "provided",

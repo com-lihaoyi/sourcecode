@@ -15,7 +15,8 @@ abstract class SourceValue[T]{
 }
 abstract class SourceCompanion[T, V <: SourceValue[T]](build: T => V){
   def apply()(implicit s: V): T = s.value
-  implicit def wrap(s: T): V = build(s)
+  import scala.language.implicitConversions
+  implicit def wrap(s: T): V = build(s) // implicit conversion
 }
 case class Name(value: String) extends SourceValue[String]
 object Name extends SourceCompanion[String, Name](new Name(_)){
@@ -107,6 +108,7 @@ object Pkg extends SourceCompanion[String, Pkg](new Pkg(_)){
 
 case class Text[T](value: T, source: String)
 object Text{
+  import scala.language.implicitConversions
   implicit def generate[T](v: T): Text[T] = macro Impls.text[T]
   def apply[T](v: T): Text[T] = macro Impls.text[T]
 
@@ -116,7 +118,8 @@ object Impls{
     import c.universe._
     val fileContent = new String(v.tree.pos.source.content)
     val start = v.tree.collect{case tree => tree.pos.startOrPoint}.min
-    val g = c.asInstanceOf[reflect.macros.runtime.Context].global
+    import scala.language.existentials
+    val g = c.asInstanceOf[reflect.macros.runtime.Context].global // inferred existential
     val parser = g.newUnitParser(fileContent.drop(start))
     parser.expr()
     val end = parser.in.lastOffset
