@@ -8,7 +8,7 @@ object Util{
   def isSyntheticName(name: String) = {
     name == "<init>" || (name.startsWith("<local ") && name.endsWith(">"))
   }
-  def getName(c: Compat.Context)(s: c.Symbol) = s.name.decoded.toString.trim
+  def getName(c: Compat.Context)(s: c.Symbol) = s.name.decodedName.toString.trim
 }
 abstract class SourceValue[T]{
   def value: T
@@ -117,7 +117,7 @@ object Impls{
   def text[T: c.WeakTypeTag](c: Compat.Context)(v: c.Expr[T]): c.Expr[sourcecode.Text[T]] = {
     import c.universe._
     val fileContent = new String(v.tree.pos.source.content)
-    val start = v.tree.collect{case tree => tree.pos.startOrPoint}.min
+    val start = v.tree.collect{case tree => tree.pos.start}.min
     import scala.language.existentials
     val g = c.asInstanceOf[reflect.macros.runtime.Context].global // inferred existential
     val parser = g.newUnitParser(fileContent.drop(start))
