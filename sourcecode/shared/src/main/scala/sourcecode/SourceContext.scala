@@ -122,7 +122,7 @@ object Args extends SourceCompanion[Seq[Seq[Text[_]]], Args](new Args(_)) {
       if (owner.isMethod) owner.asMethod else enclosingMethod(owner.owner)
 
     val method = enclosingMethod(Compat.enclosingOwner(c))
-    val param = method.asMethod.paramLists
+    val param = method.asMethod.paramss
     val texts = param.map(_.map(p => c.Expr[Text[_]](q"""sourcecode.Text($p, ${p.name.toString})""")))
     val textSeqs = texts.map(s => c.Expr(q"""Seq(..$s)"""))
     c.Expr[Args](q"""Seq(..$textSeqs)""")
