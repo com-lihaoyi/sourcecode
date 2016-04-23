@@ -111,6 +111,24 @@ object Text{
   def apply[T](v: T): Text[T] = macro Impls.text[T]
 
 }
+
+case class Args(value: Seq[Seq[Text[_]]]) extends SourceValue[Seq[Seq[Text[_]]]]
+object Args extends SourceCompanion[Seq[Seq[Text[_]]], Args](new Args(_)) {
+  implicit def generate: Args = macro impl
+  def impl(c: Compat.Context): c.Expr[Args] = {
+    import c.universe._
+
+    def enclosingMethod(owner: Symbol): MethodSymbol =
+      if (owner.isMethod) owner.asMethod else enclosingMethod(owner.owner)
+
+    val method = enclosingMethod(Compat.enclosingOwner(c))
+    val param = method.asMethod.paramLists
+    val texts = param.map(_.map(p => c.Expr[Text[_]](q"""sourcecode.Text($p, ${p.name.toString})""")))
+    val textSeqs = texts.map(s => c.Expr(q"""Seq(..$s)"""))
+    c.Expr[Args](q"""Seq(..$textSeqs)""")
+  }
+}
+
 object Impls{
   def text[T: c.WeakTypeTag](c: Compat.Context)(v: c.Expr[T]): c.Expr[sourcecode.Text[T]] = {
     import c.universe._
