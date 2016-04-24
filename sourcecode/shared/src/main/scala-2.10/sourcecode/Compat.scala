@@ -9,4 +9,12 @@ object Compat{
       .owner
       .asInstanceOf[c.Symbol]
   }
+
+  def enclosingParamList(c: Context): List[List[c.Symbol]] = {
+    def nearestClassOrMethod(owner: c.Symbol): c.Symbol =
+      if (owner.isMethod || owner.isClass) owner else nearestClassOrMethod(owner.owner)
+
+    val com = nearestClassOrMethod(enclosingOwner(c))
+    if (com.isClass) List() else com.asMethod.paramss
+  }
 }

@@ -3,21 +3,9 @@ package sourcecode
 object ArgsTests {
   def apply() = {
 
-    def debug(implicit args: sourcecode.Args): Unit = {
-      assert(args.value.size == 2)
-      assert(args.value(0).size == 3)
-      assert(args.value(0)(0).source == "p1")
-      assert(args.value(0)(0).value == "text")
-      assert(args.value(0)(1).source == "p2")
-      assert(args.value(0)(1).value == 42)
-      assert(args.value(0)(2).source == "p3")
-      assert(args.value(0)(2).value == false)
-      assert(args.value(1).size == 2)
-      assert(args.value(1)(0).source == "foo")
-      assert(args.value(1)(0).value == "foo")
-      assert(args.value(1)(1).source == "bar")
-      assert(args.value(1)(1).value == "bar")
-    }
+    var args: Seq[Seq[(String, Any)]] = Seq()
+
+    def debug(implicit arguments: sourcecode.Args): Unit = args = arguments.value.map(_.map(t => t.source -> t.value))
 
     def foo(p1: String, p2: Long, p3: Boolean)(foo: String, bar: String): Unit = {
       debug
@@ -30,7 +18,39 @@ object ArgsTests {
       }
     }
 
+    def baz: Unit = {
+      debug
+    }
+
+    def withImplicit(p1: String, p2: Long, p3: Boolean)(implicit foo: String): Unit = {
+      debug
+    }
+
+    class Foo(p1: String, p2: Long, p3: Boolean)(foo: String, bar: String) {
+
+      def this(p1: String, p2: Long) = {
+        this(p1, p2, false)("foo", "bar")
+        debug
+      }
+    }
+
+    new Foo("text", 42)
+    assert(args == Seq(Seq("p1" -> "text", "p2" -> 42)))
+
     foo("text", 42, false)("foo", "bar")
+    assert(args == Seq(Seq("p1" -> "text", "p2" -> 42, "p3" -> false), Seq("foo" -> "foo", "bar" -> "bar")))
+
     bar("text", 42, false)("foo", "bar")
+    assert(args == Seq(Seq("p1" -> "text", "p2" -> 42, "p3" -> false), Seq("foo" -> "foo", "bar" -> "bar")))
+
+    baz
+    assert(args == Seq())
+
+    withImplicit("text", 42, false)("foo")
+    assert(args == Seq(Seq("p1" -> "text", "p2" -> 42, "p3" -> false), Seq("foo" -> "foo")))
+
+    implicit val implicitFoo = "bar"
+    withImplicit("text", 42, false)
+    assert(args == Seq(Seq("p1" -> "text", "p2" -> 42, "p3" -> false), Seq("foo" -> "bar")))
   }
 }

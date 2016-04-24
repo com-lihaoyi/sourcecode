@@ -492,6 +492,23 @@ def foo(bar: String, baz: Int)(p: Boolean): Unit = {
 foo("baz", 42)(true) // foo(bar=baz, baz=42)(p=true)
 ```
 
+Please note, that it's currently not possible to access the arguments passed
+to a constructor if you are using Scala 2.10, e.g. the following code will 
+work as expected with 2.11, but _not_ with 2.10:
+```scala
+def debug(implicit name: sourcecode.Name, args: sourcecode.Args): Unit = {
+  println(name.value + args.value.map(_.map(a => a.source + "=" + a.value).mkString("(", ", ", ")")).mkString(""))
+}
+
+class Foo(arg1: String, arg2: Int) {
+  debug
+}
+
+new Foo("bar", 42)
+```
+
+For 2.10 `sourcecode.Args.value will be an empty list.`
+
 Embedding Domain-Specific Languages
 -----------------------------------
 
