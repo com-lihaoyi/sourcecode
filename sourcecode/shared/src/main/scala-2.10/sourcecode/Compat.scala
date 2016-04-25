@@ -15,6 +15,11 @@ object Compat{
       if (owner.isMethod || owner.isClass) owner else nearestClassOrMethod(owner.owner)
 
     val com = nearestClassOrMethod(enclosingOwner(c))
-    if (com.isClass) List() else com.asMethod.paramss
+    if (com.isClass) {
+      val pc = com.typeSignature.members.filter(m => m.isMethod && m.asMethod.isPrimaryConstructor)
+      pc.head.asMethod.paramss
+    } else {
+      com.asMethod.paramss
+    }
   }
 }

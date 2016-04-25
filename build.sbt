@@ -22,10 +22,6 @@ lazy val sourcecode = crossProject.settings(
     if (scalaVersion.value startsWith "2.10.") Seq(baseDirectory.value / ".."/"shared"/"src"/ "main" / "scala-2.10")
     else Seq(baseDirectory.value / ".."/"shared" / "src" / "main" / "scala-2.11")
   },
-  unmanagedSourceDirectories in Test ++= {
-    if (scalaVersion.value startsWith "2.10.") Seq(baseDirectory.value / ".."/"shared"/"src"/ "test" / "scala-2.10")
-    else Seq(baseDirectory.value / ".."/"shared" / "src" / "test" / "scala-2.11")
-  },
   publishTo := Some("releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2"),
 
   pomExtra :=

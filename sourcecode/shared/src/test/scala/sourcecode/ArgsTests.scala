@@ -27,12 +27,16 @@ object ArgsTests {
     }
 
     class Foo(p1: String, p2: Long, p3: Boolean)(foo: String, bar: String) {
+      debug
 
       def this(p1: String, p2: Long) = {
         this(p1, p2, false)("foo", "bar")
         debug
       }
     }
+
+    new Foo("text", 42, false)("foo", "bar")
+    assert(args == Seq(Seq("p1" -> "text", "p2" -> 42, "p3" -> false), Seq("foo" -> "foo", "bar" -> "bar")))
 
     new Foo("text", 42)
     assert(args == Seq(Seq("p1" -> "text", "p2" -> 42)))
