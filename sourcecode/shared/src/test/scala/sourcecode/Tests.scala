@@ -21,6 +21,7 @@ object Tests{
     ManualImplicit()
     TextTests()
     ArgsTests()
+    DocTests()
 
     println("================LogExample================")
     logExample()

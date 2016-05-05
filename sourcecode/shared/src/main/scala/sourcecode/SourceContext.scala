@@ -186,3 +186,89 @@ object Impls{
     c.Expr[T](q"""${c.prefix}($renderedPath)""")
   }
 }
+
+case class DocString[T](value: String) extends SourceValue[String]
+
+object DocString {
+
+  import java.util.concurrent.TimeUnit
+
+  import scala.tools.nsc.doc.DocParser.DefTree
+  import scala.tools.nsc.doc.DocParser.Parsed
+  import scala.tools.nsc.doc.DocParser.Tree
+  import scala.tools.nsc.doc.DocParser
+  import scala.tools.nsc.doc.Settings
+
+  // A small file can take up to 100ms to parse, so we cache results between macro invocations.
+  private val parsedCache = scala.collection.mutable.Map.empty[String, List[Parsed]]
+
+  implicit def apply[T]: sourcecode.DocString[T] = macro impl[T]
+  implicit def apply[T](t: T): sourcecode.DocString[T] = macro value[T]
+
+  def value[T : c.WeakTypeTag](c: Compat.Context)(t: c.Expr[T]): c.Expr[sourcecode.DocString[T]] = {
+    ???
+  }
+
+  def impl[T : c.WeakTypeTag](c: Compat.Context): c.Expr[sourcecode.DocString[T]] = {
+    import c.universe._
+    val t1 = System.nanoTime()
+    val typ = c.weakTypeOf[T].typeSymbol
+
+    // Returns all docstrings from that file.
+    val docDefs = parsedCache.getOrElseUpdate(typ.pos.source.path, {
+      val docParser = getDocParser(c)
+      docParser.docDefs(new String(typ.pos.source.content))
+    })
+    val matchingDocDef = docDefs.collectFirst {
+      case x if parsedFullName(x).exists(_ == typ.fullName) =>
+        trimDocString(x.raw)
+    }
+    matchingDocDef match {
+      case Some(doc) =>
+        val t2 = System.nanoTime()
+        println(s"elapsed ${TimeUnit.MILLISECONDS.convert(t2 - t1, TimeUnit.NANOSECONDS)}ms")
+        c.Expr[sourcecode.DocString[T]](q"""${c.prefix}($doc)""")
+      case _ =>
+        c.abort(c.enclosingPosition,
+          s"Unable to find docstring for ${typ.fullName}")
+    }
+  }
+
+  private def getDocParser(c: Compat.Context): DocParser = {
+    val global = c.asInstanceOf[reflect.macros.runtime.Context].global
+    val parserSettings = new Settings(_ => Unit, _ => Unit)
+    // The DocParser's global requires scala-library.
+    parserSettings.classpath.append(global.classPath.asClassPathString)
+    new DocParser(parserSettings)
+  }
+
+
+  private def parsedFullName(parsed: Parsed): Option[String] = {
+    for {
+      enclosingTree <- parsed.enclosing.headOption // top level pkg tree
+      parents = {
+        val parentsBuilder = Seq.newBuilder[Tree]
+        def findChildren(tree: Tree): Unit = {
+          if (tree.find(_ == parsed.docDef).nonEmpty) {
+            parentsBuilder += tree
+            tree.children.foreach(findChildren)
+          }
+        }
+        findChildren(enclosingTree)
+        parentsBuilder.result()
+      }
+      prefix = parents.collect {
+        case x: DefTree =>
+          if (x.name.isTypeName) x.name + "#"
+          else x.name + "."
+      }.mkString
+      lastName <- parsed.nameChain.lastOption
+    } yield prefix + lastName
+  }
+
+  private def trimDocString(docString: String): String =
+    docString.lines
+        .map(_.replaceFirst("\\s*/?\\*\\*?/?", ""))
+        .mkString("\n")
+        .trim
+}
