@@ -20,6 +20,7 @@ object Tests{
     Synthetic.run()
     ManualImplicit()
     TextTests()
+    ArgsTests()
 
     println("================LogExample================")
     logExample()

@@ -72,6 +72,8 @@ The kinds of compilation-time data that `sourcecode` provides are:
   you have multiple statements in a `{}` block, `sourcecode.Text` will only 
   capture the source code for the last expression that gets returned. This
   implicit is slightly experimental; be sure to report any bugs you find!
+- `sourcecode.Args`: the arguments that where provided to the nearest enclosing 
+  method
 - `sourcecode.Name.Machine`, `sourcecode.FullName.Machine` and 
   `sourcecode.Enclosing.Machine` which are similar to `sourcecode.Name`,
   `sourcecode.FullName` and `sourcecode.Enclosing` except they do not filter
@@ -474,6 +476,21 @@ Using `sourcecode.Enclosing` and `sourcecode.Line` to provide the context to
 be printed. You can, or course, define your own `log` method in the same way,
 customizing it to print or not-print exactly what you want to see via the 
 implicits that `sourcecode` provides!
+
+`sourcecode.Args` can be used to access all parameters that where provided 
+to a method:
+
+```scala
+def debug(implicit name: sourcecode.Name, args: sourcecode.Args): Unit = {
+  println(name.value + args.value.map(_.map(a => a.source + "=" + a.value).mkString("(", ", ", ")")).mkString(""))
+}
+
+def foo(bar: String, baz: Int)(p: Boolean): Unit = {
+  debug
+}
+
+foo("baz", 42)(true) // foo(bar=baz, baz=42)(p=true)
+```
 
 Embedding Domain-Specific Languages
 -----------------------------------
