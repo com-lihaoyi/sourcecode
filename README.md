@@ -2,8 +2,8 @@ SourceCode [![Build Status](https://travis-ci.org/lihaoyi/sourcecode.svg?branch=
 ==========
 
 ```scala
-"com.lihaoyi" %% "sourcecode" % "0.1.1" // Scala-JVM
-"com.lihaoyi" %%% "sourcecode" % "0.1.1" // Scala.js
+"com.lihaoyi" %% "sourcecode" % "0.1.2" // Scala-JVM
+"com.lihaoyi" %%% "sourcecode" % "0.1.2" // Scala.js
 ```
 
 `sourcecode` is a small Scala library for that provides common "source code"
@@ -599,6 +599,18 @@ in its `.toString` method.
 
 Version History
 ===============
+
+0.1.2
+-----
+
+- Add `sourcecode.Args` implicit, which can be used to capture debugging information
+  about the nearest enclosing function call for logging/debugging, thanks to 
+  [Benjamin Hagemeister](https://github.com/benhag)
+
+- Attempted fix for [#17](https://github.com/lihaoyi/sourcecode/issues/17) and 
+  [#13](https://github.com/lihaoyi/sourcecode/issues/13), thanks to
+  [Simeon H.K. Fitch](https://github.com/metasim) 
+
 0.1.1
 -----
 

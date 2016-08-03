@@ -13,7 +13,7 @@ def macroDependencies(version: String) =
       Seq())
 
 lazy val sourcecode = crossProject.settings(
-  version := "0.1.1",
+  version := "0.1.2",
   scalaVersion := "2.11.7",
   name := "sourcecode"  ,
   organization := "com.lihaoyi",
