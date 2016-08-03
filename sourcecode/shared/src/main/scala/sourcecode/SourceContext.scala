@@ -128,7 +128,12 @@ object Impls{
   def text[T: c.WeakTypeTag](c: Compat.Context)(v: c.Expr[T]): c.Expr[sourcecode.Text[T]] = {
     import c.universe._
     val fileContent = new String(v.tree.pos.source.content)
-    val start = v.tree.collect{case tree => tree.pos.startOrPoint}.min
+    val start = v.tree.collect {
+      case treeVal => treeVal.pos match {
+        case NoPosition ⇒ Int.MaxValue
+        case p ⇒ p.startOrPoint
+      }
+    }.min
     val g = c.asInstanceOf[reflect.macros.runtime.Context].global
     val parser = g.newUnitParser(fileContent.drop(start))
     parser.expr()

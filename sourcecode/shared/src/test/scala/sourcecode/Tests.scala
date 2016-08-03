@@ -30,6 +30,8 @@ object Tests{
     DebugName.main()
     println("================Debug Lite================")
     DebugLite.main()
+    println("================Regressions===============")
+    Regressions.main()
     println("================Test Ended================")
   }
 }
