@@ -2,7 +2,6 @@ package sourcecode
 
 import language.experimental.macros
 
-
 object Util{
   def isSynthetic(c: Compat.Context)(s: c.Symbol) = isSyntheticName(getName(c)(s))
   def isSyntheticName(name: String) = {
