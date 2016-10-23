@@ -1,48 +1,48 @@
+val baseSettings = Seq(
+  scalaVersion := "2.11.8",
+  crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0-RC2"),
+  version := "0.2.0",
+  name := "sourcecode"  ,
+  organization := "com.lihaoyi",
+  publishTo := Some("releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2"),
+  scmInfo := Some(ScmInfo(
+    browseUrl = url("https://github.com/lihaoyi/sourcecode"),
+    connection = "scm:git:git@github.com:lihaoyi/sourcecode.git"
+  )),
+  licenses := Seq("MIT" -> url("http://www.opensource.org/licenses/mit-license.html")),
+  developers += Developer(
+    email = "haoyi.sg@gmail.com",
+    id = "lihaoyi",
+    name = "Li Haoyi",
+    url = url("https://github.com/lihaoyi")
+  )
+)
 
-crossScalaVersions := Seq("2.10.4", "2.11.7")
+baseSettings
 
-def macroDependencies(version: String) =
+def macroDependencies(version: String, binaryVersion: String) = {
+  val quasiquotes = 
+    if(binaryVersion == "2.10")
+      Seq(
+        compilerPlugin("org.scalamacros" % s"paradise" % "2.1.0" cross CrossVersion.full),
+        "org.scalamacros" %% s"quasiquotes" % "2.1.0"
+      )
+    else Seq()
+
   Seq(
     "org.scala-lang" % "scala-reflect" % version % "provided",
     "org.scala-lang" % "scala-compiler" % version % "provided"
-  ) ++
-    (if (version startsWith "2.10.")
-      Seq(compilerPlugin("org.scalamacros" % s"paradise" % "2.0.0" cross CrossVersion.full),
-        "org.scalamacros" %% s"quasiquotes" % "2.0.0")
-    else
-      Seq())
+  ) ++ quasiquotes
+}
 
-lazy val sourcecode = crossProject.settings(
-  version := "0.1.2",
-  scalaVersion := "2.11.7",
-  name := "sourcecode"  ,
-  organization := "com.lihaoyi",
-  libraryDependencies ++= macroDependencies(scalaVersion.value),
+lazy val sourcecode = crossProject.settings(baseSettings).settings(
+  libraryDependencies ++= macroDependencies(scalaVersion.value, scalaBinaryVersion.value),
   unmanagedSourceDirectories in Compile ++= {
-    if (scalaVersion.value startsWith "2.10.") Seq(baseDirectory.value / ".."/"shared"/"src"/ "main" / "scala-2.10")
-    else Seq(baseDirectory.value / ".."/"shared" / "src" / "main" / "scala-2.11")
-  },
-  publishTo := Some("releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2"),
-
-  pomExtra :=
-    <url>https://github.com/lihaoyi/sourcecode</url>
-    <licenses>
-      <license>
-        <name>MIT license</name>
-        <url>http://www.opensource.org/licenses/mit-license.php</url>
-      </license>
-    </licenses>
-    <scm>
-      <url>git://github.com/lihaoyi/sourcecode.git</url>
-      <connection>scm:git://github.com/lihaoyi/sourcecode.git</connection>
-    </scm>
-    <developers>
-      <developer>
-        <id>lihaoyi</id>
-        <name>Li Haoyi</name>
-        <url>https://github.com/lihaoyi</url>
-      </developer>
-    </developers>
+    if (Set("2.11", "2.12.0-RC2").contains(scalaBinaryVersion.value)) 
+      Seq(baseDirectory.value / ".." / "shared" / "src" / "main" / "scala-2.11_2.12")
+    else
+      Seq()
+  }
 )
 
 lazy val js = sourcecode.js
