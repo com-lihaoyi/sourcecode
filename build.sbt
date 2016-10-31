@@ -1,5 +1,5 @@
 
-crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0-RC2")
+crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0")
 
 def macroDependencies(version: String) =
   Seq(
