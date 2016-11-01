@@ -1,5 +1,5 @@
 
-crossScalaVersions := Seq("2.10.4", "2.11.7")
+crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0")
 
 def macroDependencies(version: String) =
   Seq(
@@ -7,20 +7,20 @@ def macroDependencies(version: String) =
     "org.scala-lang" % "scala-compiler" % version % "provided"
   ) ++
     (if (version startsWith "2.10.")
-      Seq(compilerPlugin("org.scalamacros" % s"paradise" % "2.0.0" cross CrossVersion.full),
-        "org.scalamacros" %% s"quasiquotes" % "2.0.0")
+      Seq(compilerPlugin("org.scalamacros" % s"paradise" % "2.1.0" cross CrossVersion.full),
+        "org.scalamacros" %% s"quasiquotes" % "2.1.0")
     else
       Seq())
 
 lazy val sourcecode = crossProject.settings(
-  version := "0.1.2",
-  scalaVersion := "2.11.7",
+  version := "0.1.3",
+  scalaVersion := "2.11.8",
   name := "sourcecode"  ,
   organization := "com.lihaoyi",
   libraryDependencies ++= macroDependencies(scalaVersion.value),
   unmanagedSourceDirectories in Compile ++= {
-    if (scalaVersion.value startsWith "2.10.") Seq(baseDirectory.value / ".."/"shared"/"src"/ "main" / "scala-2.10")
-    else Seq(baseDirectory.value / ".."/"shared" / "src" / "main" / "scala-2.11")
+    if (scalaVersion.value startsWith "2.12.") Seq(baseDirectory.value / ".."/"shared"/"src"/ "main" / "scala-2.11")
+    else Seq()
   },
   publishTo := Some("releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2"),
 

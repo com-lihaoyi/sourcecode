@@ -35,7 +35,10 @@ object Apply {
         assert(line == 34)
 
         val enclosing = sourcecode.Enclosing()
-        assert(enclosing == "sourcecode.Apply.applyRun myLazy$lzy Bar#enclosing")
+        assert(
+          (enclosing == "sourcecode.Apply.applyRun myLazy$lzy Bar#enclosing") ||
+          (enclosing == "sourcecode.Apply.applyRun myLazy Bar#enclosing") // encoding changed in Scala 2.12
+        )
       }
       val b = new Bar{}
     }

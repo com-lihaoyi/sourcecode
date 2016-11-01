@@ -1,7 +1,15 @@
 language: scala
 script:
-- sbt ++$TRAVIS_SCALA_VERSION sourcecodeJVM/test:run sourcecodeJS/test:run
+  - sbt ++$TRAVIS_SCALA_VERSION sourcecodeJVM/test:run sourcecodeJS/test:run
 scala:
-  - 2.10.4
-  - 2.11.7
+  - 2.10.6
+  - 2.11.8
+  - 2.12.0
+jdk:
+  - openjdk7
+  - oraclejdk8
+matrix:
+  exclude:
+    - scala: 2.12.0
+      jdk: openjdk7
 sudo: false

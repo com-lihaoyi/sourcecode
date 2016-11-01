@@ -35,7 +35,10 @@ object Implicits {
         assert(line.value == 34)
 
         val enclosing = implicitly[sourcecode.Enclosing]
-        assert(enclosing.value == "sourcecode.Implicits.implicitRun myLazy$lzy Bar#enclosing")
+        assert(
+          (enclosing.value == "sourcecode.Implicits.implicitRun myLazy$lzy Bar#enclosing") ||
+          (enclosing.value == "sourcecode.Implicits.implicitRun myLazy Bar#enclosing") // encoding changed in Scala 2.12
+        )
       }
       val b = new Bar{}
     }
