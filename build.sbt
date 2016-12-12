@@ -19,8 +19,12 @@ lazy val sourcecode = crossProject.settings(
   organization := "com.lihaoyi",
   libraryDependencies ++= macroDependencies(scalaVersion.value),
   unmanagedSourceDirectories in Compile ++= {
-    if (scalaVersion.value startsWith "2.12.") Seq(baseDirectory.value / ".."/"shared"/"src"/ "main" / "scala-2.11")
-    else Seq()
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, n)) if n >= 12 =>
+        Seq(baseDirectory.value / ".."/"shared"/"src"/ "main" / "scala-2.11")
+      case _ =>
+        Seq()
+    }
   },
   publishTo := Some("releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2"),
 
