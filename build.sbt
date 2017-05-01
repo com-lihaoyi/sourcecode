@@ -1,6 +1,15 @@
 import sbtcrossproject.{crossProject, CrossType}
 
-crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.0")
+lazy val testAllCommand = Command.command("testall"){state =>
+  "project sourcecodeNative" :: "clean" :: "test:run" ::
+    "project sourcecodeJVM" :: "clean" :: "+test:run" ::
+      "project sourcecodeJS" :: "clean" :: "+test:run" ::
+        state
+}
+
+commands += testAllCommand
+
+lazy val crossVersions = Seq("2.10.6", "2.11.11", "2.12.0")
 
 def macroDependencies(version: String) =
   Seq(
@@ -17,8 +26,9 @@ lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
     version := "0.1.4-SNAPSHOT",
     scalaVersion := "2.11.11",
-    name := "sourcecode"  ,
+    name := "sourcecode",
     organization := "com.lihaoyi",
+    commands += testAllCommand,
     libraryDependencies ++= macroDependencies(scalaVersion.value),
     unmanagedSourceDirectories in Compile ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
@@ -50,6 +60,10 @@ lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
       </developers>
   )
 
-lazy val js = sourcecode.js
-lazy val jvm = sourcecode.jvm
+lazy val js = sourcecode.js.settings(
+    crossScalaVersions := crossVersions
+  )
+lazy val jvm = sourcecode.jvm.settings(
+  crossScalaVersions := crossVersions
+  )
 lazy val native = sourcecode.native
