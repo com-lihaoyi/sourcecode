@@ -1,15 +1,22 @@
 language: scala
-script:
-  - sbt ++$TRAVIS_SCALA_VERSION sourcecodeJVM/test:run sourcecodeJS/test:run
+
 scala:
-  - 2.10.6
-  - 2.11.8
-  - 2.12.0
+  - 2.11.11
+
+sudo: true
+
 jdk:
-  - openjdk7
   - oraclejdk8
-matrix:
-  exclude:
-    - scala: 2.12.0
-      jdk: openjdk7
-sudo: false
+
+before_install:
+- sudo apt-get -qq update
+- sudo apt-get install -y nodejs
+- sudo sh -c "echo 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.7 main' >> /etc/apt/sources.list"
+- sudo sh -c "echo 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise main' >> /etc/apt/sources.list" 
+- wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
+- sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
+- sudo apt-get -qq update
+- sudo apt-get install -y libgc-dev clang++-3.7 llvm-3.7 llvm-3.7-dev llvm-3.7-runtime llvm-3.7-tool libunwind7-dev
+
+script: 
+  - sbt testall

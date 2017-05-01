@@ -12,4 +12,8 @@ object Compat{
 
     nearestEnclosingMethod(enclosingOwner(c)).asMethod.paramLists
   }
+  def posExtractor(c: Context)(pos: c.universe.Position): Int = pos match {
+    case c.universe.NoPosition ⇒ Int.MaxValue
+    case p ⇒ p.start
+  }
 }

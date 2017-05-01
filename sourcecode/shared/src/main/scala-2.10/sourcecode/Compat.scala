@@ -22,4 +22,8 @@ object Compat{
       com.asMethod.paramss
     }
   }
+  def posExtractor(c: Context)(pos: c.universe.Position): Int = pos match {
+    case c.universe.NoPosition ⇒ Int.MaxValue
+    case p ⇒ p.startOrPoint
+  }
 }

@@ -1,14 +1,14 @@
 package sourcecode
 
 import language.experimental.macros
-
+import language.{existentials, implicitConversions}
 
 object Util{
   def isSynthetic(c: Compat.Context)(s: c.Symbol) = isSyntheticName(getName(c)(s))
   def isSyntheticName(name: String) = {
     name == "<init>" || (name.startsWith("<local ") && name.endsWith(">"))
   }
-  def getName(c: Compat.Context)(s: c.Symbol) = s.name.decoded.toString.trim
+  def getName(c: Compat.Context)(s: c.Symbol) = s.name.decodedName.toString.trim
 }
 abstract class SourceValue[T]{
   def value: T
@@ -129,10 +129,7 @@ object Impls{
     import c.universe._
     val fileContent = new String(v.tree.pos.source.content)
     val start = v.tree.collect {
-      case treeVal => treeVal.pos match {
-        case NoPosition ⇒ Int.MaxValue
-        case p ⇒ p.startOrPoint
-      }
+      case treeVal => Compat.posExtractor(c)(treeVal.pos)
     }.min
     val g = c.asInstanceOf[reflect.macros.runtime.Context].global
     val parser = g.newUnitParser(fileContent.drop(start))
