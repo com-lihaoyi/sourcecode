@@ -9,7 +9,7 @@ lazy val testAllCommand = Command.command("testall"){state =>
 
 commands += testAllCommand
 
-lazy val crossVersions = Seq("2.10.6", "2.11.11", "2.12.0")
+lazy val crossVersions = Seq("2.10.6", "2.11.11", "2.12.2")
 
 def macroDependencies(version: String) =
   Seq(
@@ -22,6 +22,31 @@ def macroDependencies(version: String) =
     else
       Seq())
 
+lazy val commonScalacOptions = Seq(
+  "-deprecation",
+  "-unchecked",
+  "-explaintypes",
+  "-encoding",
+  "UTF-8",
+  "-feature",
+  "-Xlog-reflective-calls",
+  "-Ywarn-dead-code",
+  "-Ywarn-inaccessible",
+  "-Ywarn-value-discard",
+  "-Xlint",
+  "-Ywarn-nullary-override",
+  "-Ywarn-nullary-unit",
+  "-Xfuture"
+)
+
+lazy val scalacOptionsExt = Seq(
+  "-Ywarn-infer-any",
+  "-Ywarn-unused"
+  )
+
+def scalacCompileOptions(version: String) = if(version.startsWith("2.10")) commonScalacOptions 
+  else  scalacOptionsExt ++ commonScalacOptions
+
 lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
     version := "0.1.4-SNAPSHOT",
@@ -30,6 +55,8 @@ lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     organization := "com.lihaoyi",
     commands += testAllCommand,
     libraryDependencies ++= macroDependencies(scalaVersion.value),
+    scalacOptions ++= scalacCompileOptions(scalaVersion.value),
+    incOptions := incOptions.value.withLogRecompileOnMacro(false),
     unmanagedSourceDirectories in Compile ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, n)) if n >= 12 =>
