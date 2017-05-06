@@ -1,15 +1,32 @@
 language: scala
-script:
-  - sbt ++$TRAVIS_SCALA_VERSION sourcecodeJVM/test:run sourcecodeJS/test:run
+
+sudo: required
+
+dist: trusty
+
+jdk:
+  - oraclejdk8
 scala:
   - 2.10.6
-  - 2.11.8
-  - 2.12.0
-jdk:
-  - openjdk7
-  - oraclejdk8
+  - 2.11.11
+  - 2.12.2
+  - 2.13.0-M1
 matrix:
-  exclude:
-    - scala: 2.12.0
+  include:
+    - scala: 2.10.6
       jdk: openjdk7
-sudo: false
+
+# Taken from https://github.com/typelevel/cats/blob/master/.travis.yml
+cache:
+  directories:
+  - $HOME/.sbt/0.13/dependency
+  - $HOME/.sbt/boot/scala*
+  - $HOME/.sbt/launchers
+  - $HOME/.ivy2/cache
+  - $HOME/.nvm
+
+before_cache:
+  - du -h -d 1 $HOME/.ivy2/cache
+  - du -h -d 2 $HOME/.sbt/
+  - find $HOME/.sbt -name "*.lock" -type f -delete
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
