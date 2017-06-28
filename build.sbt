@@ -51,7 +51,7 @@ lazy val sourcecode = crossProject.settings(
 ).enablePlugins(SbtOsgi).settings(osgiSettings).settings(
   exportPackage := Seq("sourcecode.*"),
   privatePackage := Seq(),
-  dynamicImportPackage := Seq("*"),
+  dynamicImportPackage := Seq("*")
 )
 
 lazy val js = sourcecode.js
