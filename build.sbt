@@ -1,3 +1,4 @@
+import OsgiKeys._
 
 crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0")
 
@@ -13,7 +14,7 @@ def macroDependencies(version: String) =
       Seq())
 
 lazy val sourcecode = crossProject.settings(
-  version := "0.1.3",
+  version := "0.1.4",
   scalaVersion := "2.11.8",
   name := "sourcecode"  ,
   organization := "com.lihaoyi",
@@ -47,6 +48,10 @@ lazy val sourcecode = crossProject.settings(
         <url>https://github.com/lihaoyi</url>
       </developer>
     </developers>
+).enablePlugins(SbtOsgi).settings(osgiSettings).settings(
+  exportPackage := Seq("sourcecode.*"),
+  privatePackage := Seq(),
+  dynamicImportPackage := Seq("*")
 )
 
 lazy val js = sourcecode.js
