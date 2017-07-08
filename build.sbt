@@ -1,6 +1,38 @@
+import sbtcrossproject.{crossProject, CrossType}
 import OsgiKeys._
 
-crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0")
+val scala210 = "2.10.6"
+val scala211 = "2.11.11"
+val scala212 = "2.12.2"
+val scala213 = "2.13.0-M1"
+val baseSettings = Seq(
+  organization := "com.lihaoyi",
+  name := "sourcecode",
+  version := "0.1.4",
+  scalaVersion := scala211,
+  crossScalaVersions := Seq(scala210, scala211, scala212, scala213),
+  scmInfo := Some(ScmInfo(
+    browseUrl = url("https://github.com/lihaoyi/sourcecode"),
+    connection = "scm:git:git@github.com:lihaoyi/sourcecode.git"
+  )),
+  homepage := Some(url("https://github.com/lihaoyi/sourcecode")),
+  licenses := Seq("MIT" -> url("http://www.opensource.org/licenses/mit-license.html")),
+  developers += Developer(
+    email = "haoyi.sg@gmail.com",
+    id = "lihaoyi",
+    name = "Li Haoyi",
+    url = url("https://github.com/lihaoyi")
+  ),
+  publishTo := Some("releases" at "https://oss.sonatype.org/service/local/staging/deploy/maven2")
+)
+lazy val noPublish = Seq(
+  publishArtifact := false,
+  publish := {},
+  publishLocal := {}
+)
+
+baseSettings
+noPublish
 
 def macroDependencies(version: String) =
   Seq(
@@ -13,46 +45,33 @@ def macroDependencies(version: String) =
     else
       Seq())
 
-lazy val sourcecode = crossProject.settings(
-  version := "0.1.4",
-  scalaVersion := "2.11.8",
-  name := "sourcecode"  ,
-  organization := "com.lihaoyi",
-  libraryDependencies ++= macroDependencies(scalaVersion.value),
-  unmanagedSourceDirectories in Compile ++= {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, n)) if n >= 12 =>
-        Seq(baseDirectory.value / ".."/"shared"/"src"/ "main" / "scala-2.11")
-      case _ =>
-        Seq()
-    }
-  },
-  publishTo := Some("releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2"),
-
-  pomExtra :=
-    <url>https://github.com/lihaoyi/sourcecode</url>
-    <licenses>
-      <license>
-        <name>MIT license</name>
-        <url>http://www.opensource.org/licenses/mit-license.php</url>
-      </license>
-    </licenses>
-    <scm>
-      <url>git://github.com/lihaoyi/sourcecode.git</url>
-      <connection>scm:git://github.com/lihaoyi/sourcecode.git</connection>
-    </scm>
-    <developers>
-      <developer>
-        <id>lihaoyi</id>
-        <name>Li Haoyi</name>
-        <url>https://github.com/lihaoyi</url>
-      </developer>
-    </developers>
-).enablePlugins(SbtOsgi).settings(osgiSettings).settings(
-  exportPackage := Seq("sourcecode.*"),
-  privatePackage := Seq(),
-  dynamicImportPackage := Seq("*")
-)
+lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+  .settings(
+    baseSettings,
+    libraryDependencies ++= macroDependencies(scalaVersion.value),
+    test in Test := (run in Test).toTask("").value,
+    unmanagedSourceDirectories in Compile ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, n)) if n >= 12 =>
+          Seq(baseDirectory.value / ".." / "shared" / "src" / "main" / "scala-2.11")
+        case _ =>
+          Seq()
+      }
+    },
+    // Osgi settings
+    osgiSettings,
+    exportPackage := Seq("sourcecode.*"),
+    privatePackage := Seq(),
+    dynamicImportPackage := Seq("*")
+  )
+  .enablePlugins(SbtOsgi)
+  .jsSettings(
+    scalaJSUseMainModuleInitializer in Test := true // use JVM-style main.
+  )
+  .nativeSettings(
+    crossScalaVersions := Seq(scala211)
+  )
 
 lazy val js = sourcecode.js
 lazy val jvm = sourcecode.jvm
+lazy val native = sourcecode.native
