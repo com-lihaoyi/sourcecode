@@ -37,6 +37,7 @@ lazy val sourcecode = crossProject
   .settings(baseSettings)
   .settings(
     libraryDependencies ++= macroDependencies(scalaVersion.value),
+    test in Test := (run in Test).toTask("").value,
     unmanagedSourceDirectories in Compile ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, n)) if n >= 12 =>
