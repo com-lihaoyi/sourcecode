@@ -22,10 +22,17 @@ val baseSettings = Seq(
     id = "lihaoyi",
     name = "Li Haoyi",
     url = url("https://github.com/lihaoyi")
-  )
+  ),
+  publishTo := Some("releases" at "https://oss.sonatype.org/service/local/staging/deploy/maven2")
+)
+lazy val noPublish = Seq(
+  publishArtifact := false,
+  publish := {},
+  publishLocal := {}
 )
 
 baseSettings
+noPublish
 
 def macroDependencies(version: String) =
   Seq(
@@ -39,8 +46,8 @@ def macroDependencies(version: String) =
       Seq())
 
 lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
-  .settings(baseSettings)
   .settings(
+    baseSettings,
     libraryDependencies ++= macroDependencies(scalaVersion.value),
     test in Test := (run in Test).toTask("").value,
     unmanagedSourceDirectories in Compile ++= {
@@ -51,15 +58,13 @@ lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
           Seq()
       }
     },
-    publishTo := Some("releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2")
-  )
-  .enablePlugins(SbtOsgi)
-  .settings(
+    // Osgi settings
     osgiSettings,
     exportPackage := Seq("sourcecode.*"),
     privatePackage := Seq(),
     dynamicImportPackage := Seq("*")
   )
+  .enablePlugins(SbtOsgi)
   .jsSettings(
     scalaJSUseMainModuleInitializer in Test := true // use JVM-style main.
   )
