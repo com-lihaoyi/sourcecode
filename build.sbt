@@ -1,11 +1,16 @@
+import sbtcrossproject.{crossProject, CrossType}
 import OsgiKeys._
 
+val scala210 = "2.10.6"
+val scala211 = "2.11.11"
+val scala212 = "2.12.2"
+val scala213 = "2.13.0-M1"
 val baseSettings = Seq(
   organization := "com.lihaoyi",
   name := "sourcecode",
   version := "0.1.4",
-  scalaVersion := "2.11.11",
-  crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.2", "2.13.0-M1"),
+  scalaVersion := scala211,
+  crossScalaVersions := Seq(scala210, scala211, scala212, scala213),
   scmInfo := Some(ScmInfo(
     browseUrl = url("https://github.com/lihaoyi/sourcecode"),
     connection = "scm:git:git@github.com:lihaoyi/sourcecode.git"
@@ -33,7 +38,7 @@ def macroDependencies(version: String) =
     else
       Seq())
 
-lazy val sourcecode = crossProject
+lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(baseSettings)
   .settings(
     libraryDependencies ++= macroDependencies(scalaVersion.value),
@@ -55,6 +60,13 @@ lazy val sourcecode = crossProject
     privatePackage := Seq(),
     dynamicImportPackage := Seq("*")
   )
+  .jsSettings(
+    scalaJSUseMainModuleInitializer in Test := true // use JVM-style main.
+  )
+  .nativeSettings(
+    crossScalaVersions := Seq(scala211)
+  )
 
 lazy val js = sourcecode.js
 lazy val jvm = sourcecode.jvm
+lazy val native = sourcecode.native

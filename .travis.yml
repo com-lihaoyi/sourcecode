@@ -1,9 +1,6 @@
 language: scala
-
 sudo: required
-
 dist: trusty
-
 jdk:
   - oraclejdk8
 scala:
@@ -15,8 +12,8 @@ matrix:
   include:
     - scala: 2.10.6
       jdk: openjdk7
-
-# Taken from https://github.com/typelevel/cats/blob/master/.travis.yml
+before_install:
+    - bash bin/travis_setup.sh
 cache:
   directories:
   - $HOME/.sbt/0.13/dependency
@@ -24,7 +21,6 @@ cache:
   - $HOME/.sbt/launchers
   - $HOME/.ivy2/cache
   - $HOME/.nvm
-
 before_cache:
   - du -h -d 1 $HOME/.ivy2/cache
   - du -h -d 2 $HOME/.sbt/
