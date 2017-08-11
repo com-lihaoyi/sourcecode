@@ -401,7 +401,7 @@ new Foo(123).bar("lol")  // sourcecode.DebugRun.main Foo#bar [arg -> param]: (12
 ```
 
 You can easily vary the amount of verbosity, e.g. by swapping the 
-`sourcecode.Enclosing` for a `sourcecode.Name if you think it's too verbose:
+`sourcecode.Enclosing` for a `sourcecode.Name` if you think it's too verbose:
 
 ```scala
 def debug[V](value: sourcecode.Text[V])(implicit name: sourcecode.Name) = {
