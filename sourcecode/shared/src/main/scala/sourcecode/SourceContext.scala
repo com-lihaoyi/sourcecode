@@ -107,9 +107,24 @@ object Pkg extends SourceCompanion[String, Pkg](new Pkg(_)){
 
 case class Text[T](value: T, source: String)
 object Text{
-  implicit def generate[T](v: T): Text[T] = macro Impls.text[T]
-  def apply[T](v: T): Text[T] = macro Impls.text[T]
+  implicit def generate[T](v: T): Text[T] = macro Impls.text[Text, T]
+  def apply[T](v: T): Text[T] = macro Impls.text[Text, T]
 
+}
+
+// like Text, but with lazy semantics for `value`
+sealed abstract class LazyText[T] {
+  def value: T
+  def source: String
+}
+object LazyText{
+  def apply[T](v0: => T, source0: String): LazyText[T] = new LazyText[T] {
+    private[this] lazy val v1: T = v0
+    def value: T = v1
+    def source: String = source0
+  }
+  implicit def generate[T](v: => T): LazyText[T] = macro Impls.text[LazyText, T]
+  def apply[T](v: => T): LazyText[T] = macro Impls.text[LazyText, T]
 }
 
 case class Args(value: Seq[Seq[Text[_]]]) extends SourceValue[Seq[Seq[Text[_]]]]
@@ -125,7 +140,7 @@ object Args extends SourceCompanion[Seq[Seq[Text[_]]], Args](new Args(_)) {
 }
 
 object Impls{
-  def text[T: c.WeakTypeTag](c: Compat.Context)(v: c.Expr[T]): c.Expr[sourcecode.Text[T]] = {
+  def text[F[_], T: c.WeakTypeTag](c: Compat.Context)(v: c.Expr[T]): c.Expr[F[T]] = {
     import c.universe._
     val fileContent = new String(v.tree.pos.source.content)
     val start = v.tree.collect {
@@ -140,7 +155,7 @@ object Impls{
     val end = parser.in.lastOffset
     val txt = fileContent.slice(start, start + end)
     val tree = q"""${c.prefix}(${v.tree}, $txt)"""
-    c.Expr[sourcecode.Text[T]](tree)
+    c.Expr[F[T]](tree)
   }
   sealed trait Chunk
   object Chunk{
