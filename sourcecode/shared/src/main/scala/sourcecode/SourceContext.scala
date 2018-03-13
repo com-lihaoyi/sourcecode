@@ -71,7 +71,9 @@ object File extends SourceCompanion[String, File](new File(_)){
 
   def impl(c: Compat.Context): c.Expr[sourcecode.File] = {
     import c.universe._
-    val file = c.enclosingPosition.source.path
+    import java.nio.file.Paths
+    val abs  = c.enclosingPosition.source.path
+    val file = Paths.get(sys.props("user.dir")).relativize(Paths.get(abs)).toString
     c.Expr[sourcecode.File](q"""${c.prefix}($file)""")
   }
 }
