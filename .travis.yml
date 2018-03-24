@@ -19,7 +19,7 @@ matrix:
     - scala: 2.10.6
       jdk: openjdk7
 before_install:
-    - bash bin/travis_setup.sh
+    - curl https://raw.githubusercontent.com/scala-native/scala-native/master/scripts/travis_setup.sh | bash -x
 cache:
   directories:
   - $HOME/.sbt/0.13/dependency
