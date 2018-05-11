@@ -15,7 +15,7 @@ object Implicits {
     assert(pkg.value == "sourcecode")
 
     val file = implicitly[sourcecode.File]
-    assert(file.value.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Implicits.scala"))
+    assert(file.value == "sourcecode/shared/src/test/scala/sourcecode/Implicits.scala")
 
     val line = implicitly[sourcecode.Line]
     assert(line.value == 20)
@@ -29,7 +29,7 @@ object Implicits {
         assert(fullName.value == "sourcecode.Implicits.Bar.fullName")
 
         val file = implicitly[sourcecode.File]
-        assert(file.value.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Implicits.scala"))
+        assert(file.value == "sourcecode/shared/src/test/scala/sourcecode/Implicits.scala")
 
         val line = implicitly[sourcecode.Line]
         assert(line.value == 34)
