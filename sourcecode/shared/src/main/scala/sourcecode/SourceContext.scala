@@ -26,7 +26,12 @@ object Name extends SourceCompanion[String, Name](new Name(_)){
     var owner = Compat.enclosingOwner(c)
     while(Util.isSynthetic(c)(owner)) owner = owner.owner
     val simpleName = Util.getName(c)(owner)
-    c.Expr[sourcecode.Name](q"""${c.prefix}($simpleName)""")
+    //if the class name is anonymous, then we dig up the instance value name instead
+    val valName = if ((simpleName == "$anon") && (owner.owner.isTerm)) {
+      Util.getName(c)(owner.owner)
+    } else simpleName
+
+    c.Expr[sourcecode.Name](q"""${c.prefix}($valName)""")
   }
   case class Machine(value: String) extends SourceValue[String]
   object Machine extends SourceCompanion[String, Machine](new Machine(_)){
