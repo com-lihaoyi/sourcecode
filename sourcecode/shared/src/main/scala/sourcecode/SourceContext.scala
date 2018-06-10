@@ -26,8 +26,9 @@ object Name extends SourceCompanion[String, Name](new Name(_)){
     var owner = Compat.enclosingOwner(c)
     while(Util.isSynthetic(c)(owner)) owner = owner.owner
     val simpleName = Util.getName(c)(owner)
+    def termIsValVarOrLazy(term : TermSymbol) : Boolean = term.isVal || term.isVar || term.isLazy
     //if the class name is anonymous, then we dig up the instance value name instead
-    val valName = if ((simpleName == "$anon") && (owner.owner.isTerm)) {
+    val valName = if ((simpleName == "$anon") && (owner.owner.isTerm) && termIsValVarOrLazy(owner.owner.asTerm)) {
       Util.getName(c)(owner.owner)
     } else simpleName
 
