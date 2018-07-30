@@ -21,6 +21,7 @@ object Tests{
     ManualImplicit()
     TextTests()
     ArgsTests()
+    AnonClassName.run()
 
     println("================LogExample================")
     logExample()
