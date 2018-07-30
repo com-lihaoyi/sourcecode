@@ -26,13 +26,8 @@ object Name extends SourceCompanion[String, Name](new Name(_)){
     var owner = Compat.enclosingOwner(c)
     while(Util.isSynthetic(c)(owner)) owner = owner.owner
     val simpleName = Util.getName(c)(owner)
-    def termIsValVarOrLazy(term : TermSymbol) : Boolean = term.isVal || term.isVar || term.isLazy
-    //if the class name is anonymous, then we dig up the instance value name instead
-    val valName = if ((simpleName == "$anon") && (owner.owner.isTerm) && termIsValVarOrLazy(owner.owner.asTerm)) {
-      Util.getName(c)(owner.owner)
-    } else simpleName
 
-    c.Expr[sourcecode.Name](q"""${c.prefix}($valName)""")
+    c.Expr[sourcecode.Name](q"""${c.prefix}($simpleName)""")
   }
   case class Machine(value: String) extends SourceValue[String]
   object Machine extends SourceCompanion[String, Machine](new Machine(_)){
@@ -41,6 +36,29 @@ object Name extends SourceCompanion[String, Name](new Name(_)){
       import c.universe._
       val owner = Compat.enclosingOwner(c)
       val simpleName = Util.getName(c)(owner)
+      c.Expr[Machine](q"""${c.prefix}($simpleName)""")
+    }
+  }
+}
+case class OwnerName(value: String) extends SourceValue[String]
+object OwnerName extends SourceCompanion[String, OwnerName](new OwnerName(_)){
+  implicit def generate: OwnerName = macro impl
+
+  def impl(c: Compat.Context): c.Expr[OwnerName] = {
+    import c.universe._
+    var owner = Compat.enclosingOwner(c)
+    while(Util.isSynthetic(c)(owner)) owner = owner.owner
+    val simpleName = Util.getName(c)(owner.owner)
+
+    c.Expr[sourcecode.OwnerName](q"""${c.prefix}($simpleName)""")
+  }
+  case class Machine(value: String) extends SourceValue[String]
+  object Machine extends SourceCompanion[String, Machine](new Machine(_)){
+    implicit def generate: Machine = macro impl
+    def impl(c: Compat.Context): c.Expr[Machine] = {
+      import c.universe._
+      val owner = Compat.enclosingOwner(c)
+      val simpleName = Util.getName(c)(owner.owner)
       c.Expr[Machine](q"""${c.prefix}($simpleName)""")
     }
   }
