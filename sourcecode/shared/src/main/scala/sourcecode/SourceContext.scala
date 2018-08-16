@@ -39,7 +39,19 @@ object Name extends SourceCompanion[String, Name](new Name(_)){
       c.Expr[Machine](q"""${c.prefix}($simpleName)""")
     }
   }
+  case class Of[T](value: String) extends SourceValue[String]
+  object Of extends SourceCompanion[String, Of[_]](new Of(_)){
+    implicit def generate[T]: Of[T] = macro impl[T]
+
+    def impl[T](c: Compat.Context)(implicit t : c.WeakTypeTag[T]): c.Expr[Of[T]] = {
+      import c.universe._
+      val sym = symbolOf[T]
+      val simpleName = sym.name.toString
+      c.Expr[sourcecode.Name.Of[T]](q"""${c.prefix}($simpleName)""")
+    }
+  }
 }
+
 case class OwnerName(value: String) extends SourceValue[String]
 object OwnerName extends SourceCompanion[String, OwnerName](new OwnerName(_)){
   implicit def generate: OwnerName = macro impl
@@ -86,6 +98,17 @@ object FullName extends SourceCompanion[String, FullName](new FullName(_)){
       val owner = Compat.enclosingOwner(c)
       val fullName = owner.fullName.trim
       c.Expr[Machine](q"""${c.prefix}($fullName)""")
+    }
+  }
+  case class Of[T](value: String) extends SourceValue[String]
+  object Of extends SourceCompanion[String, Of[_]](new Of(_)){
+    implicit def generate[T]: Of[T] = macro impl[T]
+
+    def impl[T](c: Compat.Context)(implicit t : c.WeakTypeTag[T]): c.Expr[Of[T]] = {
+      import c.universe._
+      val sym = symbolOf[T]
+      val simpleName = sym.fullName
+      c.Expr[sourcecode.FullName.Of[T]](q"""${c.prefix}($simpleName)""")
     }
   }
 }

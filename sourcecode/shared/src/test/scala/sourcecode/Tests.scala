@@ -22,6 +22,7 @@ object Tests{
     TextTests()
     ArgsTests()
     AnonClassName.run()
+    NameOfTests.run()
 
     println("================LogExample================")
     logExample()
