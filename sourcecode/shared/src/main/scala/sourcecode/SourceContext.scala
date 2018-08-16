@@ -84,6 +84,15 @@ object Line extends SourceCompanion[Int, Line](new Line(_)){
     c.Expr[sourcecode.Line](q"""${c.prefix}($line)""")
   }
 }
+case class Column(value: Int) extends SourceValue[Int]
+object Column extends SourceCompanion[Int, Line](new Line(_)){
+  implicit def generate: sourcecode.Column = macro impl
+  def impl(c: Compat.Context): c.Expr[sourcecode.Column] = {
+    import c.universe._
+    val column = c.enclosingPosition.column
+    c.Expr[sourcecode.Column](q"""${c.prefix}($column)""")
+  }
+}
 case class Enclosing(value: String) extends SourceValue[String]
 
 object Enclosing extends SourceCompanion[String, Enclosing](new Enclosing(_)){

@@ -20,6 +20,9 @@ object Implicits {
     val line = implicitly[sourcecode.Line]
     assert(line.value == 20)
 
+    val column = implicitly[sourcecode.Column]
+    assert(column.value == 28, column.value)
+
     lazy val myLazy = {
       trait Bar{
         val name = implicitly[sourcecode.Name]
@@ -32,7 +35,10 @@ object Implicits {
         assert(file.value.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Implicits.scala"))
 
         val line = implicitly[sourcecode.Line]
-        assert(line.value == 34)
+        assert(line.value == 37)
+
+        val column = implicitly[sourcecode.Column]
+        assert(column.value == 32, column.value)
 
         val enclosing = implicitly[sourcecode.Enclosing]
         assert(
