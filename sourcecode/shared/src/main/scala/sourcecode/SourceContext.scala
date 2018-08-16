@@ -39,15 +39,26 @@ object Name extends SourceCompanion[String, Name](new Name(_)){
       c.Expr[Machine](q"""${c.prefix}($simpleName)""")
     }
   }
-  case class Of[T](value: String) extends SourceValue[String]
-  object Of extends SourceCompanion[String, Of[_]](new Of(_)){
-    implicit def generate[T]: Of[T] = macro impl[T]
+  case class OfType[T](value: String) extends SourceValue[String]
+  object OfType extends SourceCompanion[String, OfType[_]](new OfType(_)){
+    implicit def generate[T]: OfType[T] = macro impl[T]
 
-    def impl[T](c: Compat.Context)(implicit t : c.WeakTypeTag[T]): c.Expr[Of[T]] = {
+    def impl[T](c: Compat.Context)(implicit t : c.WeakTypeTag[T]): c.Expr[OfType[T]] = {
+      import c.universe._
+      val sym = weakTypeOf[T]
+      val simpleName = sym.toString
+      c.Expr[sourcecode.Name.OfType[T]](q"""${c.prefix}($simpleName)""")
+    }
+  }
+  case class OfSymbol[T](value: String) extends SourceValue[String]
+  object OfSymbol extends SourceCompanion[String, OfSymbol[_]](new OfSymbol(_)){
+    implicit def generate[T]: OfSymbol[T] = macro impl[T]
+
+    def impl[T](c: Compat.Context)(implicit t : c.WeakTypeTag[T]): c.Expr[OfSymbol[T]] = {
       import c.universe._
       val sym = symbolOf[T]
       val simpleName = sym.name.toString
-      c.Expr[sourcecode.Name.Of[T]](q"""${c.prefix}($simpleName)""")
+      c.Expr[sourcecode.Name.OfSymbol[T]](q"""${c.prefix}($simpleName)""")
     }
   }
 }
@@ -100,15 +111,15 @@ object FullName extends SourceCompanion[String, FullName](new FullName(_)){
       c.Expr[Machine](q"""${c.prefix}($fullName)""")
     }
   }
-  case class Of[T](value: String) extends SourceValue[String]
-  object Of extends SourceCompanion[String, Of[_]](new Of(_)){
-    implicit def generate[T]: Of[T] = macro impl[T]
+  case class OfSymbol[T](value: String) extends SourceValue[String]
+  object OfSymbol extends SourceCompanion[String, OfSymbol[_]](new OfSymbol(_)){
+    implicit def generate[T]: OfSymbol[T] = macro impl[T]
 
-    def impl[T](c: Compat.Context)(implicit t : c.WeakTypeTag[T]): c.Expr[Of[T]] = {
+    def impl[T](c: Compat.Context)(implicit t : c.WeakTypeTag[T]): c.Expr[OfSymbol[T]] = {
       import c.universe._
       val sym = symbolOf[T]
       val simpleName = sym.fullName
-      c.Expr[sourcecode.FullName.Of[T]](q"""${c.prefix}($simpleName)""")
+      c.Expr[sourcecode.FullName.OfSymbol[T]](q"""${c.prefix}($simpleName)""")
     }
   }
 }
