@@ -84,8 +84,29 @@ object Line extends SourceCompanion[Int, Line](new Line(_)){
     c.Expr[sourcecode.Line](q"""${c.prefix}($line)""")
   }
 }
+case class Column(value: Int) extends SourceValue[Int]
+object Column extends SourceCompanion[Int, Line](new Line(_)){
+  implicit def generate: sourcecode.Column = macro impl
+  def impl(c: Compat.Context): c.Expr[sourcecode.Column] = {
+    import c.universe._
+    val column = c.enclosingPosition.column
+    c.Expr[sourcecode.Column](q"""${c.prefix}($column)""")
+  }
+}
+case class Position(value: (String, Int, Int)) extends SourceValue[(String, Int, Int)] {
+  val (file: String, line: Int, column: Int) = value
+}
+object Position extends SourceCompanion[(String, Int, Int), Position](new Position(_)){
+  implicit def generate: sourcecode.Position = macro impl
+  def impl(c: Compat.Context): c.Expr[sourcecode.Position] = {
+    import c.universe._
+    val file = c.enclosingPosition.source.path
+    val line = c.enclosingPosition.line
+    val column = c.enclosingPosition.column
+    c.Expr[sourcecode.Position](q"""${c.prefix}($file, $line, $column)""")
+  }
+}
 case class Enclosing(value: String) extends SourceValue[String]
-
 object Enclosing extends SourceCompanion[String, Enclosing](new Enclosing(_)){
   implicit def generate: Enclosing = macro impl
   def impl(c: Compat.Context): c.Expr[Enclosing] = Impls.enclosing[Enclosing](c)(
@@ -97,7 +118,6 @@ object Enclosing extends SourceCompanion[String, Enclosing](new Enclosing(_)){
     def impl(c: Compat.Context): c.Expr[Machine] = Impls.enclosing[Machine](c)(_ => true)
   }
 }
-
 
 case class Pkg(value: String) extends SourceValue[String]
 object Pkg extends SourceCompanion[String, Pkg](new Pkg(_)){
