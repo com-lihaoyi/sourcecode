@@ -7,15 +7,15 @@ script:
 jdk:
   - oraclejdk8
 scala:
-  - 2.10.6
-  - 2.11.11
-  - 2.12.2
-  - 2.13.0-M1
+  - 2.10.7
+  - 2.11.12
+  - 2.12.6
+  - 2.13.0-M5
 env:
-  - SCALAJS_VERSION=0.6.23
+  - SCALAJS_VERSION=0.6.25
 matrix:
   include:
-    - scala: 2.10.6
+    - scala: 2.10.7
       jdk: openjdk7
 before_install:
     - curl https://raw.githubusercontent.com/scala-native/scala-native/master/scripts/travis_setup.sh | bash -x
