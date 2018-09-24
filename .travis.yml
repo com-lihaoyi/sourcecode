@@ -1,27 +1,31 @@
 language: scala
-sudo: required
-dist: trusty
-script:
-  # plz is like ++ except it skips projects that are not defined for that scala version.
-  - sbt "plz $TRAVIS_SCALA_VERSION test"
 jdk:
   - oraclejdk8
-scala:
-  - 2.10.7
-  - 2.11.12
-  - 2.12.6
-  - 2.13.0-M5
-env:
-  - SCALAJS_VERSION=0.6.25
-matrix:
+sudo: required
+dist: trusty
+stages:
+  - name: test
+  - name: release
+    if: (branch = master AND type = push) OR (tag IS present)
+script: sbt "++$TRAVIS_SCALA_VERSION test"
+jobs:
   include:
     - scala: 2.10.7
       jdk: openjdk7
-before_install:
-    - curl https://raw.githubusercontent.com/scala-native/scala-native/master/scripts/travis_setup.sh | bash -x
+    - scala: 2.10.7
+    - scala: 2.11.12
+      before_install:
+        - curl https://raw.githubusercontent.com/scala-native/scala-native/master/scripts/travis_setup.sh | bash -x
+    - scala: 2.12.6
+    - scala: 2.13.0-M5
+
+    # Release stable release on tag push and snapshot on merge to master
+    - stage: release
+      script: sbt ci-release
+
 cache:
   directories:
-  - $HOME/.sbt/0.13/dependency
+  - $HOME/.sbt/1.0/dependency
   - $HOME/.sbt/boot/scala*
   - $HOME/.sbt/launchers
   - $HOME/.ivy2/cache
