@@ -5,7 +5,8 @@ val scala210 = "2.10.7"
 val scala211 = "2.11.12"
 val scala212 = "2.12.6"
 val scala213 = "2.13.0-M5"
-val baseSettings = Seq(
+
+inThisBuild(List(
   organization := "com.lihaoyi",
   name := "sourcecode",
   scalaVersion := scala211,
@@ -18,10 +19,10 @@ val baseSettings = Seq(
     name = "Li Haoyi",
     url = url("https://github.com/lihaoyi")
   )
-)
+))
 
-baseSettings
 skip in publish := true
+crossScalaVersions := List() // required for `++2.12.6 test` to ignore native project
 
 def macroDependencies(version: String) =
   Seq(
@@ -36,7 +37,6 @@ def macroDependencies(version: String) =
 
 lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
-    baseSettings,
     libraryDependencies ++= macroDependencies(scalaVersion.value),
     test in Test := (run in Test).toTask("").value,
     unmanagedSourceDirectories in Compile ++= {
