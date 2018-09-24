@@ -1,0 +1,9 @@
+import sbt._
+object ScalaJS1Settings extends AutoPlugin {
+  override def requires = org.scalajs.sbtplugin.ScalaJSPlugin
+  override def trigger = allRequirements
+  override def projectSettings = Seq(
+    // seems required with scala-js 1.0.0-M5
+    org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.scalaJSUseTestModuleInitializer in Test := false
+  )
+}

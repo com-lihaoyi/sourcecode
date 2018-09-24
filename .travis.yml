@@ -2,6 +2,7 @@ language: scala
 sudo: required
 dist: trusty
 script:
+  - if [[ ${SCALAJS_VERSION} = 1.* ]]; then mv project/ScalaJS1Settings.scala.0 project/ScalaJS1Settings.scala; fi
   # plz is like ++ except it skips projects that are not defined for that scala version.
   - sbt "plz $TRAVIS_SCALA_VERSION test"
 jdk:
@@ -13,6 +14,7 @@ scala:
   - 2.13.0-M5
 env:
   - SCALAJS_VERSION=0.6.25
+  - SCALAJS_VERSION=1.0.0-M5
 matrix:
   include:
     - scala: 2.10.7
