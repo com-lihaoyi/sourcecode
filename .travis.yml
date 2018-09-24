@@ -23,11 +23,10 @@ jobs:
 
 cache:
   directories:
-  - $HOME/.sbt/1.0/dependency
-  - $HOME/.sbt/boot/scala*
-  - $HOME/.sbt/launchers
+  - $HOME/.sbt/zinc
   - $HOME/.ivy2/cache
   - $HOME/.nvm
+  - $HOME/.coursier
 before_cache:
   - du -h -d 1 $HOME/.ivy2/cache
   - du -h -d 2 $HOME/.sbt/
