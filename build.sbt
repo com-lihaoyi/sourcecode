@@ -5,16 +5,12 @@ val scala210 = "2.10.7"
 val scala211 = "2.11.12"
 val scala212 = "2.12.6"
 val scala213 = "2.13.0-M5"
-val baseSettings = Seq(
+
+inThisBuild(List(
   organization := "com.lihaoyi",
   name := "sourcecode",
-  version := "0.1.5-SNAPSHOT",
   scalaVersion := scala211,
   crossScalaVersions := Seq(scala210, scala211, scala212, scala213),
-  scmInfo := Some(ScmInfo(
-    browseUrl = url("https://github.com/lihaoyi/sourcecode"),
-    connection = "scm:git:git@github.com:lihaoyi/sourcecode.git"
-  )),
   homepage := Some(url("https://github.com/lihaoyi/sourcecode")),
   licenses := Seq("MIT" -> url("http://www.opensource.org/licenses/mit-license.html")),
   developers += Developer(
@@ -22,17 +18,11 @@ val baseSettings = Seq(
     id = "lihaoyi",
     name = "Li Haoyi",
     url = url("https://github.com/lihaoyi")
-  ),
-  publishTo := Some("releases" at "https://oss.sonatype.org/service/local/staging/deploy/maven2")
-)
-lazy val noPublish = Seq(
-  publishArtifact := false,
-  publish := {},
-  publishLocal := {}
-)
+  )
+))
 
-baseSettings
-noPublish
+skip in publish := true
+crossScalaVersions := List() // required for `++2.12.6 test` to ignore native project
 
 def macroDependencies(version: String) =
   Seq(
@@ -47,7 +37,6 @@ def macroDependencies(version: String) =
 
 lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
-    baseSettings,
     libraryDependencies ++= macroDependencies(scalaVersion.value),
     test in Test := (run in Test).toTask("").value,
     unmanagedSourceDirectories in Compile ++= {
