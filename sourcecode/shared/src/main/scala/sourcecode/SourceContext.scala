@@ -1,6 +1,7 @@
 package sourcecode
 
 import language.experimental.macros
+import scala.reflect.macros.whitebox
 
 
 object Util{
@@ -103,6 +104,15 @@ case class Pkg(value: String) extends SourceValue[String]
 object Pkg extends SourceCompanion[String, Pkg](new Pkg(_)){
   implicit def generate: Pkg = macro impl
   def impl(c: Compat.Context): c.Expr[Pkg] = Impls.enclosing[Pkg](c)(_.isPackage)
+}
+
+case class Caller[A](value: A)
+object Caller {
+  implicit def generate: Caller[_] = macro impl
+  def impl(c: whitebox.Context): c.Tree = {
+    import c.universe._
+    q"new _root_.sourcecode.Caller(this)"
+  }
 }
 
 case class Text[T](value: T, source: String)
