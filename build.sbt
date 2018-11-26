@@ -41,8 +41,8 @@ lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     test in Test := (run in Test).toTask("").value,
     unmanagedSourceDirectories in Compile ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, n)) if n >= 12 =>
-          Seq(baseDirectory.value / ".." / "shared" / "src" / "main" / "scala-2.11")
+        case Some((2, n)) if n >= 11 =>
+          Seq(baseDirectory.value / ".." / "shared" / "src" / "main" / "scala-2.11+")
         case _ =>
           Seq()
       }
