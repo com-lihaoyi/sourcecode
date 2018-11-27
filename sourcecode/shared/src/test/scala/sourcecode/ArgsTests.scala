@@ -7,6 +7,15 @@ object ArgsTests {
 
     def debug(implicit arguments: sourcecode.Args): Unit = args = arguments.value.map(_.map(t => t.source -> t.value))
 
+    // FIXME Can't manage to get the arg values from dotty…
+    val checkValues = !TestUtil.isDotty
+
+    def check(expected: Seq[Seq[(String, Any)]]): Unit =
+      if (checkValues)
+        assert(args == expected, s"Expected: $expected, got: $args")
+      else
+        assert(args.map(_.map(_._1)) == expected.map(_.map(_._1)), s"Expected: ${expected.map(_.map(_._1))}, got: ${args.map(_.map(_._1))}")
+
     def foo(p1: String, p2: Long, p3: Boolean)(foo: String, bar: String): Unit = {
       debug
     }
@@ -36,25 +45,25 @@ object ArgsTests {
     }
 
     new Foo("text", 42, false)("foo", "bar")
-    assert(args == Seq(Seq("p1" -> "text", "p2" -> 42, "p3" -> false), Seq("foo" -> "foo", "bar" -> "bar")))
+    check(Seq(Seq("p1" -> "text", "p2" -> 42, "p3" -> false), Seq("foo" -> "foo", "bar" -> "bar")))
 
     new Foo("text", 42)
-    assert(args == Seq(Seq("p1" -> "text", "p2" -> 42)))
+    check(Seq(Seq("p1" -> "text", "p2" -> 42)))
 
     foo("text", 42, false)("foo", "bar")
-    assert(args == Seq(Seq("p1" -> "text", "p2" -> 42, "p3" -> false), Seq("foo" -> "foo", "bar" -> "bar")))
+    check(Seq(Seq("p1" -> "text", "p2" -> 42, "p3" -> false), Seq("foo" -> "foo", "bar" -> "bar")))
 
     bar("text", 42, false)("foo", "bar")
-    assert(args == Seq(Seq("p1" -> "text", "p2" -> 42, "p3" -> false), Seq("foo" -> "foo", "bar" -> "bar")))
+    check(Seq(Seq("p1" -> "text", "p2" -> 42, "p3" -> false), Seq("foo" -> "foo", "bar" -> "bar")))
 
     baz
-    assert(args == Seq())
+    check(Seq())
 
     withImplicit("text", 42, false)("foo")
-    assert(args == Seq(Seq("p1" -> "text", "p2" -> 42, "p3" -> false), Seq("foo" -> "foo")))
+    check(Seq(Seq("p1" -> "text", "p2" -> 42, "p3" -> false), Seq("foo" -> "foo")))
 
     implicit val implicitFoo = "bar"
     withImplicit("text", 42, false)
-    assert(args == Seq(Seq("p1" -> "text", "p2" -> 42, "p3" -> false), Seq("foo" -> "bar")))
+    check(Seq(Seq("p1" -> "text", "p2" -> 42, "p3" -> false), Seq("foo" -> "bar")))
   }
 }

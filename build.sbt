@@ -5,6 +5,7 @@ val scala210 = "2.10.7"
 val scala211 = "2.11.12"
 val scala212 = "2.12.6"
 val scala213 = "2.13.0-M5"
+val dotty = "0.10.0"
 
 inThisBuild(List(
   organization := "com.lihaoyi",
@@ -37,7 +38,12 @@ def macroDependencies(version: String) =
 
 lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
-    libraryDependencies ++= macroDependencies(scalaVersion.value),
+    libraryDependencies ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, _)) => macroDependencies(scalaVersion.value)
+        case _ => Nil
+      }
+    },
     test in Test := (run in Test).toTask("").value,
     unmanagedSourceDirectories in Compile ++= {
       val crossVer = CrossVersion.partialVersion(scalaVersion.value)
@@ -65,6 +71,9 @@ lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     dynamicImportPackage := Seq("*")
   )
   .enablePlugins(SbtOsgi)
+  .jvmSettings(
+    crossScalaVersions += dotty
+  )
   .jsSettings(
     scalaJSUseMainModuleInitializer in Test := true // use JVM-style main.
   )
