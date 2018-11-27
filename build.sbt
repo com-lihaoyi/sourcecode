@@ -40,12 +40,23 @@ lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     libraryDependencies ++= macroDependencies(scalaVersion.value),
     test in Test := (run in Test).toTask("").value,
     unmanagedSourceDirectories in Compile ++= {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, n)) if n >= 12 =>
-          Seq(baseDirectory.value / ".." / "shared" / "src" / "main" / "scala-2.11")
+      val crossVer = CrossVersion.partialVersion(scalaVersion.value)
+
+      val scala211plus = crossVer match {
+        case Some((2, n)) if n >= 11 =>
+          Seq(baseDirectory.value / ".." / "shared" / "src" / "main" / "scala-2.11+")
         case _ =>
           Seq()
       }
+
+      val scala2 = crossVer match {
+        case Some((2, _)) =>
+          Seq(baseDirectory.value / ".." / "shared" / "src" / "main" / "scala-2.x")
+        case _ =>
+          Seq()
+      }
+
+      scala211plus ++ scala2
     },
     // Osgi settings
     osgiSettings,
