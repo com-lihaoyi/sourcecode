@@ -55,14 +55,14 @@ lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
           Seq()
       }
 
-      val scala2 = crossVer match {
+      val scala2OrDotty = crossVer match {
         case Some((2, _)) =>
           Seq(baseDirectory.value / ".." / "shared" / "src" / "main" / "scala-2.x")
         case _ =>
-          Seq()
+          Seq(baseDirectory.value / ".." / "shared" / "src" / "main" / "dotty")
       }
 
-      scala211plus ++ scala2
+      scala211plus ++ scala2OrDotty
     },
     // Osgi settings
     osgiSettings,
