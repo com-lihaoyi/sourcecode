@@ -48,6 +48,6 @@ object Implicits {
       }
       val b = new Bar{}
     }
-    myLazy
+    myLazy // FIXME seems like this is not run on dotty
   }
 }
