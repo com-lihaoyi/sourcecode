@@ -3,7 +3,7 @@ package sourcecode
 import scala.language.implicitConversions
 import scala.quoted.Exprs.TastyTreeExpr
 import scala.quoted.{Expr, LiftExprOps, Type}
-import scala.tasty.Tasty
+import scala.tasty.Reflection
 
 trait NameMacros {
   inline implicit def generate: Name =
@@ -61,11 +61,11 @@ trait ArgsMacros {
 }
 
 object Util{
-  def isSynthetic(c: Tasty)(s: c.Symbol) = isSyntheticName(getName(c)(s))
+  def isSynthetic(c: Reflection)(s: c.Symbol) = isSyntheticName(getName(c)(s))
   def isSyntheticName(name: String) = {
     name == "<init>" || (name.startsWith("<local ") && name.endsWith(">"))
   }
-  def getName(c: Tasty)(s: c.Symbol) = {
+  def getName(c: Reflection)(s: c.Symbol) = {
     import c._
     s.name.trim
       .stripSuffix("$") // meh
@@ -74,7 +74,7 @@ object Util{
 
 object Macros {
 
-  def actualOwner(c: Tasty)(owner: c.Symbol): c.Symbol = {
+  def actualOwner(c: Reflection)(owner: c.Symbol): c.Symbol = {
     import c._
     var owner0 = owner
     // second condition is meh
@@ -84,7 +84,7 @@ object Macros {
     owner0
   }
 
-  def nameImpl(implicit c: Tasty): Expr[Name] = {
+  def nameImpl(implicit c: Reflection): Expr[Name] = {
     import c._
     val owner = actualOwner(c)(c.rootContext.owner)
     val simpleName = Util.getName(c)(owner)
@@ -98,14 +98,14 @@ object Macros {
     else
       s
 
-  def nameMachineImpl(implicit c: Tasty): Expr[Name.Machine] = {
+  def nameMachineImpl(implicit c: Reflection): Expr[Name.Machine] = {
     import c._
     val owner = c.rootContext.owner
     val simpleName = adjustName(Util.getName(c)(owner))
     '(Name.Machine(~simpleName.toExpr))
   }
 
-  def fullNameImpl(implicit c: Tasty): Expr[FullName] = {
+  def fullNameImpl(implicit c: Reflection): Expr[FullName] = {
     import c._
     val owner = actualOwner(c)(c.rootContext.owner)
     val fullName =
@@ -117,7 +117,7 @@ object Macros {
     '(FullName(~fullName.toExpr))
   }
 
-  def fullNameMachineImpl(implicit c: Tasty): Expr[FullName.Machine] = {
+  def fullNameMachineImpl(implicit c: Reflection): Expr[FullName.Machine] = {
     import c._
     val owner = c.rootContext.owner
     val fullName = owner.fullName.trim
@@ -128,19 +128,19 @@ object Macros {
     '(FullName.Machine(~fullName.toExpr))
   }
 
-  def fileImpl(implicit c: Tasty): Expr[sourcecode.File] = {
+  def fileImpl(implicit c: Reflection): Expr[sourcecode.File] = {
     import c._
     val file = c.rootPosition.sourceFile.toAbsolutePath.toString
     '(sourcecode.File(~file.toExpr))
   }
 
-  def lineImpl(implicit c: Tasty): Expr[sourcecode.Line] = {
+  def lineImpl(implicit c: Reflection): Expr[sourcecode.Line] = {
     import c._
     val line = c.rootPosition.startLine + 1
     '(sourcecode.Line(~line.toExpr))
   }
 
-  def enclosingImpl(implicit c: Tasty): Expr[Enclosing] = {
+  def enclosingImpl(implicit c: Reflection): Expr[Enclosing] = {
     val path = enclosing(c)(
       !Util.isSynthetic(c)(_)
     )
@@ -148,36 +148,31 @@ object Macros {
     '(Enclosing(~path.toExpr))
   }
 
-  def enclosingMachineImpl(implicit c: Tasty): Expr[Enclosing.Machine] = {
+  def enclosingMachineImpl(implicit c: Reflection): Expr[Enclosing.Machine] = {
     val path = enclosing(c, machine = true)(_ => true)
     '(Enclosing.Machine(~path.toExpr))
   }
 
-  def pkgImpl(implicit c: Tasty): Expr[Pkg] = {
+  def pkgImpl(implicit c: Reflection): Expr[Pkg] = {
     import c._
-    val path = enclosing(c)(
-      // _.isPackage
-      s => s.tree match {
-        case Some(PackageDef(_)) => true
-        case _ => false
-      }
-    )
+    val path = enclosing(c) {
+      case IsPackageSymbol(_) => true
+      case _ => false
+    }
 
     '(Pkg(~path.toExpr))
   }
 
-  def argsImpl(implicit c: Tasty): Expr[Args] = {
+  def argsImpl(implicit c: Reflection): Expr[Args] = {
     import c._
 
     val param: List[List[c.ValDef]] = {
       def nearestEnclosingMethod(owner: c.Symbol): List[List[c.ValDef]] =
-        owner.tree match {
-          case Some(DefDef((_, _, paramss, _, _))) =>
-            paramss
-          case Some(ClassDef((_, constructor, _, _, _))) =>
-            constructor.paramss
-          case Some(ValDef(_, _, rhs)) =>
-            nearestEnclosingMethod(owner.owner)
+        owner match {
+          case IsDefSymbol(defSym) =>
+            defSym.tree.paramss
+          case IsClassSymbol(classSym) =>
+            classSym.tree.constructor.paramss
           case _ =>
             nearestEnclosingMethod(owner.owner)
         }
@@ -198,7 +193,7 @@ object Macros {
   }
 
 
-  def text[T: Type](v: Expr[T])(implicit c: Tasty): Expr[sourcecode.Text[T]] = {
+  def text[T: Type](v: Expr[T])(implicit c: Reflection): Expr[sourcecode.Text[T]] = {
     import c._
     import scala.quoted.Toolbox.Default._
     val txt = v.show
@@ -213,7 +208,7 @@ object Macros {
 
   }
 
-  def enclosing(c: Tasty, machine: Boolean = false)(filter: c.Symbol => Boolean): String = {
+  def enclosing(c: Reflection, machine: Boolean = false)(filter: c.Symbol => Boolean): String = {
 
     import c._
     var current = c.rootContext.owner
@@ -223,9 +218,9 @@ object Macros {
     while(current.toString != "NoSymbol" && current != definitions.RootPackage && current != definitions.RootClass){
       if (filter(current)) {
 
-        val chunk = current.tree match {
-          case Some(ValDef(_)) => Chunk.ValVarLzyDef
-          case Some(DefDef(_)) => Chunk.ValVarLzyDef
+        val chunk = current match {
+          case IsValSymbol(_) => Chunk.ValVarLzyDef
+          case IsDefSymbol(_) => Chunk.ValVarLzyDef
           case _ => Chunk.PkgObj
         }
 
