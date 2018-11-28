@@ -5,7 +5,7 @@ val scala210 = "2.10.7"
 val scala211 = "2.11.12"
 val scala212 = "2.12.6"
 val scala213 = "2.13.0-M5"
-val dotty = "0.10.0"
+val dotty = "0.12.0-bin-20181127-235a103-NIGHTLY"
 
 inThisBuild(List(
   organization := "com.lihaoyi",
@@ -39,10 +39,7 @@ def macroDependencies(version: String) =
 lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
     libraryDependencies ++= {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, _)) => macroDependencies(scalaVersion.value)
-        case _ => Nil
-      }
+      if (isDotty.value) Nil else macroDependencies(scalaVersion.value)
     },
     test in Test := (run in Test).toTask("").value,
     unmanagedSourceDirectories in Compile ++= {
