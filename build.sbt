@@ -58,6 +58,10 @@ lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
 
       scala211plus ++ scala2
     },
+    // Java 9 settings
+    packageOptions in (Compile, packageBin) += Package.ManifestAttributes(
+      "Automatic-Module-Name" -> "com.lihaoyi.sourcecode"
+    ),
     // Osgi settings
     osgiSettings,
     exportPackage := Seq("sourcecode.*"),
