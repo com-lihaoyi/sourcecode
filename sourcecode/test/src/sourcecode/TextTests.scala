@@ -7,11 +7,11 @@ object TextTests {
     assert(foo(bar) == (Seq("lols"), "bar"))
     // FIXME Don't pass on dotty (second element not ok)
     if (TestUtil.isDotty) {
-      assert(foo('lol.toString * 2)._1 == "'lol'lol")
-      assert(foo{println("Hello"); 'lol.toString * 2}._1 == "'lol'lol")
+      assert(foo(Symbol("lol").toString * 2)._1 == "'lol'lol")
+      assert(foo{println("Hello"); Symbol("lol").toString * 2}._1 == "'lol'lol")
     } else {
-      assert(foo('lol.toString * 2) == ("'lol'lol", "'lol.toString * 2"))
-      assert(foo{println("Hello"); 'lol.toString * 2} == ("'lol'lol", "'lol.toString * 2"))
+      assert(foo(Symbol("lol").toString * 2) == ("'lol'lol", "'lol.toString * 2"))
+      assert(foo{println("Hello"); Symbol("lol").toString * 2} == ("'lol'lol", "'lol.toString * 2"))
     }
   }
   def foo[T](v: sourcecode.Text[T]) = (v.value, v.source)
