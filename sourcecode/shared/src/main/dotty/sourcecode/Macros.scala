@@ -197,7 +197,7 @@ object Macros {
     import c._
     import scala.quoted.Toolbox.Default._
     val txt = v.show
-    '{sourcecode.Text[T]($v, $txt.toExpr)}
+    '{sourcecode.Text[T]($v, ${txt.toExpr})}
   }
 
   sealed trait Chunk
