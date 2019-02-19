@@ -7,57 +7,57 @@ import scala.tasty.Reflection
 
 trait NameMacros {
   inline implicit def generate: Name =
-    ~Macros.nameImpl
+    ${ Macros.nameImpl }
 }
 
 trait NameMachineMacros {
   inline implicit def generate: Name.Machine =
-    ~Macros.nameMachineImpl
+    ${ Macros.nameMachineImpl }
 }
 
 trait FullNameMacros {
   inline implicit def generate: FullName =
-    ~Macros.fullNameImpl
+    ${ Macros.fullNameImpl }
 }
 
 trait FullNameMachineMacros {
   inline implicit def generate: FullName.Machine =
-    ~Macros.fullNameMachineImpl
+    ${ Macros.fullNameMachineImpl }
 }
 
 trait FileMacros {
   inline implicit def generate: sourcecode.File =
-    ~Macros.fileImpl
+    ${ Macros.fileImpl }
 }
 
 trait LineMacros {
   inline implicit def generate: sourcecode.Line =
-    ~Macros.lineImpl
+    ${ Macros.lineImpl }
 }
 
 trait EnclosingMacros {
   inline implicit def generate: Enclosing =
-    ~Macros.enclosingImpl
+    ${ Macros.enclosingImpl }
 }
 
 trait EnclosingMachineMacros {
   inline implicit def generate: Enclosing.Machine =
-    ~Macros.enclosingMachineImpl
+    ${ Macros.enclosingMachineImpl }
 }
 
 trait PkgMacros {
   inline implicit def generate: Pkg =
-    ~Macros.pkgImpl
+    ${ Macros.pkgImpl }
 }
 
 trait TextMacros {
-  inline implicit def generate[T](v: => T): Text[T] = ~Macros.text('(v))
-  inline def apply[T](v: => T): Text[T] = ~Macros.text('(v))
+  inline implicit def generate[T](v: => T): Text[T] = ${ Macros.text('(v)) }
+  inline def apply[T](v: => T): Text[T] = ${ Macros.text('(v)) }
 }
 
 trait ArgsMacros {
   inline implicit def generate: Args =
-    ~Macros.argsImpl
+    ${ Macros.argsImpl }
 }
 
 object Util{
@@ -88,7 +88,7 @@ object Macros {
     import c._
     val owner = actualOwner(c)(c.rootContext.owner)
     val simpleName = Util.getName(c)(owner)
-    '(Name(~simpleName.toExpr))
+    '(Name(${simpleName.toExpr}))
   }
 
   private def adjustName(s: String): String =
@@ -102,7 +102,7 @@ object Macros {
     import c._
     val owner = c.rootContext.owner
     val simpleName = adjustName(Util.getName(c)(owner))
-    '(Name.Machine(~simpleName.toExpr))
+    '(Name.Machine(${simpleName.toExpr}))
   }
 
   def fullNameImpl(implicit c: Reflection): Expr[FullName] = {
@@ -114,7 +114,7 @@ object Macros {
         .filterNot(Util.isSyntheticName)
         .map(_.stripPrefix("_$").stripSuffix("$")) // meh
         .mkString(".")
-    '(FullName(~fullName.toExpr))
+    '(FullName(${fullName.toExpr}))
   }
 
   def fullNameMachineImpl(implicit c: Reflection): Expr[FullName.Machine] = {
@@ -125,19 +125,19 @@ object Macros {
       .map(_.stripPrefix("_$").stripSuffix("$")) // meh
       .map(adjustName)
       .mkString(".")
-    '(FullName.Machine(~fullName.toExpr))
+    '(FullName.Machine(${fullName.toExpr}))
   }
 
   def fileImpl(implicit c: Reflection): Expr[sourcecode.File] = {
     import c._
     val file = c.rootPosition.sourceFile.toAbsolutePath.toString
-    '(sourcecode.File(~file.toExpr))
+    '(sourcecode.File(${file.toExpr}))
   }
 
   def lineImpl(implicit c: Reflection): Expr[sourcecode.Line] = {
     import c._
     val line = c.rootPosition.startLine + 1
-    '(sourcecode.Line(~line.toExpr))
+    '(sourcecode.Line(${line.toExpr}))
   }
 
   def enclosingImpl(implicit c: Reflection): Expr[Enclosing] = {
@@ -145,12 +145,12 @@ object Macros {
       !Util.isSynthetic(c)(_)
     )
 
-    '(Enclosing(~path.toExpr))
+    '(Enclosing(${path.toExpr}))
   }
 
   def enclosingMachineImpl(implicit c: Reflection): Expr[Enclosing.Machine] = {
     val path = enclosing(c, machine = true)(_ => true)
-    '(Enclosing.Machine(~path.toExpr))
+    '(Enclosing.Machine(${path.toExpr}))
   }
 
   def pkgImpl(implicit c: Reflection): Expr[Pkg] = {
@@ -160,7 +160,7 @@ object Macros {
       case _ => false
     }
 
-    '(Pkg(~path.toExpr))
+    '(Pkg(${path.toExpr}))
   }
 
   def argsImpl(implicit c: Reflection): Expr[Args] = {
@@ -182,14 +182,14 @@ object Macros {
 
     val texts0 = param.map(_.foldRight('(List.empty[Text[_]])) {
       case (vd @ ValDef(nme, _, optV), l) =>
-        '(Text(~{optV.fold('(None))(v => new TastyTreeExpr(v))}, ~nme.toExpr) :: ~l)
+        '(Text(${optV.fold('(None))(v => new TastyTreeExpr(v))}, ${nme.toExpr}) :: $l)
     })
     val texts = texts0.foldRight('(List.empty[List[Text[_]]])) {
       case (l, acc) =>
-        '(~l :: ~acc)
+        '($l :: $acc)
     }
 
-    '(Args(~texts))
+    '(Args($texts))
   }
 
 
@@ -197,7 +197,7 @@ object Macros {
     import c._
     import scala.quoted.Toolbox.Default._
     val txt = v.show
-    '(sourcecode.Text[T](~v, ~txt.toExpr))
+    '(sourcecode.Text[T]($v, $txt.toExpr))
   }
 
   sealed trait Chunk
