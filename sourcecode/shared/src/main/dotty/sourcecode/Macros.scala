@@ -195,9 +195,8 @@ object Macros {
 
   def text[T: Type](v: Expr[T])(implicit c: Reflection): Expr[sourcecode.Text[T]] = {
     import c._
-    import scala.quoted.Toolbox.Default._
-    val txt = v.show
-    '(sourcecode.Text[T](~v, ~txt.toExpr))
+    val txt = v.unseal.underlyingArgument.pos.sourceCode.toString.toExpr
+    '(sourcecode.Text[T](~v, ~txt))
   }
 
   sealed trait Chunk
