@@ -3,7 +3,7 @@ import OsgiKeys._
 
 val scala210 = "2.10.7"
 val scala211 = "2.11.12"
-val scala212 = "2.12.6"
+val scala212 = "2.12.8"
 val scala213 = "2.13.0-M5"
 
 inThisBuild(List(
@@ -22,7 +22,7 @@ inThisBuild(List(
 ))
 
 skip in publish := true
-crossScalaVersions := List() // required for `++2.12.6 test` to ignore native project
+crossScalaVersions := List() // required for `++2.12.8 test` to ignore native project
 
 def macroDependencies(version: String) =
   Seq(
