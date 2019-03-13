@@ -26,18 +26,22 @@ object Apply {
         assert(name == "name")
 
         val fullName = sourcecode.FullName()
-        assert(fullName == "sourcecode.Apply.Bar.fullName")
+        assert(
+          fullName == "sourcecode.Apply.Bar.fullName" ||
+            fullName == "sourcecode.Apply._$Bar.fullName" // dotty
+        )
 
         val file = sourcecode.File()
         assert(file.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Apply.scala"))
 
         val line = sourcecode.Line()
-        assert(line == 34)
+        assert(line == 37)
 
         val enclosing = sourcecode.Enclosing()
         assert(
           (enclosing == "sourcecode.Apply.applyRun myLazy$lzy Bar#enclosing") ||
-          (enclosing == "sourcecode.Apply.applyRun myLazy Bar#enclosing") // encoding changed in Scala 2.12
+          (enclosing == "sourcecode.Apply.applyRun myLazy Bar#enclosing") || // encoding changed in Scala 2.12
+          (enclosing == "sourcecode.Apply.applyRun myLazy Bar.enclosing") // dotty
         )
       }
       val b = new Bar{}

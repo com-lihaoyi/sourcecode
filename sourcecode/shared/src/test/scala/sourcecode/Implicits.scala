@@ -26,18 +26,22 @@ object Implicits {
         assert(name.value == "name")
 
         val fullName = implicitly[sourcecode.FullName]
-        assert(fullName.value == "sourcecode.Implicits.Bar.fullName")
+        assert(
+          fullName.value == "sourcecode.Implicits.Bar.fullName" ||
+            fullName.value == "sourcecode.Implicits._$Bar.fullName" // dotty
+        )
 
         val file = implicitly[sourcecode.File]
         assert(file.value.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Implicits.scala"))
 
         val line = implicitly[sourcecode.Line]
-        assert(line.value == 34)
+        assert(line.value == 37)
 
         val enclosing = implicitly[sourcecode.Enclosing]
         assert(
           (enclosing.value == "sourcecode.Implicits.implicitRun myLazy$lzy Bar#enclosing") ||
-          (enclosing.value == "sourcecode.Implicits.implicitRun myLazy Bar#enclosing") // encoding changed in Scala 2.12
+          (enclosing.value == "sourcecode.Implicits.implicitRun myLazy Bar#enclosing") || // encoding changed in Scala 2.12
+          (enclosing.value == "sourcecode.Implicits.implicitRun myLazy Bar.enclosing") // dotty
         )
       }
       val b = new Bar{}
