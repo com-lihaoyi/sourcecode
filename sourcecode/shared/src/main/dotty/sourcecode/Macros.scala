@@ -156,7 +156,7 @@ object Macros {
   def pkgImpl(implicit c: Reflection): Expr[Pkg] = {
     import c._
     val path = enclosing(c) {
-      case IsPackageSymbol(_) => true
+      case IsPackageDefSymbol(_) => true
       case _ => false
     }
 
@@ -169,9 +169,9 @@ object Macros {
     val param: List[List[c.ValDef]] = {
       def nearestEnclosingMethod(owner: c.Symbol): List[List[c.ValDef]] =
         owner match {
-          case IsDefSymbol(defSym) =>
+          case IsDefDefSymbol(defSym) =>
             defSym.tree.paramss
-          case IsClassSymbol(classSym) =>
+          case IsClassDefSymbol(classSym) =>
             classSym.tree.constructor.paramss
           case _ =>
             nearestEnclosingMethod(owner.owner)
@@ -219,8 +219,8 @@ object Macros {
       if (filter(current)) {
 
         val chunk = current match {
-          case IsValSymbol(_) => Chunk.ValVarLzyDef
-          case IsDefSymbol(_) => Chunk.ValVarLzyDef
+          case IsValDefSymbol(_) => Chunk.ValVarLzyDef
+          case IsDefDefSymbol(_) => Chunk.ValVarLzyDef
           case _ => Chunk.PkgObj
         }
 
