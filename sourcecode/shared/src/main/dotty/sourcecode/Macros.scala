@@ -130,7 +130,7 @@ object Macros {
 
   def fileImpl(implicit c: Reflection): Expr[sourcecode.File] = {
     import c._
-    val file = c.rootPosition.sourceFile.toAbsolutePath.toString
+    val file = c.rootPosition.sourceFile.jpath.toAbsolutePath.toString
     '{sourcecode.File(${file.toExpr})}
   }
 
