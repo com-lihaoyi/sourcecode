@@ -15,7 +15,7 @@ jobs:
       before_install:
         - curl https://raw.githubusercontent.com/scala-native/scala-native/master/scripts/travis_setup.sh | bash -x
     - scala: 2.12.8
-    - scala: 2.13.0-M5
+    - scala: 2.13.0-RC1
 
     # Release stable release on tag push and snapshot on merge to master
     - stage: release
