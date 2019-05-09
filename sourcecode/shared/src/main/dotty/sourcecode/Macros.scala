@@ -1,8 +1,8 @@
 package sourcecode
 
 import scala.language.implicitConversions
+import scala.quoted._
 import scala.quoted.Exprs.TastyTreeExpr
-import scala.quoted.{Expr, LiftExprOps, Type}
 import scala.tasty.Reflection
 
 trait NameMacros {
