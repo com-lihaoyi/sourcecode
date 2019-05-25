@@ -1,4 +1,4 @@
-import sbtcrossproject.{crossProject, CrossType}
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 import OsgiKeys._
 
 val scala210 = "2.10.7"
@@ -26,8 +26,8 @@ crossScalaVersions := List() // required for `++2.12.8 test` to ignore native pr
 
 def macroDependencies(version: String) =
   Seq(
-    "org.scala-lang" % "scala-reflect" % version % "provided",
-    "org.scala-lang" % "scala-compiler" % version % "provided"
+    "org.scala-lang" % "scala-reflect" % version % Provided,
+    "org.scala-lang" % "scala-compiler" % version % Provided
   ) ++
     (if (version startsWith "2.10.")
       Seq(compilerPlugin("org.scalamacros" % s"paradise" % "2.1.0" cross CrossVersion.full),
@@ -36,6 +36,7 @@ def macroDependencies(version: String) =
       Seq())
 
 lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+  .crossType(CrossType.Pure)
   .settings(
     libraryDependencies ++= macroDependencies(scalaVersion.value),
     test in Test := (run in Test).toTask("").value,
@@ -44,14 +45,14 @@ lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
 
       val scala211plus = crossVer match {
         case Some((2, n)) if n >= 11 =>
-          Seq(baseDirectory.value / ".." / "shared" / "src" / "main" / "scala-2.11+")
+          Seq(baseDirectory.value / ".." / "src" / "main" / "scala-2.11+")
         case _ =>
           Seq()
       }
 
       val scala2 = crossVer match {
         case Some((2, _)) =>
-          Seq(baseDirectory.value / ".." / "shared" / "src" / "main" / "scala-2.x")
+          Seq(baseDirectory.value / ".." / "src" / "main" / "scala-2.x")
         case _ =>
           Seq()
       }
@@ -73,9 +74,6 @@ lazy val sourcecode = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     scalaJSUseMainModuleInitializer in Test := true // use JVM-style main.
   )
   .nativeSettings(
-    crossScalaVersions := Seq(scala211)
+    crossScalaVersions := Seq(scala211),
+    nativeLinkStubs := true
   )
-
-lazy val js = sourcecode.js
-lazy val jvm = sourcecode.jvm
-lazy val native = sourcecode.native

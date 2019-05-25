@@ -15,7 +15,7 @@ object Apply {
     assert(pkg == "sourcecode")
 
     val file = sourcecode.File()
-    assert(file.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Apply.scala"))
+    assert(file.endsWith("/sourcecode/src/test/scala/sourcecode/Apply.scala"))
 
     val line = sourcecode.Line()
     assert(line == 20)
@@ -29,7 +29,7 @@ object Apply {
         assert(fullName == "sourcecode.Apply.Bar.fullName")
 
         val file = sourcecode.File()
-        assert(file.endsWith("/sourcecode/shared/src/test/scala/sourcecode/Apply.scala"))
+        assert(file.endsWith("/sourcecode/src/test/scala/sourcecode/Apply.scala"))
 
         val line = sourcecode.Line()
         assert(line == 34)
