@@ -2,7 +2,6 @@ package sourcecode
 
 import scala.language.implicitConversions
 import scala.quoted._
-import scala.quoted.Exprs.TastyTreeExpr
 import scala.tasty.Reflection
 
 trait NameMacros {
@@ -182,7 +181,7 @@ object Macros {
 
     val texts0 = param.map(_.foldRight('{List.empty[Text[_]]}) {
       case (vd @ ValDef(nme, _, optV), l) =>
-        '{Text(${optV.fold('None)(v => new TastyTreeExpr(v))}, ${nme.toExpr}) :: $l}
+        '{Text(${optV.fold('None)(_.seal)}, ${nme.toExpr}) :: $l}
     })
     val texts = texts0.foldRight('{List.empty[List[Text[_]]]}) {
       case (l, acc) =>
