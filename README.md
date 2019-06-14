@@ -2,8 +2,8 @@ SourceCode [![Build Status](https://travis-ci.org/lihaoyi/sourcecode.svg?branch=
 ==========
 
 ```scala
-"com.lihaoyi" %% "sourcecode" % "0.1.5" // Scala-JVM
-"com.lihaoyi" %%% "sourcecode" % "0.1.5" // Scala.js / Scala Native
+"com.lihaoyi" %% "sourcecode" % "0.1.7" // Scala-JVM
+"com.lihaoyi" %%% "sourcecode" % "0.1.7" // Scala.js / Scala Native
 ```
 
 `sourcecode` is a small Scala library for that provides common "source code"
@@ -599,6 +599,11 @@ in its `.toString` method.
 
 Version History
 ===============
+
+0.1.7
+-----
+
+- Support for Scala 2.13.0 final
 
 0.1.5
 -----
