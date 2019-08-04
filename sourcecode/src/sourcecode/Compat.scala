@@ -12,4 +12,6 @@ object Compat{
 
     nearestEnclosingMethod(enclosingOwner(c)).asMethod.paramLists
   }
+
+  def isDotty: Boolean = false
 }

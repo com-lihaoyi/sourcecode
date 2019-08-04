@@ -20,7 +20,9 @@ object Tests{
     Synthetic.run()
     ManualImplicit()
     TextTests()
-    ArgsTests()
+    if (!Compat.isDotty) {
+      ArgsTests()
+    }
 
     println("================LogExample================")
     logExample()
@@ -30,8 +32,10 @@ object Tests{
     DebugName.main()
     println("================Debug Lite================")
     DebugLite.main()
-    println("================Regressions===============")
-    Regressions.main()
+    if (!Compat.isDotty) {
+      println("================Regressions===============")
+      Regressions.main()
+    }
     println("================Test Ended================")
   }
 }

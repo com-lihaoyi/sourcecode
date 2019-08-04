@@ -10,9 +10,18 @@ object Synthetic {
     assert(Foo.toString == "<init>")
 
     object Bar{
-      assert(sourcecode.Name.Machine() == "<local Bar>", sourcecode.Name())
-      assert(sourcecode.FullName.Machine() == "sourcecode.Synthetic.Bar.<local Bar>")
-      assert(sourcecode.Enclosing.Machine() == "sourcecode.Synthetic.run Bar.<local Bar>")
+      assert(
+        (sourcecode.Name.Machine() == "<local Bar>") ||
+        (sourcecode.Name.Machine() == "<local Bar$>")
+      )
+      assert(
+        (sourcecode.FullName.Machine() == "sourcecode.Synthetic.Bar.<local Bar>") ||
+        (sourcecode.FullName.Machine() == "sourcecode.Synthetic$._$Bar$.<local Bar$>")
+      )
+      assert(
+        (sourcecode.Enclosing.Machine() == "sourcecode.Synthetic.run Bar.<local Bar>") ||
+        (sourcecode.Enclosing.Machine() == "sourcecode.Synthetic.run Bar.<local Bar$>")
+      )
     }
     Bar
   }
