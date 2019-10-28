@@ -17,8 +17,11 @@ object Apply {
     val file = sourcecode.File()
     assert(file.endsWith("/sourcecode/Apply.scala"))
 
+    val fileName = sourcecode.FileName()
+    assert(fileName == "Apply.scala")
+
     val line = sourcecode.Line()
-    assert(line == 20)
+    assert(line == 23)
 
     lazy val myLazy = {
       trait Bar{
@@ -31,8 +34,11 @@ object Apply {
         val file = sourcecode.File()
         assert(file.endsWith("/sourcecode/Apply.scala"))
 
+        val fileName = sourcecode.FileName()
+        assert(fileName == "Apply.scala")
+
         val line = sourcecode.Line()
-        assert(line == 34)
+        assert(line == 40)
 
         val enclosing = sourcecode.Enclosing()
         assert(

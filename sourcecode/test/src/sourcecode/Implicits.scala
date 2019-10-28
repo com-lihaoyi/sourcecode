@@ -17,8 +17,11 @@ object Implicits {
     val file = implicitly[sourcecode.File]
     assert(file.value.endsWith("/sourcecode/Implicits.scala"))
 
+    val fileName = implicitly[sourcecode.FileName]
+    assert(fileName.value == "Implicits.scala")
+
     val line = implicitly[sourcecode.Line]
-    assert(line.value == 20)
+    assert(line.value == 23)
 
     lazy val myLazy = {
       trait Bar{
@@ -31,8 +34,11 @@ object Implicits {
         val file = implicitly[sourcecode.File]
         assert(file.value.endsWith("/sourcecode/Implicits.scala"))
 
+        val fileName = implicitly[sourcecode.FileName]
+        assert(fileName.value == "Implicits.scala")
+
         val line = implicitly[sourcecode.Line]
-        assert(line.value == 34)
+        assert(line.value == 40)
 
         val enclosing = implicitly[sourcecode.Enclosing]
         assert(

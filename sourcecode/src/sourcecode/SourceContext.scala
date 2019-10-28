@@ -18,8 +18,13 @@ object FullName extends SourceCompanion[String, FullName](new FullName(_)) with 
   case class Machine(value: String) extends SourceValue[String]
   object Machine extends SourceCompanion[String, Machine](new Machine(_)) with FullNameMachineMacros
 }
+
 case class File(value: String) extends SourceValue[String]
 object File extends SourceCompanion[String, File](new File(_)) with FileMacros
+
+case class FileName(value: String) extends SourceValue[String]
+object FileName extends SourceCompanion[String, FileName](new FileName(_)) with FileNameMacros
+
 case class Line(value: Int) extends SourceValue[Int]
 object Line extends SourceCompanion[Int, Line](new Line(_)) with LineMacros
 case class Enclosing(value: String) extends SourceValue[String]

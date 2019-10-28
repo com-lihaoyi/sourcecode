@@ -22,6 +22,10 @@ trait FileMacros {
   implicit def generate: sourcecode.File = macro Macros.fileImpl
 }
 
+trait FileNameMacros {
+  implicit def generate: sourcecode.FileName = macro Macros.fileNameImpl
+}
+
 trait LineMacros {
   implicit def generate: sourcecode.Line = macro Macros.lineImpl
 }
@@ -94,6 +98,12 @@ object Macros {
     import c.universe._
     val file = c.enclosingPosition.source.path
     c.Expr[sourcecode.File](q"""${c.prefix}($file)""")
+  }
+
+  def fileNameImpl(c: Compat.Context): c.Expr[sourcecode.FileName] = {
+    import c.universe._
+    val fileName = c.enclosingPosition.source.path.split('/').last
+    c.Expr[sourcecode.FileName](q"""${c.prefix}($fileName)""")
   }
 
   def lineImpl(c: Compat.Context): c.Expr[sourcecode.Line] = {
