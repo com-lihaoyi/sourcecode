@@ -25,10 +25,12 @@ trait SourcecodeMainModule extends CrossScalaModule {
 
   def offset: os.RelPath = os.rel
 
-  def compileIvyDeps = Agg(
-    ivy"org.scala-lang:scala-reflect:${scalaVersion()}",
-    ivy"org.scala-lang:scala-compiler:${scalaVersion()}"
-  )
+  def compileIvyDeps =
+    if (crossScalaVersion.startsWith("2")) Agg(
+      ivy"org.scala-lang:scala-reflect:${crossScalaVersion}",
+      ivy"org.scala-lang:scala-compiler:${crossScalaVersion}"
+    )
+    else Agg.empty[Dep]
 
   def sources = T.sources(
     super.sources()
@@ -62,7 +64,7 @@ trait SourcecodeTestModule extends ScalaModule {
 }
 
 object sourcecode extends Module {
-  object jvm extends Cross[JvmSourcecodeModule]("2.11.12", "2.12.8", "2.13.0")
+  object jvm extends Cross[JvmSourcecodeModule]("2.11.12", "2.12.8", "2.13.0", "0.21.0-bin-SNAPSHOT")
   class JvmSourcecodeModule(val crossScalaVersion: String)
     extends SourcecodeMainModule with ScalaModule with SourcecodeModule {
 
