@@ -29,6 +29,11 @@ trait FileMacros {
     ${ Macros.fileImpl }
 }
 
+trait FileNameMacros {
+  inline implicit def generate: sourcecode.FileName =
+    ${ Macros.fileNameImpl }
+}
+
 trait LineMacros {
   inline implicit def generate: sourcecode.Line =
     ${ Macros.lineImpl }
@@ -131,6 +136,12 @@ object Macros {
     import ctx.tasty.given
     val file = ctx.tasty.rootPosition.sourceFile.jpath.toAbsolutePath.toString
     '{sourcecode.File(${file.toExpr})}
+  }
+
+  def fileNameImpl(given ctx: QuoteContext): Expr[sourcecode.FileName] = {
+    import ctx.tasty.given
+    val name = ctx.tasty.rootPosition.sourceFile.jpath.getFileName.toString
+    '{sourcecode.FileName(${Expr(name)})}
   }
 
   def lineImpl(given ctx: QuoteContext): Expr[sourcecode.Line] = {
