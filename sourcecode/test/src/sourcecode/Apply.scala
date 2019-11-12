@@ -44,7 +44,6 @@ object Apply {
         assert(line == 43)
 
         val enclosing = sourcecode.Enclosing()
-        println(s"enclosing: $enclosing")
         assert(
           enclosing == "sourcecode.Apply.applyRun myLazy$lzy Bar#enclosing" ||
           enclosing == "sourcecode.Apply.applyRun myLazy Bar#enclosing" || // encoding changed in Scala 2.12
