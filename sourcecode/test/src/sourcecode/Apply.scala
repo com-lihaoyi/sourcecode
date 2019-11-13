@@ -52,6 +52,6 @@ object Apply {
       }
       val b = new Bar{}
     }
-    myLazy // FIXME seems like this is not run on dotty
+    myLazy
   }
 }
