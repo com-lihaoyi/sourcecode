@@ -74,6 +74,13 @@ object sourcecode extends Module {
       def moduleDeps = Seq(JvmSourcecodeModule.this)
       val crossScalaVersion = JvmSourcecodeModule.this.crossScalaVersion
     }
+
+    override def docJar = T {
+      val outDir = T.ctx().dest
+      val javadocDir = outDir / 'javadoc
+      os.makeDir.all(javadocDir)
+      mill.api.Result.Success(mill.modules.Jvm.createJar(Agg(javadocDir))(outDir))
+    }
   }
 
   object js extends Cross[JsSourcecodeModule](
