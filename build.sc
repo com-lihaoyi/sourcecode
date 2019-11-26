@@ -65,7 +65,7 @@ trait SourcecodeTestModule extends ScalaModule {
 
 object sourcecode extends Module {
   val dottyVersion = Option(sys.props("dottyVersion"))
-  object jvm extends Cross[JvmSourcecodeModule]((List("2.11.12", "2.12.8", "2.13.0") ++ "0.21.0-bin-SNAPSHOT"): _*)
+  object jvm extends Cross[JvmSourcecodeModule]((List("2.11.12", "2.12.8", "2.13.0") ++ dottyVersion): _*)
   class JvmSourcecodeModule(val crossScalaVersion: String)
     extends SourcecodeMainModule with ScalaModule with SourcecodeModule {
 
@@ -73,6 +73,13 @@ object sourcecode extends Module {
       def scalaVersion = crossScalaVersion
       def moduleDeps = Seq(JvmSourcecodeModule.this)
       val crossScalaVersion = JvmSourcecodeModule.this.crossScalaVersion
+    }
+
+    override def docJar = T {
+      val outDir = T.ctx().dest
+      val javadocDir = outDir / 'javadoc
+      os.makeDir.all(javadocDir)
+      mill.api.Result.Success(mill.modules.Jvm.createJar(Agg(javadocDir))(outDir))
     }
   }
 
