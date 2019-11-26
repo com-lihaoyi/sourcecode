@@ -9,8 +9,8 @@ object TextTests {
       assert(foo(Symbol("lol").toString * 2) == ("'lol'lol", "Symbol(\"lol\").toString * 2"))
       assert(foo{println("Hello"); Symbol("lol").toString * 2} == ("'lol'lol", "Symbol(\"lol\").toString * 2"))
     } else {
-      assert(foo(Symbol("lol").toString * 2) == ("'lol'lol", "'lol.toString * 2"))
-      assert(foo{println("Hello"); Symbol("lol").toString * 2} == ("'lol'lol", "'lol.toString * 2"))
+      assert(foo(Symbol("lol").toString * 2) == ("'lol'lol", "Symbol(\"lol\").toString * 2"))
+      assert(foo{println("Hello"); Symbol("lol").toString * 2} == ("'lol'lol", "Symbol(\"lol\").toString * 2"))
     }
   }
   def foo[T](v: sourcecode.Text[T]) = (v.value, v.source)
