@@ -29,10 +29,7 @@ object Apply {
         assert(name == "name")
 
         val fullName = sourcecode.FullName()
-        assert(
-          fullName == "sourcecode.Apply.Bar.fullName" ||
-          fullName == "sourcecode.Apply._$Bar.fullName"  // Dotty
-        )
+        assert(fullName == "sourcecode.Apply.Bar.fullName")
 
         val file = sourcecode.File()
         assert(file.endsWith("/sourcecode/Apply.scala"))
@@ -41,7 +38,7 @@ object Apply {
         assert(fileName == "Apply.scala")
 
         val line = sourcecode.Line()
-        assert(line == 43)
+        assert(line == 40)
 
         val enclosing = sourcecode.Enclosing()
         assert(

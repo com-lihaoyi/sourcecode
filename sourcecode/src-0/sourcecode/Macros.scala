@@ -111,12 +111,16 @@ object Macros {
 
   def fullNameImpl(given ctx: QuoteContext): Expr[FullName] = {
     import ctx.tasty.given
+    @annotation.tailrec def cleanChunk(chunk: String): String =
+      val refined = chunk.stripPrefix("_$").stripSuffix("$")
+      if chunk != refined then cleanChunk(refined) else refined
+
     val owner = actualOwner(ctx.tasty)(ctx.tasty.rootContext.owner)
     val fullName =
       owner.fullName.trim
         .split("\\.", -1)
         .filterNot(Util.isSyntheticName)
-        .map(_.stripPrefix("_$").stripSuffix("$")) // meh
+        .map(cleanChunk)
         .mkString(".")
     '{FullName(${fullName.toExpr})}
   }
