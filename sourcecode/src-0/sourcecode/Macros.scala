@@ -228,7 +228,7 @@ object Macros {
     if (!machine)
       current = actualOwner(c)(current)
     var path = List.empty[Chunk]
-    while(current.toString != "NoSymbol" && current != defn.RootPackage && current != defn.RootClass){
+    while(current != Symbol.noSymbol && current != defn.RootPackage && current != defn.RootClass){
       if (filter(current)) {
 
         val chunk = current match {
