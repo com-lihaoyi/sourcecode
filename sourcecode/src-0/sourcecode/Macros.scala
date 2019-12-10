@@ -232,24 +232,14 @@ object Macros {
       if (filter(current)) {
 
         val chunk = current match {
-          case sym if sym.isValDef => Chunk.ValVarLzyDef
-          case sym if sym.isDefDef => Chunk.ValVarLzyDef
+          case sym if
+            sym.isValDef || sym.isDefDef => Chunk.ValVarLzyDef
+          case sym if
+            sym.isPackageDef ||
+            sym.moduleClass != Symbol.noSymbol => Chunk.PkgObj
+          case sym if sym.isClassDef => Chunk.ClsTrt
           case _ => Chunk.PkgObj
         }
-
-        // TODO
-        // val chunk = current match {
-        //   case x if x.flags.isPackage => Chunk.PkgObj
-        //   case x if x.flags.isModuleClass => Chunk.PkgObj
-        //   case x if x.flags.isClass && x.asClass.isTrait => Chunk.ClsTrt
-        //   case x if x.flags.isClass => Chunk.ClsTrt
-        //   case x if x.flags.isMethod => Chunk.ValVarLzyDef
-        //   case x if x.flags.isTerm && x.asTerm.isVar => Chunk.ValVarLzyDef
-        //   case x if x.flags.isTerm && x.asTerm.isLazy => Chunk.ValVarLzyDef
-        //   case x if x.flags.isTerm && x.asTerm.isVal => Chunk.ValVarLzyDef
-        // }
-        //
-        // path = chunk(Util.getName(c)(current)) :: path
 
         path = chunk(Util.getName(c)(current).stripSuffix("$")) :: path
       }
