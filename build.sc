@@ -25,10 +25,12 @@ trait SourcecodeMainModule extends CrossScalaModule {
 
   def offset: os.RelPath = os.rel
 
-  def compileIvyDeps = Agg(
-    ivy"org.scala-lang:scala-reflect:${scalaVersion()}",
-    ivy"org.scala-lang:scala-compiler:${scalaVersion()}"
-  )
+  def compileIvyDeps =
+    if (crossScalaVersion.startsWith("2")) Agg(
+      ivy"org.scala-lang:scala-reflect:${crossScalaVersion}",
+      ivy"org.scala-lang:scala-compiler:${crossScalaVersion}"
+    )
+    else Agg.empty[Dep]
 
   def sources = T.sources(
     super.sources()
@@ -62,7 +64,7 @@ trait SourcecodeTestModule extends ScalaModule {
 }
 
 object sourcecode extends Module {
-  object jvm extends Cross[JvmSourcecodeModule]("2.11.12", "2.12.8", "2.13.0")
+  object jvm extends Cross[JvmSourcecodeModule]("2.11.12", "2.12.8", "2.13.0", "0.21.0-bin-20191125-a64725c-NIGHTLY")
   class JvmSourcecodeModule(val crossScalaVersion: String)
     extends SourcecodeMainModule with ScalaModule with SourcecodeModule {
 
@@ -71,6 +73,15 @@ object sourcecode extends Module {
       def moduleDeps = Seq(JvmSourcecodeModule.this)
       val crossScalaVersion = JvmSourcecodeModule.this.crossScalaVersion
     }
+
+    override def docJar =
+      if (crossScalaVersion.startsWith("2")) super.docJar
+      else T {
+        val outDir = T.ctx().dest
+        val javadocDir = outDir / 'javadoc
+        os.makeDir.all(javadocDir)
+        mill.api.Result.Success(mill.modules.Jvm.createJar(Agg(javadocDir))(outDir))
+      }
   }
 
   object js extends Cross[JsSourcecodeModule](

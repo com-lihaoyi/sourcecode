@@ -12,4 +12,4 @@ script:
   - curl -L -o ~/bin/mill https://github.com/lihaoyi/mill/releases/download/0.4.0/0.4.0-12-102ddf && chmod +x ~/bin/mill
   - curl https://raw.githubusercontent.com/scala-native/scala-native/master/scripts/travis_setup.sh | bash -x
   - export PATH=~/bin/mill:$PATH
-  - mill __.test.run
+  - ./mill __.test.run
