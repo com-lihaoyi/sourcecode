@@ -64,7 +64,7 @@ trait SourcecodeTestModule extends ScalaModule {
 }
 
 object sourcecode extends Module {
-  object jvm extends Cross[JvmSourcecodeModule]("2.11.12", "2.12.8", "2.13.0", "0.21.0-bin-20191125-a64725c-NIGHTLY")
+  object jvm extends Cross[JvmSourcecodeModule]("2.11.12", "2.12.8", "2.13.0", "0.21.0-RC1")
   class JvmSourcecodeModule(val crossScalaVersion: String)
     extends SourcecodeMainModule with ScalaModule with SourcecodeModule {
 
