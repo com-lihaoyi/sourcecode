@@ -228,8 +228,8 @@ object Implicits {
 }
 ```
 
-By default, the various implicits all ignore any synthetic `<init>` or 
-`<local Foo>` methods that might be present:
+By default, the various implicits all ignore any synthetic `<init>`,  
+`<local Foo>` or `$anonfun` methods that might be present:
 
 ```scala
 package sourcecode
