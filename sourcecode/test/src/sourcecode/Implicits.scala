@@ -24,7 +24,11 @@ object Implicits {
     assert(line.value == 23)
 
     lazy val myLazy = {
-      trait Bar{
+      /* Bar used to be a trait, but that ran into the upstream bug
+       * https://github.com/scala-js/scala-js/issues/3918 in Scala.js 1.0.0-RC2
+       * and Scala 2.12+. We use an abstract class as a workaround.
+       */
+      abstract class Bar{
         val name = implicitly[sourcecode.Name]
         assert(name.value == "name")
 
@@ -41,7 +45,7 @@ object Implicits {
         assert(fileName.value == "Implicits.scala")
 
         val line = implicitly[sourcecode.Line]
-        assert(line.value == 43)
+        assert(line.value == 47)
 
         val enclosing = implicitly[sourcecode.Enclosing]
         assert(
