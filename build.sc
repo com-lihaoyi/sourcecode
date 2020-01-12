@@ -4,7 +4,7 @@ import mill._, scalalib._, scalajslib._, scalanativelib._, publish._
 trait SourcecodeModule extends PublishModule {
   def artifactName = "sourcecode"
 
-  def publishVersion = "0.1.9"
+  def publishVersion = "0.2.0"
 
   def pomSettings = PomSettings(
     description = artifactName(),
@@ -85,7 +85,7 @@ object sourcecode extends Module {
   }
 
   object js extends Cross[JsSourcecodeModule](
-    ("2.11.12", "0.6.28"), ("2.12.8", "0.6.28"), ("2.13.0", "0.6.28")/*, ("2.12.8", "1.0.0-M8"), ("2.13.0", "1.0.0-M8")*/
+    ("2.11.12", "0.6.28"), ("2.12.8", "0.6.28"), ("2.13.0", "0.6.28"), ("2.12.8", "1.0.0-RC2"), ("2.13.0", "1.0.0-RC2")
   )
   class JsSourcecodeModule(val crossScalaVersion: String, crossJSVersion: String)
     extends SourcecodeMainModule with ScalaJSModule with SourcecodeModule {
