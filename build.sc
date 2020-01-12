@@ -4,7 +4,7 @@ import mill._, scalalib._, scalajslib._, scalanativelib._, publish._
 trait SourcecodeModule extends PublishModule {
   def artifactName = "sourcecode"
 
-  def publishVersion = "0.1.9"
+  def publishVersion = "0.2.0"
 
   def pomSettings = PomSettings(
     description = artifactName(),
