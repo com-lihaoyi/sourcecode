@@ -67,7 +67,7 @@ trait ArgsMacros {
 object Util{
   def isSynthetic(c: Reflection)(s: c.Symbol) = isSyntheticName(getName(c)(s))
   def isSyntheticName(name: String) = {
-    name == "<init>" || (name.startsWith("<local ") && name.endsWith(">"))
+    name == "<init>" || (name.startsWith("<local ") && name.endsWith(">")) || name == "$anonfun"
   }
   def getName(c: Reflection)(s: c.Symbol) = {
     import c.given
