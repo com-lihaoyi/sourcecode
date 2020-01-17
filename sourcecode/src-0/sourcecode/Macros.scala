@@ -67,7 +67,7 @@ trait ArgsMacros {
 object Util{
   def isSynthetic(c: Reflection)(s: c.Symbol) = isSyntheticName(getName(c)(s))
   def isSyntheticName(name: String) = {
-    name == "<init>" || (name.startsWith("<local ") && name.endsWith(">")) || name == "$anonfun"
+    name == "<init>" || (name.startsWith("<local ") && name.endsWith(">")) || name == "$anonfun" || name.startsWith("macro$")
   }
   def getName(c: Reflection)(s: c.Symbol) = {
     import c.given
@@ -78,15 +78,27 @@ object Util{
 
 object Macros {
 
-  def actualOwner(c: Reflection)(owner: c.Symbol): c.Symbol = {
+  def findOwner(c: Reflection)(owner: c.Symbol, skipIf: (c: Reflection) => (c.Symbol) => Boolean): c.Symbol = {
     import c.given
     var owner0 = owner
-    // second condition is meh
-    while(Util.isSynthetic(c)(owner0) || Util.getName(c)(owner0) == "ev") {
-      owner0 = owner0.owner
-    }
+    while(skipIf(c)(owner0)) owner0 = owner0.owner
     owner0
   }
+
+  def actualOwner(c: Reflection)(owner: c.Symbol): c.Symbol =
+    findOwner(c)(owner, c => owner0 => Util.isSynthetic(c)(owner0) || Util.getName(c)(owner0) == "ev")
+
+  /**
+   * In Scala 3, macro `mcr()` is expanded to:
+   *
+   * val macro$n = ...
+   * macro$n
+   *
+   * Where n is an ordinal. This method returns the first owner that is not
+   * such a synthetic variable.
+   */
+  def nonMacroOwner(c: Reflection)(owner: c.Symbol): c.Symbol =
+    findOwner(c)(owner, c => owner0 => Util.getName(c)(owner0).startsWith("macro$"))
 
   def nameImpl(given ctx: QuoteContext): Expr[Name] = {
     import ctx.tasty.given
@@ -104,7 +116,7 @@ object Macros {
 
   def nameMachineImpl(given ctx: QuoteContext): Expr[Name.Machine] = {
     import ctx.tasty.given
-    val owner = ctx.tasty.rootContext.owner
+    val owner = nonMacroOwner(ctx.tasty)(ctx.tasty.rootContext.owner)
     val simpleName = adjustName(Util.getName(ctx.tasty)(owner))
     '{Name.Machine(${Expr(simpleName)})}
   }
@@ -127,7 +139,7 @@ object Macros {
 
   def fullNameMachineImpl(given ctx: QuoteContext): Expr[FullName.Machine] = {
     import ctx.tasty.given
-    val owner = ctx.tasty.rootContext.owner
+    val owner = nonMacroOwner(ctx.tasty)(ctx.tasty.rootContext.owner)
     val fullName = owner.fullName.trim
       .split("\\.", -1)
       .map(_.stripPrefix("_$").stripSuffix("$")) // meh
@@ -227,6 +239,8 @@ object Macros {
     var current = c.rootContext.owner
     if (!machine)
       current = actualOwner(c)(current)
+    else
+      current = nonMacroOwner(c)(current)
     var path = List.empty[Chunk]
     while(current != Symbol.noSymbol && current != defn.RootPackage && current != defn.RootClass){
       if (filter(current)) {
