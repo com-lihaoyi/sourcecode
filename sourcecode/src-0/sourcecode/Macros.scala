@@ -67,7 +67,7 @@ trait ArgsMacros {
 object Util{
   def isSynthetic(c: Reflection)(s: c.Symbol) = isSyntheticName(getName(c)(s))
   def isSyntheticName(name: String) = {
-    name == "<init>" || (name.startsWith("<local ") && name.endsWith(">")) || name == "$anonfun" || name.startsWith("macro$")
+    name == "<init>" || (name.startsWith("<local ") && name.endsWith(">")) || name == "$anonfun" || name == "macro"
   }
   def getName(c: Reflection)(s: c.Symbol) = {
     import c.given
@@ -91,14 +91,14 @@ object Macros {
   /**
    * In Scala 3, macro `mcr()` is expanded to:
    *
-   * val macro$n = ...
-   * macro$n
+   * val macro = ...
+   * macro
    *
    * Where n is an ordinal. This method returns the first owner that is not
    * such a synthetic variable.
    */
   def nonMacroOwner(c: Reflection)(owner: c.Symbol): c.Symbol =
-    findOwner(c)(owner, c => owner0 => Util.getName(c)(owner0).startsWith("macro$"))
+    findOwner(c)(owner, c => owner0 => {import c.given; owner0.flags.is(c.Flags.Macro) && Util.getName(c)(owner0) == "macro"})
 
   def nameImpl(given ctx: QuoteContext): Expr[Name] = {
     import ctx.tasty.given
