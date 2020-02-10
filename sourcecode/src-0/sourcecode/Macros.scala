@@ -100,7 +100,7 @@ object Macros {
   def nonMacroOwner(c: Reflection)(owner: c.Symbol): c.Symbol =
     findOwner(c)(owner, c => owner0 => {import c.given; owner0.flags.is(c.Flags.Macro) && Util.getName(c)(owner0) == "macro"})
 
-  def nameImpl(given ctx: QuoteContext): Expr[Name] = {
+  def nameImpl(using ctx: QuoteContext): Expr[Name] = {
     import ctx.tasty.given
     val owner = actualOwner(ctx.tasty)(ctx.tasty.rootContext.owner)
     val simpleName = Util.getName(ctx.tasty)(owner)
@@ -114,14 +114,14 @@ object Macros {
     else
       s
 
-  def nameMachineImpl(given ctx: QuoteContext): Expr[Name.Machine] = {
+  def nameMachineImpl(using ctx: QuoteContext): Expr[Name.Machine] = {
     import ctx.tasty.given
     val owner = nonMacroOwner(ctx.tasty)(ctx.tasty.rootContext.owner)
     val simpleName = adjustName(Util.getName(ctx.tasty)(owner))
     '{Name.Machine(${Expr(simpleName)})}
   }
 
-  def fullNameImpl(given ctx: QuoteContext): Expr[FullName] = {
+  def fullNameImpl(using ctx: QuoteContext): Expr[FullName] = {
     import ctx.tasty.given
     @annotation.tailrec def cleanChunk(chunk: String): String =
       val refined = chunk.stripPrefix("_$").stripSuffix("$")
@@ -137,7 +137,7 @@ object Macros {
     '{FullName(${Expr(fullName)})}
   }
 
-  def fullNameMachineImpl(given ctx: QuoteContext): Expr[FullName.Machine] = {
+  def fullNameMachineImpl(using ctx: QuoteContext): Expr[FullName.Machine] = {
     import ctx.tasty.given
     val owner = nonMacroOwner(ctx.tasty)(ctx.tasty.rootContext.owner)
     val fullName = owner.fullName.trim
@@ -148,25 +148,25 @@ object Macros {
     '{FullName.Machine(${Expr(fullName)})}
   }
 
-  def fileImpl(given ctx: QuoteContext): Expr[sourcecode.File] = {
+  def fileImpl(using ctx: QuoteContext): Expr[sourcecode.File] = {
     import ctx.tasty.given
     val file = ctx.tasty.rootPosition.sourceFile.jpath.toAbsolutePath.toString
     '{sourcecode.File(${Expr(file)})}
   }
 
-  def fileNameImpl(given ctx: QuoteContext): Expr[sourcecode.FileName] = {
+  def fileNameImpl(using ctx: QuoteContext): Expr[sourcecode.FileName] = {
     import ctx.tasty.given
     val name = ctx.tasty.rootPosition.sourceFile.jpath.getFileName.toString
     '{sourcecode.FileName(${Expr(name)})}
   }
 
-  def lineImpl(given ctx: QuoteContext): Expr[sourcecode.Line] = {
+  def lineImpl(using ctx: QuoteContext): Expr[sourcecode.Line] = {
     import ctx.tasty.given
     val line = ctx.tasty.rootPosition.startLine + 1
     '{sourcecode.Line(${Expr(line)})}
   }
 
-  def enclosingImpl(given ctx: QuoteContext): Expr[Enclosing] = {
+  def enclosingImpl(using ctx: QuoteContext): Expr[Enclosing] = {
     val path = enclosing(ctx.tasty)(
       !Util.isSynthetic(ctx.tasty)(_)
     )
@@ -174,12 +174,12 @@ object Macros {
     '{Enclosing(${Expr(path)})}
   }
 
-  def enclosingMachineImpl(given ctx: QuoteContext): Expr[Enclosing.Machine] = {
+  def enclosingMachineImpl(using ctx: QuoteContext): Expr[Enclosing.Machine] = {
     val path = enclosing(ctx.tasty, machine = true)(_ => true)
     '{Enclosing.Machine(${Expr(path)})}
   }
 
-  def pkgImpl(given ctx: QuoteContext): Expr[Pkg] = {
+  def pkgImpl(using ctx: QuoteContext): Expr[Pkg] = {
     import ctx.tasty.given
     val path = enclosing(ctx.tasty) {
       case s if s.isPackageDef => true
@@ -189,7 +189,7 @@ object Macros {
     '{Pkg(${Expr(path)})}
   }
 
-  def argsImpl(given ctx: QuoteContext): Expr[Args] = {
+  def argsImpl(using ctx: QuoteContext): Expr[Args] = {
     import ctx.tasty.{ _, given }
 
     val param: List[List[ctx.tasty.ValDef]] = {
@@ -219,7 +219,7 @@ object Macros {
   }
 
 
-  def text[T: Type](v: Expr[T])(given ctx: QuoteContext): Expr[sourcecode.Text[T]] = {
+  def text[T: Type](v: Expr[T])(using ctx: QuoteContext): Expr[sourcecode.Text[T]] = {
     import ctx.tasty.given
     val txt = v.unseal.pos.sourceCode
     '{sourcecode.Text[T]($v, ${Expr(txt)})}
