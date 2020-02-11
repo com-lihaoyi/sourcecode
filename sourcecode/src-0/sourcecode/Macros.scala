@@ -70,7 +70,7 @@ object Util{
     name == "<init>" || (name.startsWith("<local ") && name.endsWith(">")) || name == "$anonfun" || name == "macro"
   }
   def getName(c: Reflection)(s: c.Symbol) = {
-    import c.given
+    import c.{given _}
     s.name.trim
       .stripSuffix("$") // meh
   }
@@ -79,7 +79,7 @@ object Util{
 object Macros {
 
   def findOwner(c: Reflection)(owner: c.Symbol, skipIf: (c: Reflection) => (c.Symbol) => Boolean): c.Symbol = {
-    import c.given
+    import c.{given _}
     var owner0 = owner
     while(skipIf(c)(owner0)) owner0 = owner0.owner
     owner0
@@ -101,7 +101,7 @@ object Macros {
     findOwner(c)(owner, c => owner0 => {import c.given; owner0.flags.is(c.Flags.Macro) && Util.getName(c)(owner0) == "macro"})
 
   def nameImpl(using ctx: QuoteContext): Expr[Name] = {
-    import ctx.tasty.given
+    import ctx.tasty.{given _}
     val owner = actualOwner(ctx.tasty)(ctx.tasty.rootContext.owner)
     val simpleName = Util.getName(ctx.tasty)(owner)
     '{Name(${Expr(simpleName)})}
@@ -115,14 +115,14 @@ object Macros {
       s
 
   def nameMachineImpl(using ctx: QuoteContext): Expr[Name.Machine] = {
-    import ctx.tasty.given
+    import ctx.tasty.{given _}
     val owner = nonMacroOwner(ctx.tasty)(ctx.tasty.rootContext.owner)
     val simpleName = adjustName(Util.getName(ctx.tasty)(owner))
     '{Name.Machine(${Expr(simpleName)})}
   }
 
   def fullNameImpl(using ctx: QuoteContext): Expr[FullName] = {
-    import ctx.tasty.given
+    import ctx.tasty.{given _}
     @annotation.tailrec def cleanChunk(chunk: String): String =
       val refined = chunk.stripPrefix("_$").stripSuffix("$")
       if chunk != refined then cleanChunk(refined) else refined
@@ -138,7 +138,7 @@ object Macros {
   }
 
   def fullNameMachineImpl(using ctx: QuoteContext): Expr[FullName.Machine] = {
-    import ctx.tasty.given
+    import ctx.tasty.{given _}
     val owner = nonMacroOwner(ctx.tasty)(ctx.tasty.rootContext.owner)
     val fullName = owner.fullName.trim
       .split("\\.", -1)
@@ -149,19 +149,19 @@ object Macros {
   }
 
   def fileImpl(using ctx: QuoteContext): Expr[sourcecode.File] = {
-    import ctx.tasty.given
+    import ctx.tasty.{given _}
     val file = ctx.tasty.rootPosition.sourceFile.jpath.toAbsolutePath.toString
     '{sourcecode.File(${Expr(file)})}
   }
 
   def fileNameImpl(using ctx: QuoteContext): Expr[sourcecode.FileName] = {
-    import ctx.tasty.given
+    import ctx.tasty.{given _}
     val name = ctx.tasty.rootPosition.sourceFile.jpath.getFileName.toString
     '{sourcecode.FileName(${Expr(name)})}
   }
 
   def lineImpl(using ctx: QuoteContext): Expr[sourcecode.Line] = {
-    import ctx.tasty.given
+    import ctx.tasty.{given _}
     val line = ctx.tasty.rootPosition.startLine + 1
     '{sourcecode.Line(${Expr(line)})}
   }
@@ -180,7 +180,7 @@ object Macros {
   }
 
   def pkgImpl(using ctx: QuoteContext): Expr[Pkg] = {
-    import ctx.tasty.given
+    import ctx.tasty.{given _}
     val path = enclosing(ctx.tasty) {
       case s if s.isPackageDef => true
       case _ => false
@@ -220,7 +220,7 @@ object Macros {
 
 
   def text[T: Type](v: Expr[T])(using ctx: QuoteContext): Expr[sourcecode.Text[T]] = {
-    import ctx.tasty.given
+    import ctx.tasty.{given _}
     val txt = v.unseal.pos.sourceCode
     '{sourcecode.Text[T]($v, ${Expr(txt)})}
   }
