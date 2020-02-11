@@ -98,7 +98,7 @@ object Macros {
    * such a synthetic variable.
    */
   def nonMacroOwner(c: Reflection)(owner: c.Symbol): c.Symbol =
-    findOwner(c)(owner, c => owner0 => {import c.given; owner0.flags.is(c.Flags.Macro) && Util.getName(c)(owner0) == "macro"})
+    findOwner(c)(owner, c => owner0 => {import c.{given _}; owner0.flags.is(c.Flags.Macro) && Util.getName(c)(owner0) == "macro"})
 
   def nameImpl(using ctx: QuoteContext): Expr[Name] = {
     import ctx.tasty.{given _}
@@ -190,7 +190,7 @@ object Macros {
   }
 
   def argsImpl(using ctx: QuoteContext): Expr[Args] = {
-    import ctx.tasty.{ _, given }
+    import ctx.tasty.{ _, given _ }
 
     val param: List[List[ctx.tasty.ValDef]] = {
       def nearestEnclosingMethod(owner: ctx.tasty.Symbol): List[List[ctx.tasty.ValDef]] =
@@ -234,7 +234,7 @@ object Macros {
   }
 
   def enclosing(c: Reflection, machine: Boolean = false)(filter: c.Symbol => Boolean): String = {
-    import c.{ _, given }
+    import c.{ _, given _ }
 
     var current = c.rootContext.owner
     if (!machine)
