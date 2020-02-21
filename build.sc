@@ -101,8 +101,8 @@ object sourcecode extends Module {
       val crossScalaVersion = JsSourcecodeModule.this.crossScalaVersion
     }
   }
-/*
-  object native extends Cross[NativeSourcecodeModule](("2.11.12", "0.3.8")/*, ("2.11.12", "0.4.0-M2")*/)
+
+  object native extends Cross[NativeSourcecodeModule](("2.11.12", "0.3.9"), ("2.11.12", "0.4.0-M2"))
   class NativeSourcecodeModule(val crossScalaVersion: String, crossScalaNativeVersion: String)
     extends SourcecodeMainModule with ScalaNativeModule with SourcecodeModule {
     def offset = os.up
@@ -116,5 +116,5 @@ object sourcecode extends Module {
       def moduleDeps = Seq(NativeSourcecodeModule.this)
       val crossScalaVersion = NativeSourcecodeModule.this.crossScalaVersion
     }
-  }*/
+  }
 }
