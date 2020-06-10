@@ -40,6 +40,11 @@ meaningful names that tell you where they were defined, automatically without
 needing you to manually assign a string-ID to every anonymous function or 
 anonymous class you define all over your code bas. 
 
+If you like using Sourcecode, you might also enjoy this book by the author which
+teaches you Scala in a similarly simple and straightforward way:
+
+- [Hands-on Scala Programming](https://www.handsonscala.com/) https://www.handsonscala.com/
+
 Table of Contents
 =================
 
