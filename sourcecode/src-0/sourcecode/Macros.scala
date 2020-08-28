@@ -101,8 +101,8 @@ object Macros {
     findOwner(c)(owner, c => owner0 => {import c.{given _}; owner0.flags.is(c.Flags.Macro) && Util.getName(c)(owner0) == "macro"})
 
   def nameImpl(using ctx: QuoteContext): Expr[Name] = {
-    import ctx.tasty.{given _}
-    val owner = actualOwner(ctx.tasty)(ctx.tasty.rootContext.owner)
+    import ctx.tasty._
+    val owner = actualOwner(ctx.tasty)(Symbol.currentOwner)
     val simpleName = Util.getName(ctx.tasty)(owner)
     '{Name(${Expr(simpleName)})}
   }
@@ -115,19 +115,19 @@ object Macros {
       s
 
   def nameMachineImpl(using ctx: QuoteContext): Expr[Name.Machine] = {
-    import ctx.tasty.{given _}
-    val owner = nonMacroOwner(ctx.tasty)(ctx.tasty.rootContext.owner)
+    import ctx.tasty._
+    val owner = nonMacroOwner(ctx.tasty)(Symbol.currentOwner)
     val simpleName = adjustName(Util.getName(ctx.tasty)(owner))
     '{Name.Machine(${Expr(simpleName)})}
   }
 
   def fullNameImpl(using ctx: QuoteContext): Expr[FullName] = {
-    import ctx.tasty.{given _}
+    import ctx.tasty._
     @annotation.tailrec def cleanChunk(chunk: String): String =
       val refined = chunk.stripPrefix("_$").stripSuffix("$")
       if chunk != refined then cleanChunk(refined) else refined
 
-    val owner = actualOwner(ctx.tasty)(ctx.tasty.rootContext.owner)
+    val owner = actualOwner(ctx.tasty)(Symbol.currentOwner)
     val fullName =
       owner.fullName.trim
         .split("\\.", -1)
@@ -138,8 +138,8 @@ object Macros {
   }
 
   def fullNameMachineImpl(using ctx: QuoteContext): Expr[FullName.Machine] = {
-    import ctx.tasty.{given _}
-    val owner = nonMacroOwner(ctx.tasty)(ctx.tasty.rootContext.owner)
+    import ctx.tasty._
+    val owner = nonMacroOwner(ctx.tasty)(Symbol.currentOwner)
     val fullName = owner.fullName.trim
       .split("\\.", -1)
       .map(_.stripPrefix("_$").stripSuffix("$")) // meh
@@ -149,19 +149,19 @@ object Macros {
   }
 
   def fileImpl(using ctx: QuoteContext): Expr[sourcecode.File] = {
-    import ctx.tasty.{given _}
+    import ctx.tasty._
     val file = ctx.tasty.rootPosition.sourceFile.jpath.toAbsolutePath.toString
     '{sourcecode.File(${Expr(file)})}
   }
 
   def fileNameImpl(using ctx: QuoteContext): Expr[sourcecode.FileName] = {
-    import ctx.tasty.{given _}
+    import ctx.tasty._
     val name = ctx.tasty.rootPosition.sourceFile.jpath.getFileName.toString
     '{sourcecode.FileName(${Expr(name)})}
   }
 
   def lineImpl(using ctx: QuoteContext): Expr[sourcecode.Line] = {
-    import ctx.tasty.{given _}
+    import ctx.tasty._
     val line = ctx.tasty.rootPosition.startLine + 1
     '{sourcecode.Line(${Expr(line)})}
   }
@@ -180,7 +180,7 @@ object Macros {
   }
 
   def pkgImpl(using ctx: QuoteContext): Expr[Pkg] = {
-    import ctx.tasty.{given _}
+    import ctx.tasty._
     val path = enclosing(ctx.tasty) {
       case s if s.isPackageDef => true
       case _ => false
@@ -190,7 +190,7 @@ object Macros {
   }
 
   def argsImpl(using ctx: QuoteContext): Expr[Args] = {
-    import ctx.tasty.{ _, given _ }
+    import ctx.tasty._
 
     val param: List[List[ctx.tasty.ValDef]] = {
       def nearestEnclosingMethod(owner: ctx.tasty.Symbol): List[List[ctx.tasty.ValDef]] =
@@ -203,7 +203,7 @@ object Macros {
             nearestEnclosingMethod(owner.owner)
         }
 
-      nearestEnclosingMethod(ctx.tasty.rootContext.owner)
+      nearestEnclosingMethod(Symbol.currentOwner)
     }
 
     val texts0 = param.map(_.foldRight('{List.empty[Text[_]]}) {
@@ -220,7 +220,7 @@ object Macros {
 
 
   def text[T: Type](v: Expr[T])(using ctx: QuoteContext): Expr[sourcecode.Text[T]] = {
-    import ctx.tasty.{given _}
+    import ctx.tasty._
     val txt = v.unseal.pos.sourceCode
     '{sourcecode.Text[T]($v, ${Expr(txt)})}
   }
@@ -234,9 +234,9 @@ object Macros {
   }
 
   def enclosing(c: Reflection, machine: Boolean = false)(filter: c.Symbol => Boolean): String = {
-    import c.{ _, given _ }
+    import c._
 
-    var current = c.rootContext.owner
+    var current = Symbol.currentOwner
     if (!machine)
       current = actualOwner(c)(current)
     else
