@@ -102,7 +102,7 @@ object Macros {
 
   def nameImpl(using ctx: QuoteContext): Expr[Name] = {
     import ctx.tasty._
-    val owner = actualOwner(ctx.tasty)(Symbol.currentOwner)
+    val owner = actualOwner(ctx.tasty)(Owner.current.symbol)
     val simpleName = Util.getName(ctx.tasty)(owner)
     '{Name(${Expr(simpleName)})}
   }
@@ -116,7 +116,7 @@ object Macros {
 
   def nameMachineImpl(using ctx: QuoteContext): Expr[Name.Machine] = {
     import ctx.tasty._
-    val owner = nonMacroOwner(ctx.tasty)(Symbol.currentOwner)
+    val owner = nonMacroOwner(ctx.tasty)(Owner.current.symbol)
     val simpleName = adjustName(Util.getName(ctx.tasty)(owner))
     '{Name.Machine(${Expr(simpleName)})}
   }
@@ -127,7 +127,7 @@ object Macros {
       val refined = chunk.stripPrefix("_$").stripSuffix("$")
       if chunk != refined then cleanChunk(refined) else refined
 
-    val owner = actualOwner(ctx.tasty)(Symbol.currentOwner)
+    val owner = actualOwner(ctx.tasty)(Owner.current.symbol)
     val fullName =
       owner.fullName.trim
         .split("\\.", -1)
@@ -139,7 +139,7 @@ object Macros {
 
   def fullNameMachineImpl(using ctx: QuoteContext): Expr[FullName.Machine] = {
     import ctx.tasty._
-    val owner = nonMacroOwner(ctx.tasty)(Symbol.currentOwner)
+    val owner = nonMacroOwner(ctx.tasty)(Owner.current.symbol)
     val fullName = owner.fullName.trim
       .split("\\.", -1)
       .map(_.stripPrefix("_$").stripSuffix("$")) // meh
@@ -203,7 +203,7 @@ object Macros {
             nearestEnclosingMethod(owner.owner)
         }
 
-      nearestEnclosingMethod(Symbol.currentOwner)
+      nearestEnclosingMethod(Owner.current.symbol)
     }
 
     val texts0 = param.map(_.foldRight('{List.empty[Text[_]]}) {
@@ -236,7 +236,7 @@ object Macros {
   def enclosing(c: Reflection, machine: Boolean = false)(filter: c.Symbol => Boolean): String = {
     import c._
 
-    var current = Symbol.currentOwner
+    var current = Owner.current.symbol
     if (!machine)
       current = actualOwner(c)(current)
     else
