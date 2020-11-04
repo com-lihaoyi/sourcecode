@@ -148,19 +148,19 @@ object Macros {
 
   def fileImpl(using QuoteContext): Expr[sourcecode.File] = {
     import qctx.reflect._
-    val file = qctx.reflect.rootPosition.sourceFile.jpath.toAbsolutePath.toString
+    val file = qctx.reflect.Position.ofMacroExpansion.sourceFile.jpath.toAbsolutePath.toString
     '{sourcecode.File(${Expr(file)})}
   }
 
   def fileNameImpl(using QuoteContext): Expr[sourcecode.FileName] = {
     import qctx.reflect._
-    val name = qctx.reflect.rootPosition.sourceFile.jpath.getFileName.toString
+    val name = qctx.reflect.Position.ofMacroExpansion.sourceFile.jpath.getFileName.toString
     '{sourcecode.FileName(${Expr(name)})}
   }
 
   def lineImpl(using QuoteContext): Expr[sourcecode.Line] = {
     import qctx.reflect._
-    val line = qctx.reflect.rootPosition.startLine + 1
+    val line = qctx.reflect.Position.ofMacroExpansion.startLine + 1
     '{sourcecode.Line(${Expr(line)})}
   }
 
