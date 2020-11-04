@@ -70,7 +70,6 @@ object Util{
     name == "<init>" || (name.startsWith("<local ") && name.endsWith(">")) || name == "$anonfun" || name == "macro"
   }
   def getName(c: Reflection)(s: c.Symbol) = {
-    import c.{given _}
     s.name.trim
       .stripSuffix("$") // meh
   }
@@ -79,7 +78,6 @@ object Util{
 object Macros {
 
   def findOwner(c: Reflection)(owner: c.Symbol, skipIf: (c: Reflection) => (c.Symbol) => Boolean): c.Symbol = {
-    import c.{given _}
     var owner0 = owner
     while(skipIf(c)(owner0)) owner0 = owner0.owner
     owner0
@@ -98,12 +96,12 @@ object Macros {
    * such a synthetic variable.
    */
   def nonMacroOwner(c: Reflection)(owner: c.Symbol): c.Symbol =
-    findOwner(c)(owner, c => owner0 => {import c.{given _}; owner0.flags.is(c.Flags.Macro) && Util.getName(c)(owner0) == "macro"})
+    findOwner(c)(owner, c => owner0 => { owner0.flags.is(c.Flags.Macro) && Util.getName(c)(owner0) == "macro"})
 
-  def nameImpl(using ctx: QuoteContext): Expr[Name] = {
-    import ctx.tasty._
-    val owner = actualOwner(ctx.tasty)(Symbol.currentOwner)
-    val simpleName = Util.getName(ctx.tasty)(owner)
+  def nameImpl(using QuoteContext): Expr[Name] = {
+    import qctx.reflect._
+    val owner = actualOwner(qctx.reflect)(Symbol.currentOwner)
+    val simpleName = Util.getName(qctx.reflect)(owner)
     '{Name(${Expr(simpleName)})}
   }
 
@@ -114,20 +112,20 @@ object Macros {
     else
       s
 
-  def nameMachineImpl(using ctx: QuoteContext): Expr[Name.Machine] = {
-    import ctx.tasty._
-    val owner = nonMacroOwner(ctx.tasty)(Symbol.currentOwner)
-    val simpleName = adjustName(Util.getName(ctx.tasty)(owner))
+  def nameMachineImpl(using QuoteContext): Expr[Name.Machine] = {
+    import qctx.reflect._
+    val owner = nonMacroOwner(qctx.reflect)(Symbol.currentOwner)
+    val simpleName = adjustName(Util.getName(qctx.reflect)(owner))
     '{Name.Machine(${Expr(simpleName)})}
   }
 
-  def fullNameImpl(using ctx: QuoteContext): Expr[FullName] = {
-    import ctx.tasty._
+  def fullNameImpl(using QuoteContext): Expr[FullName] = {
+    import qctx.reflect._
     @annotation.tailrec def cleanChunk(chunk: String): String =
       val refined = chunk.stripPrefix("_$").stripSuffix("$")
       if chunk != refined then cleanChunk(refined) else refined
 
-    val owner = actualOwner(ctx.tasty)(Symbol.currentOwner)
+    val owner = actualOwner(qctx.reflect)(Symbol.currentOwner)
     val fullName =
       owner.fullName.trim
         .split("\\.", -1)
@@ -137,9 +135,9 @@ object Macros {
     '{FullName(${Expr(fullName)})}
   }
 
-  def fullNameMachineImpl(using ctx: QuoteContext): Expr[FullName.Machine] = {
-    import ctx.tasty._
-    val owner = nonMacroOwner(ctx.tasty)(Symbol.currentOwner)
+  def fullNameMachineImpl(using QuoteContext): Expr[FullName.Machine] = {
+    import qctx.reflect._
+    val owner = nonMacroOwner(qctx.reflect)(Symbol.currentOwner)
     val fullName = owner.fullName.trim
       .split("\\.", -1)
       .map(_.stripPrefix("_$").stripSuffix("$")) // meh
@@ -148,40 +146,40 @@ object Macros {
     '{FullName.Machine(${Expr(fullName)})}
   }
 
-  def fileImpl(using ctx: QuoteContext): Expr[sourcecode.File] = {
-    import ctx.tasty._
-    val file = ctx.tasty.rootPosition.sourceFile.jpath.toAbsolutePath.toString
+  def fileImpl(using QuoteContext): Expr[sourcecode.File] = {
+    import qctx.reflect._
+    val file = qctx.reflect.rootPosition.sourceFile.jpath.toAbsolutePath.toString
     '{sourcecode.File(${Expr(file)})}
   }
 
-  def fileNameImpl(using ctx: QuoteContext): Expr[sourcecode.FileName] = {
-    import ctx.tasty._
-    val name = ctx.tasty.rootPosition.sourceFile.jpath.getFileName.toString
+  def fileNameImpl(using QuoteContext): Expr[sourcecode.FileName] = {
+    import qctx.reflect._
+    val name = qctx.reflect.rootPosition.sourceFile.jpath.getFileName.toString
     '{sourcecode.FileName(${Expr(name)})}
   }
 
-  def lineImpl(using ctx: QuoteContext): Expr[sourcecode.Line] = {
-    import ctx.tasty._
-    val line = ctx.tasty.rootPosition.startLine + 1
+  def lineImpl(using QuoteContext): Expr[sourcecode.Line] = {
+    import qctx.reflect._
+    val line = qctx.reflect.rootPosition.startLine + 1
     '{sourcecode.Line(${Expr(line)})}
   }
 
-  def enclosingImpl(using ctx: QuoteContext): Expr[Enclosing] = {
-    val path = enclosing(ctx.tasty)(
-      !Util.isSynthetic(ctx.tasty)(_)
+  def enclosingImpl(using QuoteContext): Expr[Enclosing] = {
+    val path = enclosing(qctx.reflect)(
+      !Util.isSynthetic(qctx.reflect)(_)
     )
 
     '{Enclosing(${Expr(path)})}
   }
 
-  def enclosingMachineImpl(using ctx: QuoteContext): Expr[Enclosing.Machine] = {
-    val path = enclosing(ctx.tasty, machine = true)(_ => true)
+  def enclosingMachineImpl(using QuoteContext): Expr[Enclosing.Machine] = {
+    val path = enclosing(qctx.reflect, machine = true)(_ => true)
     '{Enclosing.Machine(${Expr(path)})}
   }
 
-  def pkgImpl(using ctx: QuoteContext): Expr[Pkg] = {
-    import ctx.tasty._
-    val path = enclosing(ctx.tasty) {
+  def pkgImpl(using QuoteContext): Expr[Pkg] = {
+    import qctx.reflect._
+    val path = enclosing(qctx.reflect) {
       case s if s.isPackageDef => true
       case _ => false
     }
@@ -189,11 +187,11 @@ object Macros {
     '{Pkg(${Expr(path)})}
   }
 
-  def argsImpl(using ctx: QuoteContext): Expr[Args] = {
-    import ctx.tasty._
+  def argsImpl(using qctx: QuoteContext): Expr[Args] = {
+    import qctx.reflect._
 
-    val param: List[List[ctx.tasty.ValDef]] = {
-      def nearestEnclosingMethod(owner: ctx.tasty.Symbol): List[List[ctx.tasty.ValDef]] =
+    val param: List[List[ValDef]] = {
+      def nearestEnclosingMethod(owner: Symbol): List[List[ValDef]] =
         owner match {
           case defSym if defSym.isDefDef =>
             defSym.tree.asInstanceOf[DefDef].paramss
@@ -219,8 +217,8 @@ object Macros {
   }
 
 
-  def text[T: Type](v: Expr[T])(using ctx: QuoteContext): Expr[sourcecode.Text[T]] = {
-    import ctx.tasty._
+  def text[T: Type](v: Expr[T])(using QuoteContext): Expr[sourcecode.Text[T]] = {
+    import qctx.reflect._
     val txt = v.unseal.pos.sourceCode
     '{sourcecode.Text[T]($v, ${Expr(txt)})}
   }
