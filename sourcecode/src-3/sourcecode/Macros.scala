@@ -213,7 +213,7 @@ object Macros {
 
   def text[T: Type](v: Expr[T])(using QuoteContext): Expr[sourcecode.Text[T]] = {
     import qctx.reflect._
-    val txt = v.unseal.pos.sourceCode
+    val txt = Term.of(v).pos.sourceCode
     '{sourcecode.Text[T]($v, ${Expr(txt)})}
   }
 
