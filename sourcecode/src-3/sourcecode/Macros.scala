@@ -99,7 +99,7 @@ object Macros {
 
   def nameImpl(using QuoteContext): Expr[Name] = {
     import qctx.reflect._
-    val owner = actualOwner(Symbol.currentOwner)
+    val owner = actualOwner(Symbol.spliceOwner)
     val simpleName = Util.getName(owner)
     '{Name(${Expr(simpleName)})}
   }
@@ -113,7 +113,7 @@ object Macros {
 
   def nameMachineImpl(using QuoteContext): Expr[Name.Machine] = {
     import qctx.reflect._
-    val owner = nonMacroOwner(Symbol.currentOwner)
+    val owner = nonMacroOwner(Symbol.spliceOwner)
     val simpleName = adjustName(Util.getName(owner))
     '{Name.Machine(${Expr(simpleName)})}
   }
@@ -124,7 +124,7 @@ object Macros {
       val refined = chunk.stripPrefix("_$").stripSuffix("$")
       if chunk != refined then cleanChunk(refined) else refined
 
-    val owner = actualOwner(Symbol.currentOwner)
+    val owner = actualOwner(Symbol.spliceOwner)
     val fullName =
       owner.fullName.trim
         .split("\\.", -1)
@@ -136,7 +136,7 @@ object Macros {
 
   def fullNameMachineImpl(using QuoteContext): Expr[FullName.Machine] = {
     import qctx.reflect._
-    val owner = nonMacroOwner(Symbol.currentOwner)
+    val owner = nonMacroOwner(Symbol.spliceOwner)
     val fullName = owner.fullName.trim
       .split("\\.", -1)
       .map(_.stripPrefix("_$").stripSuffix("$")) // meh
@@ -195,7 +195,7 @@ object Macros {
             nearestEnclosingMethod(owner.owner)
         }
 
-      nearestEnclosingMethod(Symbol.currentOwner)
+      nearestEnclosingMethod(Symbol.spliceOwner)
     }
 
     val texts0 = param.map(_.foldRight('{List.empty[Text[_]]}) {
@@ -228,7 +228,7 @@ object Macros {
   def enclosing(using QuoteContext)(machine: Boolean)(filter: qctx.reflect.Symbol => Boolean): String = {
     import qctx.reflect._
 
-    var current = Symbol.currentOwner
+    var current = Symbol.spliceOwner
     if (!machine)
       current = actualOwner(current)
     else
