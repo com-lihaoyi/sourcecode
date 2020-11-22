@@ -64,11 +64,11 @@ trait ArgsMacros {
 }
 
 object Util{
-  def isSynthetic(using QuoteContext)(s: qctx.reflect.Symbol) = isSyntheticName(getName(s))
+  def isSynthetic(using Quotes)(s: qctx.reflect.Symbol) = isSyntheticName(getName(s))
   def isSyntheticName(name: String) = {
     name == "<init>" || (name.startsWith("<local ") && name.endsWith(">")) || name == "$anonfun" || name == "macro"
   }
-  def getName(using QuoteContext)(s: qctx.reflect.Symbol) = {
+  def getName(using Quotes)(s: qctx.reflect.Symbol) = {
     s.name.trim
       .stripSuffix("$") // meh
   }
@@ -76,13 +76,13 @@ object Util{
 
 object Macros {
 
-  def findOwner(using QuoteContext)(owner: qctx.reflect.Symbol, skipIf: qctx.reflect.Symbol => Boolean): qctx.reflect.Symbol = {
+  def findOwner(using Quotes)(owner: qctx.reflect.Symbol, skipIf: qctx.reflect.Symbol => Boolean): qctx.reflect.Symbol = {
     var owner0 = owner
     while(skipIf(owner0)) owner0 = owner0.owner
     owner0
   }
 
-  def actualOwner(using QuoteContext)(owner: qctx.reflect.Symbol): qctx.reflect.Symbol =
+  def actualOwner(using Quotes)(owner: qctx.reflect.Symbol): qctx.reflect.Symbol =
     findOwner(owner, owner0 => Util.isSynthetic(owner0) || Util.getName(owner0) == "ev")
 
   /**
@@ -94,10 +94,10 @@ object Macros {
    * Where n is an ordinal. This method returns the first owner that is not
    * such a synthetic variable.
    */
-  def nonMacroOwner(using QuoteContext)(owner: qctx.reflect.Symbol): qctx.reflect.Symbol =
+  def nonMacroOwner(using Quotes)(owner: qctx.reflect.Symbol): qctx.reflect.Symbol =
     findOwner(owner, owner0 => { owner0.flags.is(qctx.reflect.Flags.Macro) && Util.getName(owner0) == "macro"})
 
-  def nameImpl(using QuoteContext): Expr[Name] = {
+  def nameImpl(using Quotes): Expr[Name] = {
     import qctx.reflect._
     val owner = actualOwner(Symbol.spliceOwner)
     val simpleName = Util.getName(owner)
@@ -111,14 +111,14 @@ object Macros {
     else
       s
 
-  def nameMachineImpl(using QuoteContext): Expr[Name.Machine] = {
+  def nameMachineImpl(using Quotes): Expr[Name.Machine] = {
     import qctx.reflect._
     val owner = nonMacroOwner(Symbol.spliceOwner)
     val simpleName = adjustName(Util.getName(owner))
     '{Name.Machine(${Expr(simpleName)})}
   }
 
-  def fullNameImpl(using QuoteContext): Expr[FullName] = {
+  def fullNameImpl(using Quotes): Expr[FullName] = {
     import qctx.reflect._
     @annotation.tailrec def cleanChunk(chunk: String): String =
       val refined = chunk.stripPrefix("_$").stripSuffix("$")
@@ -134,7 +134,7 @@ object Macros {
     '{FullName(${Expr(fullName)})}
   }
 
-  def fullNameMachineImpl(using QuoteContext): Expr[FullName.Machine] = {
+  def fullNameMachineImpl(using Quotes): Expr[FullName.Machine] = {
     import qctx.reflect._
     val owner = nonMacroOwner(Symbol.spliceOwner)
     val fullName = owner.fullName.trim
@@ -145,34 +145,34 @@ object Macros {
     '{FullName.Machine(${Expr(fullName)})}
   }
 
-  def fileImpl(using QuoteContext): Expr[sourcecode.File] = {
+  def fileImpl(using Quotes): Expr[sourcecode.File] = {
     import qctx.reflect._
     val file = qctx.reflect.Position.ofMacroExpansion.sourceFile.jpath.toAbsolutePath.toString
     '{sourcecode.File(${Expr(file)})}
   }
 
-  def fileNameImpl(using QuoteContext): Expr[sourcecode.FileName] = {
+  def fileNameImpl(using Quotes): Expr[sourcecode.FileName] = {
     val name = qctx.reflect.Position.ofMacroExpansion.sourceFile.jpath.getFileName.toString
     '{sourcecode.FileName(${Expr(name)})}
   }
 
-  def lineImpl(using QuoteContext): Expr[sourcecode.Line] = {
+  def lineImpl(using Quotes): Expr[sourcecode.Line] = {
     val line = qctx.reflect.Position.ofMacroExpansion.startLine + 1
     '{sourcecode.Line(${Expr(line)})}
   }
 
-  def enclosingImpl(using QuoteContext): Expr[Enclosing] = {
+  def enclosingImpl(using Quotes): Expr[Enclosing] = {
     import qctx.reflect._
     val path = enclosing(machine = false)(!Util.isSynthetic(_))
     '{Enclosing(${Expr(path)})}
   }
 
-  def enclosingMachineImpl(using QuoteContext): Expr[Enclosing.Machine] = {
+  def enclosingMachineImpl(using Quotes): Expr[Enclosing.Machine] = {
     val path = enclosing(machine = true)(_ => true)
     '{Enclosing.Machine(${Expr(path)})}
   }
 
-  def pkgImpl(using QuoteContext): Expr[Pkg] = {
+  def pkgImpl(using Quotes): Expr[Pkg] = {
     val path = enclosing(machine = false) {
       case s if s.isPackageDef => true
       case _ => false
@@ -181,7 +181,7 @@ object Macros {
     '{Pkg(${Expr(path)})}
   }
 
-  def argsImpl(using qctx: QuoteContext): Expr[Args] = {
+  def argsImpl(using qctx: Quotes): Expr[Args] = {
     import qctx.reflect._
 
     val param: List[List[ValDef]] = {
@@ -211,7 +211,7 @@ object Macros {
   }
 
 
-  def text[T: Type](v: Expr[T])(using QuoteContext): Expr[sourcecode.Text[T]] = {
+  def text[T: Type](v: Expr[T])(using Quotes): Expr[sourcecode.Text[T]] = {
     import qctx.reflect._
     val txt = Term.of(v).pos.sourceCode
     '{sourcecode.Text[T]($v, ${Expr(txt)})}
@@ -225,7 +225,7 @@ object Macros {
 
   }
 
-  def enclosing(using QuoteContext)(machine: Boolean)(filter: qctx.reflect.Symbol => Boolean): String = {
+  def enclosing(using Quotes)(machine: Boolean)(filter: qctx.reflect.Symbol => Boolean): String = {
     import qctx.reflect._
 
     var current = Symbol.spliceOwner
