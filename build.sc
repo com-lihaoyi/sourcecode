@@ -87,7 +87,7 @@ object sourcecode extends Module {
 
   object js extends Cross[JsSourcecodeModule](
     ("2.11.12", "0.6.33"), ("2.12.10", "0.6.33"), ("2.13.1", "0.6.33"),
-    ("2.11.12", "1.0.0"), ("2.12.10", "1.0.0"), ("2.13.1", "1.0.0")
+    ("2.11.12", "1.0.0"), ("2.12.10", "1.0.0"), ("2.13.1", "1.0.0"), ("3.0.0-M2", "1.0.0"),
   )
   class JsSourcecodeModule(val crossScalaVersion: String, crossJSVersion: String)
     extends SourcecodeMainModule with ScalaJSModule with SourcecodeModule {
