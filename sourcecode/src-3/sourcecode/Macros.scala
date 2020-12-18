@@ -213,7 +213,7 @@ object Macros {
 
   def text[T: Type](v: Expr[T])(using Quotes): Expr[sourcecode.Text[T]] = {
     import quotes.reflect._
-    val txt = Term.of(v).pos.sourceCode
+    val txt = Term.of(v).pos.sourceCode.get
     '{sourcecode.Text[T]($v, ${Expr(txt)})}
   }
 
@@ -239,12 +239,12 @@ object Macros {
 
         val chunk = current match {
           case sym if
-            sym.isValDef || sym.isDefDef => Chunk.ValVarLzyDef
+            sym.isValDef || sym.isDefDef => Chunk.ValVarLzyDef.apply
           case sym if
             sym.isPackageDef ||
-            sym.moduleClass != Symbol.noSymbol => Chunk.PkgObj
-          case sym if sym.isClassDef => Chunk.ClsTrt
-          case _ => Chunk.PkgObj
+            sym.moduleClass != Symbol.noSymbol => Chunk.PkgObj.apply
+          case sym if sym.isClassDef => Chunk.ClsTrt.apply
+          case _ => Chunk.PkgObj.apply
         }
 
         path = chunk(Util.getName(current).stripSuffix("$")) :: path
