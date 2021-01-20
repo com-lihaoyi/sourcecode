@@ -3,7 +3,7 @@ import mill._, scalalib._, scalajslib._, scalanativelib._, publish._
 val scala211 = "2.11.12"
 val scala212 = "2.12.13"
 val scala213 = "2.13.4"
-val scala3 = "3.0.0-M2"
+val scala3 = "3.0.0-M3"
 
 val scalaJSVersions = for {
   scalaV <- Seq(scala213, scala212)
