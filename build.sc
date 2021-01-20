@@ -1,5 +1,19 @@
 import mill._, scalalib._, scalajslib._, scalanativelib._, publish._
 
+val scala211 = "2.11.12"
+val scala212 = "2.12.13"
+val scala213 = "2.13.4"
+val scala3 = "3.0.0-M2"
+
+val scalaJSVersions = for {
+  scalaV <- Seq(scala213, scala212)
+  scalaJSV <- Seq("0.6.33", "1.4.0")
+} yield (scalaV, scalaJSV)
+
+val scalaNativeVersions = for {
+  scalaV <- Seq(scala213, scala212)
+  scalaNativeV <- Seq("0.4.0")
+} yield (scalaV, scalaNativeV)
 
 trait SourcecodeModule extends PublishModule {
   def artifactName = "sourcecode"
@@ -65,7 +79,7 @@ trait SourcecodeTestModule extends ScalaModule {
 
 object sourcecode extends Module {
   val dottyVersion = Option(sys.props("dottyVersion"))
-  object jvm extends Cross[JvmSourcecodeModule]((List("2.11.12", "2.12.8", "2.13.0", "3.0.0-M3") ++ dottyVersion): _*)
+  object jvm extends Cross[JvmSourcecodeModule]((List("2.11.12", "2.12.12", "2.13.4", "3.0.0-M3") ++ dottyVersion): _*)
   class JvmSourcecodeModule(val crossScalaVersion: String)
     extends SourcecodeMainModule with ScalaModule with SourcecodeModule {
 
@@ -85,10 +99,7 @@ object sourcecode extends Module {
       }
   }
 
-  object js extends Cross[JsSourcecodeModule](
-    ("2.11.12", "0.6.33"), ("2.12.10", "0.6.33"), ("2.13.1", "0.6.33"),
-    ("2.11.12", "1.0.0"), ("2.12.10", "1.0.0"), ("2.13.1", "1.0.0")
-  )
+  object js extends Cross[JsSourcecodeModule](scalaJSVersions: _*)
   class JsSourcecodeModule(val crossScalaVersion: String, crossJSVersion: String)
     extends SourcecodeMainModule with ScalaJSModule with SourcecodeModule {
     def offset = os.up
@@ -103,7 +114,7 @@ object sourcecode extends Module {
     }
   }
 
-  object native extends Cross[NativeSourcecodeModule](("2.11.12", "0.3.9"), ("2.11.12", "0.4.0-M2"))
+  object native extends Cross[NativeSourcecodeModule](scalaNativeVersions: _*)
   class NativeSourcecodeModule(val crossScalaVersion: String, crossScalaNativeVersion: String)
     extends SourcecodeMainModule with ScalaNativeModule with SourcecodeModule {
     def offset = os.up
