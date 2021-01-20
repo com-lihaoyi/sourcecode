@@ -78,8 +78,8 @@ trait SourcecodeTestModule extends ScalaModule {
 }
 
 object sourcecode extends Module {
-  val dottyVersion = Option(sys.props("dottyVersion"))
-  object jvm extends Cross[JvmSourcecodeModule]((List("2.11.12", "2.12.12", "2.13.4", "3.0.0-M3") ++ dottyVersion): _*)
+  val dottyVersion = sys.props.get("dottyVersion")
+  object jvm extends Cross[JvmSourcecodeModule]((scala211 :: scala212 :: scala213 :: scala3 :: dottyVersion.toList): _*)
   class JvmSourcecodeModule(val crossScalaVersion: String)
     extends SourcecodeMainModule with ScalaModule with SourcecodeModule {
 
