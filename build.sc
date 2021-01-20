@@ -5,13 +5,18 @@ val scala212 = "2.12.13"
 val scala213 = "2.13.4"
 val scala3 = "3.0.0-M3"
 
+val dottyVersions = sys.props.get("dottyVersion").toList
+
+val scalaVersions = "2.11.12" :: "2.12.13" :: "2.13.4" :: "3.0.0-M3" :: dottyVersions
+val scala2Versions = scalaVersions.filter(_.startsWith("2."))
+
 val scalaJSVersions = for {
-  scalaV <- Seq(scala213, scala212)
+  scalaV <- scala2Versions
   scalaJSV <- Seq("0.6.33", "1.4.0")
 } yield (scalaV, scalaJSV)
 
 val scalaNativeVersions = for {
-  scalaV <- Seq(scala213, scala212)
+  scalaV <- scala2Versions
   scalaNativeV <- Seq("0.4.0")
 } yield (scalaV, scalaNativeV)
 
@@ -79,7 +84,7 @@ trait SourcecodeTestModule extends ScalaModule {
 
 object sourcecode extends Module {
   val dottyVersion = sys.props.get("dottyVersion")
-  object jvm extends Cross[JvmSourcecodeModule]((scala211 :: scala212 :: scala213 :: scala3 :: dottyVersion.toList): _*)
+  object jvm extends Cross[JvmSourcecodeModule](scalaVersions: _*)
   class JvmSourcecodeModule(val crossScalaVersion: String)
     extends SourcecodeMainModule with ScalaModule with SourcecodeModule {
 
