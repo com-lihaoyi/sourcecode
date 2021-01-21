@@ -18,7 +18,7 @@ val scalaNativeVersions = for {
 trait SourcecodeModule extends PublishModule {
   def artifactName = "sourcecode"
 
-  def publishVersion = "0.2.1"
+  def publishVersion = "0.2.2"
 
   def pomSettings = PomSettings(
     description = artifactName(),
