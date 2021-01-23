@@ -2,8 +2,8 @@ SourceCode [![Build Status](https://travis-ci.org/lihaoyi/sourcecode.svg?branch=
 ==========
 
 ```scala
-"com.lihaoyi" %% "sourcecode" % "0.2.2" // Scala-JVM
-"com.lihaoyi" %%% "sourcecode" % "0.2.2" // Scala.js / Scala Native
+"com.lihaoyi" %% "sourcecode" % "0.2.3" // Scala-JVM
+"com.lihaoyi" %%% "sourcecode" % "0.2.3" // Scala.js / Scala Native
 ```
 
 `sourcecode` is a small Scala library for that provides common "source code"
