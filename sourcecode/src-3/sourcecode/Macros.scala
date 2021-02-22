@@ -189,8 +189,14 @@ object Macros {
         owner match {
           case defSym if defSym.isDefDef =>
             defSym.tree.asInstanceOf[DefDef].paramss
+              // FIXME Could be a List[TypeDef] too, although I'm not
+              // sure under which conditions this can happen…
+              .map(_.asInstanceOf[List[ValDef]])
           case classSym if classSym.isClassDef =>
             classSym.tree.asInstanceOf[ClassDef].constructor.paramss
+              // FIXME Could be a List[TypeDef] too, although I'm not
+              // sure under which conditions this can happen…
+              .map(_.asInstanceOf[List[ValDef]])
           case _ =>
             nearestEnclosingMethod(owner.owner)
         }
@@ -213,7 +219,7 @@ object Macros {
 
   def text[T: Type](v: Expr[T])(using Quotes): Expr[sourcecode.Text[T]] = {
     import quotes.reflect._
-    val txt = Term.of(v).pos.sourceCode.get
+    val txt = v.asTerm.pos.sourceCode.get
     '{sourcecode.Text[T]($v, ${Expr(txt)})}
   }
 
