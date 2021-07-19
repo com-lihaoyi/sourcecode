@@ -6,7 +6,7 @@ SourceCode [![Build Status](https://travis-ci.org/lihaoyi/sourcecode.svg?branch=
 "com.lihaoyi" %%% "sourcecode" % "0.2.7" // Scala.js / Scala Native
 ```
 
-`sourcecode` is a small Scala library for that provides common "source code"
+`sourcecode` is a small Scala library that provides common "source code"
 context to your program at runtime, similar to Python's `__name__`, C++'s
 `__LINE__` or Ruby's `__FILE__`. For example, you can ask for the file-name
 and line number of the current file, either through the `()` syntax or via an
