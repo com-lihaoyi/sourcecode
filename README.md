@@ -2,8 +2,8 @@ SourceCode [![Build Status](https://travis-ci.org/lihaoyi/sourcecode.svg?branch=
 ==========
 
 ```scala
-"com.lihaoyi" %% "sourcecode" % "0.1.9" // Scala-JVM
-"com.lihaoyi" %%% "sourcecode" % "0.1.9" // Scala.js / Scala Native
+"com.lihaoyi" %% "sourcecode" % "0.2.7" // Scala-JVM
+"com.lihaoyi" %%% "sourcecode" % "0.2.7" // Scala.js / Scala Native
 ```
 
 `sourcecode` is a small Scala library for that provides common "source code"
@@ -21,10 +21,10 @@ assert(line == 16)
 ```
 
 This might not be something you want to use for "business logic", but is very
-helpful for things like [debugging](#debug-prints), [logging](#logging) or 
-providing automatic diagnostics for [DSLs](#embedding-domain-specific-languages). 
+helpful for things like [debugging](#debug-prints), [logging](#logging) or
+providing automatic diagnostics for [DSLs](#embedding-domain-specific-languages).
 This information is also available via an `implicit`, letting you write functions
-that automatically pull it in. 
+that automatically pull it in.
 
 Using SourceCode on code dealing with lots of anonymous functions or anonymous
 classes can easily turn what you see in your debug printouts from this:
@@ -35,10 +35,15 @@ To this:
 
 ![After](docs/After.png)
 
-By capturing source information you can use to give your objects and function 
-meaningful names that tell you where they were defined, automatically without 
-needing you to manually assign a string-ID to every anonymous function or 
-anonymous class you define all over your code bas. 
+By capturing source information you can use to give your objects and function
+meaningful names that tell you where they were defined, automatically without
+needing you to manually assign a string-ID to every anonymous function or
+anonymous class you define all over your code bas.
+
+If you like using Sourcecode, you might also enjoy this book by the author which
+teaches you Scala in a similarly simple and straightforward way:
+
+- [Hands-on Scala Programming](https://www.handsonscala.com/) https://www.handsonscala.com/
 
 Table of Contents
 =================
@@ -69,14 +74,14 @@ The kinds of compilation-time data that `sourcecode` provides are:
 - `sourcecode.Enclosing`: the name of the nearest enclosing definition: `val`,
   `class`, whatever, prefixed by the names of all enclosing `class`s, `trait`s,
   `object`s or `package`s, `def`s, `val`s, `var`s or `lazy val`s`
-- `sourcecode.Text[T]`: when you want to take a value of type `T`, but also 
-  want to get the "source text" of that particular value. Note that if 
-  you have multiple statements in a `{}` block, `sourcecode.Text` will only 
+- `sourcecode.Text[T]`: when you want to take a value of type `T`, but also
+  want to get the "source text" of that particular value. Note that if
+  you have multiple statements in a `{}` block, `sourcecode.Text` will only
   capture the source code for the last expression that gets returned. This
   implicit is slightly experimental; be sure to report any bugs you find!
-- `sourcecode.Args`: the arguments that where provided to the nearest enclosing 
+- `sourcecode.Args`: the arguments that where provided to the nearest enclosing
   method
-- `sourcecode.Name.Machine`, `sourcecode.FullName.Machine` and 
+- `sourcecode.Name.Machine`, `sourcecode.FullName.Machine` and
   `sourcecode.Enclosing.Machine` which are similar to `sourcecode.Name`,
   `sourcecode.FullName` and `sourcecode.Enclosing` except they do not filter
   out synthetic method names; e.g. if you want to see the `<init>` names or
@@ -105,7 +110,7 @@ can't be used.
 Examples
 ========
 
-Here are a few examples of `sourcecode`'s core functions being used in a 
+Here are a few examples of `sourcecode`'s core functions being used in a
 variety of contexts. Hopefully they will give you an idea of how the various
 implicits behave:
 
@@ -165,8 +170,8 @@ object Implicits {
 }
 ```
 
-Note that in "normal" usage you would not directly call `implicitly` to summon 
-up `sourcecode` values; rather, you would add implicit parameters of these 
+Note that in "normal" usage you would not directly call `implicitly` to summon
+up `sourcecode` values; rather, you would add implicit parameters of these
 types to your functions. That would make these values automatically available
 to your functions without needing to manually keep passing them in. Apart from
 summoning them via implicits, you can also use the `apply` method on each type
@@ -228,7 +233,7 @@ object Implicits {
 }
 ```
 
-By default, the various implicits all ignore any synthetic `<init>`,  
+By default, the various implicits all ignore any synthetic `<init>`,
 `<local Foo>` or `$anonfun` methods that might be present:
 
 ```scala
@@ -279,10 +284,10 @@ object Synthetic {
 ```
 
 Hopefully this has given you a reasonable feel for *what** sourcecode does. You
-may still be wondering *why* we would want any of this: what could we possibly 
-use these things for? Why would we want to write code that depends on our 
+may still be wondering *why* we would want any of this: what could we possibly
+use these things for? Why would we want to write code that depends on our
 package paths or variable names? The section below will provide use cases that
-you will hopefully be able to relate to. 
+you will hopefully be able to relate to.
 
 Use Cases
 =========
@@ -313,7 +318,7 @@ This can be handy for letting you see where the log lines are coming from,
 without tediously tagging every log statement with a unique prefix.
 Furthermore, this happens at compile time, and is thus orders of magnitude
 faster than getting this information by generating stack traces, and works
-on Scala.js where stack-inspection does not. Lastly, if you want additional 
+on Scala.js where stack-inspection does not. Lastly, if you want additional
 information such as method names, class names, or packages to be provided to
 your logging function, you can easily do so by asking for the `sourcecode.Name`
 or `sourcecode.FullName` or `sourcecode.Pkg` implicits.
@@ -357,7 +362,7 @@ named enums (or even an enum of the same name in a different package!) are
 given unique names. In that case, you can use `sourcecode.FullName` or
 `sourcecode.Enclosing` to capture the full path e.g.
 `"com.mypkg.MyEnum.firstItem"` and `"com.mypkg.MyEnum.secondItem"`:
- 
+
 ```scala
 package sourcecode
 
@@ -378,7 +383,7 @@ object EnumFull {
   }
 }
 ```
-You can also use `sourcecode.Name` in an constructor, in which case it'll be 
+You can also use `sourcecode.Name` in an constructor, in which case it'll be
 picked up during inheritance:
 
 ```scala
@@ -420,7 +425,7 @@ class Foo(arg: Int){
 new Foo(123).bar("lol")  // sourcecode.DebugRun.main Foo#bar [arg -> param]: (123,lol)
 ```
 
-You can easily vary the amount of verbosity, e.g. by swapping the 
+You can easily vary the amount of verbosity, e.g. by swapping the
 `sourcecode.Enclosing` for a `sourcecode.Name` if you think it's too verbose:
 
 ```scala
@@ -455,7 +460,7 @@ new Foo(123).bar("lol")  // [param]: lol
 
 Thus you can easily configure how much information your `debug` helper method
 needs, at its definition, without having to hunt all over your codebase for the
-various `debug` call-sites you left lying around and manually tweaking the 
+various `debug` call-sites you left lying around and manually tweaking the
 verbosity of each one. Furthermore, if you want additional information like
 `sourcecode.Line` or `sourcecode.File`, that's all just one implicit away.
 
@@ -468,8 +473,8 @@ can easily distinguish your individual prints later:
 ```scala
 scala> class Foo{
      |   def bar(grid: Seq[Seq[Int]]) = {
-     |     // automatically capture and print out source context 
-     |     pprint.log(grid, tag="grid") 
+     |     // automatically capture and print out source context
+     |     pprint.log(grid, tag="grid")
      |   }
      | }
 defined class Foo
@@ -483,7 +488,7 @@ List(
 )
 ```
 
-`pprint.log` is itself defined as 
+`pprint.log` is itself defined as
 
 ```scala
 def log[T: PPrint](value: T, tag: String = "")
@@ -494,10 +499,10 @@ def log[T: PPrint](value: T, tag: String = "")
 
 Using `sourcecode.Enclosing` and `sourcecode.Line` to provide the context to
 be printed. You can, or course, define your own `log` method in the same way,
-customizing it to print or not-print exactly what you want to see via the 
+customizing it to print or not-print exactly what you want to see via the
 implicits that `sourcecode` provides!
 
-`sourcecode.Args` can be used to access all parameters that where provided 
+`sourcecode.Args` can be used to access all parameters that where provided
 to a method:
 
 ```scala
@@ -516,7 +521,7 @@ Embedding Domain-Specific Languages
 -----------------------------------
 
 The Scala programming is a popular choice to embed domain-specific languages:
-that means that you start with some external language, e.g. this 
+that means that you start with some external language, e.g. this
 [MathProg] example
 
 ```scala
@@ -537,7 +542,7 @@ var y{K} >= 0;
 ```
 
 The linked slides has more detail about what exactly this language does (it
-describes mathematical optimization problems). For a variety of reasons, you 
+describes mathematical optimization problems). For a variety of reasons, you
 may prefer to write this as part of a Scala program instead: for example you
 may want Scala's IDE support, or its ability to define functions that help
 reduce boilerplate, or maybe you like the way the compiler provides type errors
@@ -569,8 +574,8 @@ when printing error messages, or the results of the computation, you want to
 see which `val`s are involved! Thus you end up duplicating the names over and
 over and over.
 
-With sourcecode, you can easily define `param` `set` and `xvar` as taking 
-implicit `sourcecode.Name`s, thus eliminating all the boilerplate involved in 
+With sourcecode, you can easily define `param` `set` and `xvar` as taking
+implicit `sourcecode.Name`s, thus eliminating all the boilerplate involved in
 duplicating names:
 
 ```scala
@@ -604,8 +609,8 @@ C.parse("X") // Failure((A | B):1:1 ..."X")
 ```
 
 As you can see, the names of the rules `A` and `B` are embedded in the error
-messages for parse failures. This makes debugging parsers far easier, while 
-saving you the effort of duplicating the name of the parser in possibly 
+messages for parse failures. This makes debugging parsers far easier, while
+saving you the effort of duplicating the name of the parser in possibly
 hundreds of rules in a large parser. In this case, it is the `P(...)` function
 which takes an implicit `sourcecode.Name` that does this work:
 
@@ -619,6 +624,26 @@ in its `.toString` method.
 
 Version History
 ===============
+
+0.2.7
+-----
+
+- Support Scala 3.0.0
+
+0.2.6
+-----
+
+- Support Scala 3.0.0-RC3
+
+0.2.5
+-----
+
+- Support Scala 3.0.0-RC2
+
+0.2.2
+-----
+
+- Support for Scala-Native 0.4.0
 
 0.1.9
 -----
@@ -649,41 +674,41 @@ Version History
 0.1.3
 -----
 
-- Add scala 2.12.x support, thanks to 
+- Add scala 2.12.x support, thanks to
   [Lars Hupel](https://github.com/larsrh)
 
 0.1.2
 -----
 
 - Add `sourcecode.Args` implicit, which can be used to capture debugging information
-  about the nearest enclosing function call for logging/debugging, thanks to 
+  about the nearest enclosing function call for logging/debugging, thanks to
   [Benjamin Hagemeister](https://github.com/benhag)
 
-- Attempted fix for [#17](https://github.com/lihaoyi/sourcecode/issues/17) and 
+- Attempted fix for [#17](https://github.com/lihaoyi/sourcecode/issues/17) and
   [#13](https://github.com/lihaoyi/sourcecode/issues/13), thanks to
-  [Simeon H.K. Fitch](https://github.com/metasim) 
+  [Simeon H.K. Fitch](https://github.com/metasim)
 
 0.1.1
 -----
 
-- Ignore `<local foo>` and `<init>` symbols when determining `sourcecode.Name`, 
+- Ignore `<local foo>` and `<init>` symbols when determining `sourcecode.Name`,
   `sourcecode.FullName` or `sourcecode.Enclosing`. If you want these, use the
   `sourcecode.Name.Machine`/`sourcecode.FullName.Machine`/`sourcecode.Enclosing.Machine`
   implicits instead.
-   
+
 - Add `sourcecode.Text` implicit to capture source code of an expression
 
 - Add implicit conversions to `sourcecode.*`, so you can pass in a `String`
-  to manually satisfy and implicit wanting a `sourcecode.Name` or 
-  `sourcecode.FullName` or `sourcecode.File`, an `Int` to satisfy an implicit 
-  asking for `sourcecode.Line` 
+  to manually satisfy and implicit wanting a `sourcecode.Name` or
+  `sourcecode.FullName` or `sourcecode.File`, an `Int` to satisfy an implicit
+  asking for `sourcecode.Line`
 
 - `sourcecode.Enclosing` has been simplified to take a single `String` rather
   than the previous `Vector[Chunk]`.
-  
-- Added the `sourcecode.Pkg` implicit, which provides the current 
-  enclosing package without any of the `class`s/`object`s/`def`s/etc.. Can be 
-  subtracted from `sourcecode.Enclosing` if you *only* want the 
+
+- Added the `sourcecode.Pkg` implicit, which provides the current
+  enclosing package without any of the `class`s/`object`s/`def`s/etc.. Can be
+  subtracted from `sourcecode.Enclosing` if you *only* want the
   `class`s/`object`s/`def`s/etc.
 
 0.1.0

@@ -1,10 +1,27 @@
 import mill._, scalalib._, scalajslib._, scalanativelib._, publish._
+import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version_mill0.9:0.1.1`
+import de.tobiasroeser.mill.vcs.version.VcsVersion
 
+val dottyVersions = sys.props.get("dottyVersion").toList
+
+val scalaVersions = "2.11.12" :: "2.12.13" :: "2.13.4" :: "3.0.0" :: dottyVersions
+val scala2Versions = scalaVersions.filter(_.startsWith("2."))
+
+val scalaJSVersions = for {
+  scalaV <- scalaVersions
+  scalaJSV <- Seq("0.6.33", "1.5.1")
+  if scalaV.startsWith("2.") || scalaJSV.startsWith("1.")
+} yield (scalaV, scalaJSV)
+
+val scalaNativeVersions = for {
+  scalaV <- scala2Versions
+  scalaNativeV <- Seq("0.4.0")
+} yield (scalaV, scalaNativeV)
 
 trait SourcecodeModule extends PublishModule {
   def artifactName = "sourcecode"
 
-  def publishVersion = "0.2.0"
+  def publishVersion = VcsVersion.vcsState().format()
 
   def pomSettings = PomSettings(
     description = artifactName(),
@@ -64,7 +81,8 @@ trait SourcecodeTestModule extends ScalaModule {
 }
 
 object sourcecode extends Module {
-  object jvm extends Cross[JvmSourcecodeModule]("2.11.12", "2.12.10", "2.13.1", "0.21.0-RC1")
+  val dottyVersion = sys.props.get("dottyVersion")
+  object jvm extends Cross[JvmSourcecodeModule](scalaVersions: _*)
   class JvmSourcecodeModule(val crossScalaVersion: String)
     extends SourcecodeMainModule with ScalaModule with SourcecodeModule {
 
@@ -73,21 +91,9 @@ object sourcecode extends Module {
       def moduleDeps = Seq(JvmSourcecodeModule.this)
       val crossScalaVersion = JvmSourcecodeModule.this.crossScalaVersion
     }
-
-    override def docJar =
-      if (crossScalaVersion.startsWith("2")) super.docJar
-      else T {
-        val outDir = T.ctx().dest
-        val javadocDir = outDir / 'javadoc
-        os.makeDir.all(javadocDir)
-        mill.api.Result.Success(mill.modules.Jvm.createJar(Agg(javadocDir))(outDir))
-      }
   }
 
-  object js extends Cross[JsSourcecodeModule](
-    ("2.11.12", "0.6.28"), ("2.12.10", "0.6.28"), ("2.13.1", "0.6.28"),
-    ("2.11.12", "1.0.0-RC2"), ("2.12.10", "1.0.0-RC2"), ("2.13.1", "1.0.0-RC2")
-  )
+  object js extends Cross[JsSourcecodeModule](scalaJSVersions: _*)
   class JsSourcecodeModule(val crossScalaVersion: String, crossJSVersion: String)
     extends SourcecodeMainModule with ScalaJSModule with SourcecodeModule {
     def offset = os.up
@@ -102,7 +108,7 @@ object sourcecode extends Module {
     }
   }
 
-  object native extends Cross[NativeSourcecodeModule](("2.11.12", "0.3.8")/*, ("2.11.12", "0.4.0-M2")*/)
+  object native extends Cross[NativeSourcecodeModule](scalaNativeVersions: _*)
   class NativeSourcecodeModule(val crossScalaVersion: String, crossScalaNativeVersion: String)
     extends SourcecodeMainModule with ScalaNativeModule with SourcecodeModule {
     def offset = os.up
