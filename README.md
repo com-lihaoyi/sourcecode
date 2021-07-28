@@ -459,7 +459,7 @@ various `debug` call-sites you left lying around and manually tweaking the
 verbosity of each one. Furthermore, if you want additional information like
 `sourcecode.Line` or `sourcecode.File`, that's all just one implicit away.
 
-The [PPrint](https://github.com/lihaoyi/PPrint) 
+The [PPrint](https://github.com/com-lihaoyi/PPrint) 
 library provides a `pprint.log` method that does exactly this: prints out the
 value provided (in this case pretty-printing it with colors and nice formatting
 & indentation) together with the enclosing context and line number, so you
