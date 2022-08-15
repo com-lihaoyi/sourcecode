@@ -38,7 +38,7 @@ To this:
 By capturing source information you can use to give your objects and function
 meaningful names that tell you where they were defined, automatically without
 needing you to manually assign a string-ID to every anonymous function or
-anonymous class you define all over your code bas.
+anonymous class you define all over your code base.
 
 If you like using Sourcecode, you might also enjoy this book by the author which
 teaches you Scala in a similarly simple and straightforward way:
@@ -79,7 +79,7 @@ The kinds of compilation-time data that `sourcecode` provides are:
   you have multiple statements in a `{}` block, `sourcecode.Text` will only
   capture the source code for the last expression that gets returned. This
   implicit is slightly experimental; be sure to report any bugs you find!
-- `sourcecode.Args`: the arguments that where provided to the nearest enclosing
+- `sourcecode.Args`: the arguments that were provided to the nearest enclosing
   method
 - `sourcecode.Name.Machine`, `sourcecode.FullName.Machine` and
   `sourcecode.Enclosing.Machine` which are similar to `sourcecode.Name`,
@@ -520,7 +520,7 @@ foo("baz", 42)(true) // foo(bar=baz, baz=42)(p=true)
 Embedding Domain-Specific Languages
 -----------------------------------
 
-The Scala programming is a popular choice to embed domain-specific languages:
+Scala is a popular language in which to embed domain-specific languages:
 that means that you start with some external language, e.g. this
 [MathProg] example
 
