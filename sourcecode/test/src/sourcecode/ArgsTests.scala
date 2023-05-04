@@ -7,14 +7,8 @@ object ArgsTests {
 
     def debug(implicit arguments: sourcecode.Args): Unit = args = arguments.value.map(_.map(t => t.source -> t.value))
 
-    // FIXME Can't manage to get the arg values from dotty…
-    val checkValues = !TestUtil.isDotty
-
     def check(expected: Seq[Seq[(String, Any)]]): Unit =
-      if (checkValues)
-        assert(args == expected, s"Expected: $expected, got: $args")
-      else
-        assert(args.map(_.map(_._1)) == expected.map(_.map(_._1)), s"Expected: ${expected.map(_.map(_._1))}, got: ${args.map(_.map(_._1))}")
+      assert(args == expected, s"Expected: $expected, got: $args")
 
     def foo(p1: String, p2: Long, p3: Boolean)(foo: String, bar: String): Unit = {
       debug
