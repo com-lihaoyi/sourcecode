@@ -14,7 +14,7 @@ object Tests{
     println("================Test Begin================")
     Apply.applyRun()
     Implicits.implicitRun()
-    EnumExaple.run()
+    EnumExample.run()
     EnumFull.run()
     NoSynthetic.run()
     Synthetic.run()
@@ -32,6 +32,8 @@ object Tests{
     DebugLite.main()
     println("================Regressions===============")
     Regressions.main()
+    println("================Unique IDs================")
+    SourceUUID.run()
     println("================Test Ended================")
   }
 }

@@ -1,6 +1,6 @@
 package sourcecode
 
-object EnumExaple {
+object EnumExample {
   def run() = {
     case class EnumValue(name: String){
       override def toString = name

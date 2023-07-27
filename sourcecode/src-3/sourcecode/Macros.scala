@@ -63,6 +63,11 @@ trait ArgsMacros {
     ${ Macros.argsImpl }
 }
 
+trait UUIDMacros {
+  inline implicit def generate: SourceUUID =
+    ${ Macros.uuidImpl }
+}
+
 object Util{
   def isSynthetic(using Quotes)(s: quotes.reflect.Symbol) = isSyntheticName(getName(s))
   def isSyntheticName(name: String) = {
@@ -167,6 +172,12 @@ object Macros {
     '{Enclosing(${Expr(path)})}
   }
 
+  def uuidImpl(using Quotes): Expr[SourceUUID] = {
+    import quotes.reflect._
+    val uuid = java.util.UUID.randomUUID()
+    '{ sourcecode.SourceUUID(${ Expr(uuid) }) }
+  }
+  
   def enclosingMachineImpl(using Quotes): Expr[Enclosing.Machine] = {
     val path = enclosing(machine = true)(_ => true)
     '{Enclosing.Machine(${Expr(path)})}

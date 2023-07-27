@@ -43,3 +43,10 @@ object Text extends TextMacros
 
 case class Args(value: Seq[Seq[Text[_]]]) extends SourceValue[Seq[Seq[Text[_]]]]
 object Args extends SourceCompanion[Seq[Seq[Text[_]]], Args](new Args(_)) with ArgsMacros
+
+// Unique identifiers, labels, and other IDs generated at compile time.
+import java.util.UUID
+
+final case class SourceUUID(value: UUID) extends SourceValue[UUID]
+
+object SourceUUID extends SourceCompanion[UUID, SourceUUID](new SourceUUID(_)) with UUIDMacros

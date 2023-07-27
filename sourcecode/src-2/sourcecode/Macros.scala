@@ -51,6 +51,10 @@ trait ArgsMacros {
   implicit def generate: Args = macro Macros.argsImpl
 }
 
+trait UUIDMacros {
+  implicit def generate: SourceUUID = macro Macros.uuidImpl
+}
+
 object Util{
   def isSynthetic(c: Compat.Context)(s: c.Symbol) = isSyntheticName(getName(c)(s))
   def isSyntheticName(name: String) = {
@@ -194,5 +198,11 @@ object Macros {
       case Chunk.Def(s) => s + " "
     }.mkString.dropRight(1)
     c.Expr[T](q"""${c.prefix}($renderedPath)""")
+  }
+  
+  def uuidImpl(c: Compat.Context): c.Expr[SourceUUID] = {
+    import c.universe._
+    val uuid = java.util.UUID.randomUUID()
+    c.Expr[SourceUUID](q"""${c.prefix}($uuid)""")
   }
 }
