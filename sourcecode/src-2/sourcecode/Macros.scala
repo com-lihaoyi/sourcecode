@@ -199,9 +199,11 @@ object Macros {
     }.mkString.dropRight(1)
     c.Expr[T](q"""${c.prefix}($renderedPath)""")
   }
-  
+
   def uuidImpl(c: Compat.Context): c.Expr[SourceUUID] = {
     import c.universe._
+    import java.util.UUID
+    implicit val l: Liftable[UUID] = Liftable((in: UUID) => q"_root_.java.util.UUID.fromString(${in.toString})")
     val uuid = java.util.UUID.randomUUID()
     c.Expr[SourceUUID](q"""${c.prefix}($uuid)""")
   }

@@ -30,10 +30,10 @@ object Tests{
     DebugName.main()
     println("================Debug Lite================")
     DebugLite.main()
+    println("================Unique IDs================")
+    SourceUUIDTests.run()
     println("================Regressions===============")
     Regressions.main()
-    println("================Unique IDs================")
-    SourceUUID.run()
     println("================Test Ended================")
   }
 }

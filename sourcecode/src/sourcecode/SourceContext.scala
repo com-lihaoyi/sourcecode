@@ -47,6 +47,6 @@ object Args extends SourceCompanion[Seq[Seq[Text[_]]], Args](new Args(_)) with A
 // Unique identifiers, labels, and other IDs generated at compile time.
 import java.util.UUID
 
-final case class SourceUUID(value: UUID) extends SourceValue[UUID]
+case class SourceUUID(value: UUID) extends SourceValue[UUID]
 
 object SourceUUID extends SourceCompanion[UUID, SourceUUID](new SourceUUID(_)) with UUIDMacros

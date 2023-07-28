@@ -174,10 +174,14 @@ object Macros {
 
   def uuidImpl(using Quotes): Expr[SourceUUID] = {
     import quotes.reflect._
-    val uuid = java.util.UUID.randomUUID()
+    import java.util.UUID
+    given ToExpr[UUID] with {
+      def apply(x: UUID)(using Quotes) = '{ _root_.java.util.UUID.fromString(${ Expr(x.toString) }.toString) }
+    }
+    val uuid = UUID.randomUUID()
     '{ sourcecode.SourceUUID(${ Expr(uuid) }) }
   }
-  
+
   def enclosingMachineImpl(using Quotes): Expr[Enclosing.Machine] = {
     val path = enclosing(machine = true)(_ => true)
     '{Enclosing.Machine(${Expr(path)})}
