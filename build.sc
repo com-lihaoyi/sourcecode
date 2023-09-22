@@ -15,7 +15,7 @@ val scalaJSVersions = scalaVersions.map((_, "1.10.1"))
 val scalaNativeVersions = scalaVersions.map((_, "0.4.5"))
 
 trait MimaCheck extends Mima {
-  def mimaPreviousVersions = VcsVersion.vcsState().lastTag.toSeq
+  def mimaPreviousVersions = Seq("0.2.4", "0.2.5", "0.2.6", "0.2.7", "0.2.8", "0.3.0", "0.3.1")
 }
 
 trait SourcecodeModule extends PublishModule with MimaCheck {
