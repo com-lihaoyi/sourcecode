@@ -152,7 +152,7 @@ object Macros {
   }
 
   def fileNameImpl(using Quotes): Expr[sourcecode.FileName] = {
-    val name = quotes.reflect.Position.ofMacroExpansion.sourceFile.jpath.getFileName.toString
+    val name = quotes.reflect.Position.ofMacroExpansion.sourceFile.name
     '{sourcecode.FileName(${Expr(name)})}
   }
 
