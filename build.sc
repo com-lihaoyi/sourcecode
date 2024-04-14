@@ -13,6 +13,10 @@ val scalaVersions =
 
 trait MimaCheck extends Mima {
   def mimaPreviousVersions = Seq("0.2.4", "0.2.5", "0.2.6", "0.2.7", "0.2.8", "0.3.0", "0.3.1")
+
+  def mimaReportBinaryIssues() =
+    if (this.isInstanceOf[ScalaNativeModule] || this.isInstanceOf[ScalaJSModule]) T.command()
+    else super.mimaReportBinaryIssues()
 }
 
 trait SourcecodeModule extends PublishModule with MimaCheck {
