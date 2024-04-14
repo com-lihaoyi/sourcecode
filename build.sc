@@ -4,6 +4,7 @@ import $ivy.`com.github.lolgab::mill-mima::0.1.0`
 import mill._, scalalib._, scalajslib._, scalanativelib._, publish._
 import de.tobiasroeser.mill.vcs.version.VcsVersion
 import com.github.lolgab.mill.mima._
+import mill.scalalib.api.ZincWorkerUtil.isScala3
 
 val dottyCommunityBuildVersion = sys.props.get("dottyVersion").toList
 
@@ -24,7 +25,7 @@ trait SourcecodeModule extends PublishModule with MimaCheck {
   // Temporary until the next version of Mima gets released with
   // https://github.com/lightbend/mima/issues/693 included in the release.
   def mimaPreviousArtifacts =
-    if(crossScalaVersion.startsWith("3.")) Agg.empty[Dep] else super.mimaPreviousArtifacts()
+    if(isScala3(crossScalaVersion)) Agg.empty[Dep] else super.mimaPreviousArtifacts()
 
   def pomSettings = PomSettings(
     description = artifactName(),
