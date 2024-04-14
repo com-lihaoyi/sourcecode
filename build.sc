@@ -1,7 +1,8 @@
-import mill._, scalalib._, scalajslib._, scalanativelib._, publish._
 import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version::0.4.0`
+import $ivy.`com.github.lolgab::mill-mima::0.1.0`
+
+import mill._, scalalib._, scalajslib._, scalanativelib._, publish._
 import de.tobiasroeser.mill.vcs.version.VcsVersion
-import $ivy.`com.github.lolgab::mill-mima::0.0.23`
 import com.github.lolgab.mill.mima._
 
 val dottyCommunityBuildVersion = sys.props.get("dottyVersion").toList
@@ -10,7 +11,7 @@ val scalaVersions =
   "2.12.16" :: "2.13.8" :: "3.3.1" :: dottyCommunityBuildVersion
 
 trait MimaCheck extends Mima {
-  def mimaPreviousVersions = VcsVersion.vcsState().lastTag.toSeq
+  def mimaPreviousVersions = Seq("0.2.4", "0.2.5", "0.2.6", "0.2.7", "0.2.8", "0.3.0", "0.3.1")
 }
 
 trait SourcecodeModule extends PublishModule with MimaCheck {
@@ -50,6 +51,7 @@ object sourcecode extends Module {
   trait JvmSourcecodeModule extends SourcecodeMainModule with ScalaModule with SourcecodeModule {
 
     object test extends ScalaTests{
+
       def testFramework = ""
     }
   }
@@ -68,6 +70,7 @@ object sourcecode extends Module {
 
     def scalaNativeVersion = "0.5.0"
     object test extends ScalaNativeTests{
+      // stub to make use of test plumbing but not running a test suite
       def mainClass = Some("sourcecode.Main")
       def testFramework = ""
     }

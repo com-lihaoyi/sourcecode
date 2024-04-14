@@ -1,10 +1,6 @@
 SourceCode [![Join the chat at https://gitter.im/lihaoyi/Ammonite](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/lihaoyi/sourcecode?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Maven Central](https://img.shields.io/maven-central/v/com.lihaoyi/sourcecode_2.13.svg)](https://maven-badges.herokuapp.com/maven-central/com.lihaoyi/sourcecode_2.13)
 ==========
 
-```scala
-"com.lihaoyi" %% "sourcecode" % "0.3.0" // Scala-JVM
-"com.lihaoyi" %%% "sourcecode" % "0.3.0" // Scala.js / Scala Native
-```
 
 `sourcecode` is a small Scala library that provides common "source code"
 context to your program at runtime, similar to Python's `__name__`, C++'s
@@ -49,6 +45,7 @@ Table of Contents
 =================
 
 - [Overview](#overview)
+- [Download](#download)
 - [Examples](#examples)
 - [Use Cases](#use-cases)
     - [Logging](#logging)
@@ -106,6 +103,28 @@ is done at compile-time using macros. This means that it is both orders of
 magnitude faster than e.g. getting file-name and line-numbers using stack
 inspection, and also works on Scala.js where reflection and stack inspection
 can't be used.
+
+Download
+========
+
+**Mill**
+
+`sourcecode` is published to Maven Central.
+
+```scala
+def ivyDeps = Agg(
+  ivy"com.lihaoyi::sourcecode:0.3.1", // Scala-JVM
+  ivy"com.lihaoyi::sourcecode::0.3.1" // Scala.js / Scala Native
+)
+```
+
+**sbt**
+
+```scala
+"com.lihaoyi" %% "sourcecode" % "0.3.1" // Scala-JVM
+"com.lihaoyi" %%% "sourcecode" % "0.3.1" // Scala.js / Scala Native
+```
+
 
 Examples
 ========
@@ -624,6 +643,11 @@ in its `.toString` method.
 
 Version History
 ===============
+
+0.3.1
+-----
+
+- Reference method values when building `Args` in Scala 3 [#126](https://github.com/com-lihaoyi/sourcecode/pull/126)
 
 0.3.0
 -----
