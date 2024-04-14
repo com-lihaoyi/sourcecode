@@ -644,6 +644,13 @@ in its `.toString` method.
 Version History
 ===============
 
+master
+------
+
+* Support for Scala-Native 0.5.0
+* Minimum version of Scala 2 raised to 2.12.x
+* Minimum version of Scala 3 raised to 3.3.1
+
 0.3.1
 -----
 

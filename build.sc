@@ -4,15 +4,12 @@ import $ivy.`com.github.lolgab::mill-mima::0.1.0`
 import mill._, scalalib._, scalajslib._, scalanativelib._, publish._
 import de.tobiasroeser.mill.vcs.version.VcsVersion
 import com.github.lolgab.mill.mima._
-import mill.scalalib.api.Util.isScala3
+import mill.scalalib.api.ZincWorkerUtil.isScala3
 
 val dottyCommunityBuildVersion = sys.props.get("dottyVersion").toList
 
 val scalaVersions =
-  "2.11.12" :: "2.12.16" :: "2.13.8" :: "3.1.3" :: dottyCommunityBuildVersion
-
-val scalaJSVersions = scalaVersions.map((_, "1.10.1"))
-val scalaNativeVersions = scalaVersions.map((_, "0.4.5"))
+  "2.12.16" :: "2.13.8" :: "3.3.1" :: dottyCommunityBuildVersion
 
 trait MimaCheck extends Mima {
   def mimaPreviousVersions = Seq("0.2.4", "0.2.5", "0.2.6", "0.2.7", "0.2.8", "0.3.0", "0.3.1")
@@ -41,98 +38,42 @@ trait SourcecodeModule extends PublishModule with MimaCheck {
     )
   )
 }
-trait SourcecodeMainModule extends CrossScalaModule {
-  def millSourcePath = super.millSourcePath / offset
-
-  def offset: os.RelPath = os.rel
-
+trait SourcecodeMainModule extends CrossScalaModule with PlatformScalaModule {
   def compileIvyDeps =
     if (crossScalaVersion.startsWith("2")) Agg(
       ivy"org.scala-lang:scala-reflect:${crossScalaVersion}",
       ivy"org.scala-lang:scala-compiler:${crossScalaVersion}"
     )
     else Agg.empty[Dep]
-
-  def sources = T.sources(
-    super.sources()
-      .flatMap(source =>
-        Seq(
-          PathRef(source.path / os.up / source.path.last),
-          PathRef(source.path / os.up / os.up / source.path.last)
-        )
-      )
-  )
-}
-
-
-trait SourcecodeTestModule extends ScalaModule {
-  def crossScalaVersion: String
-
-  def offset: os.RelPath = os.rel
-  def millSourcePath = super.millSourcePath / os.up
-
-  def sources = T.sources(
-    super.sources()
-      .++(CrossModuleBase.scalaVersionPaths(crossScalaVersion, s => millSourcePath / s"src-$s" ))
-      .flatMap(source =>
-        Seq(
-          PathRef(source.path / os.up / "test" / source.path.last),
-          PathRef(source.path / os.up / os.up / "test" / source.path.last)
-        )
-      )
-      .distinct
-  )
 }
 
 object sourcecode extends Module {
-  object jvm extends Cross[JvmSourcecodeModule](scalaVersions: _*)
-  class JvmSourcecodeModule(val crossScalaVersion: String)
-    extends SourcecodeMainModule with ScalaModule with SourcecodeModule {
+  object jvm extends Cross[JvmSourcecodeModule](scalaVersions)
+  trait JvmSourcecodeModule extends SourcecodeMainModule with ScalaModule with SourcecodeModule {
 
-    object test extends SourcecodeTestModule{
-      def scalaVersion = crossScalaVersion
-      def moduleDeps = Seq(JvmSourcecodeModule.this)
-      val crossScalaVersion = JvmSourcecodeModule.this.crossScalaVersion
+    object test extends ScalaTests{
+
+      def testFramework = ""
     }
   }
 
-  object js extends Cross[JsSourcecodeModule](scalaJSVersions: _*)
-  class JsSourcecodeModule(val crossScalaVersion: String, crossJSVersion: String)
-    extends SourcecodeMainModule with ScalaJSModule with SourcecodeModule {
-    def offset = os.up
+  object js extends Cross[JsSourcecodeModule](scalaVersions)
+  trait JsSourcecodeModule extends SourcecodeMainModule with ScalaJSModule with SourcecodeModule {
 
-    def scalaJSVersion = crossJSVersion
-    object test extends SourcecodeTestModule with ScalaJSModule{
-      def scalaVersion = crossScalaVersion
-      def scalaJSVersion = crossJSVersion
-      def offset = os.up
-      def moduleDeps = Seq(JsSourcecodeModule.this)
-      val crossScalaVersion = JsSourcecodeModule.this.crossScalaVersion
+    def scalaJSVersion = "1.12.0"
+    object test extends ScalaJSTests{
+      def testFramework = ""
     }
   }
 
-  object native extends Cross[NativeSourcecodeModule](scalaNativeVersions: _*)
-  class NativeSourcecodeModule(val crossScalaVersion: String, crossScalaNativeVersion: String)
-    extends SourcecodeMainModule with ScalaNativeModule with SourcecodeModule {
-    def offset = os.up
+  object native extends Cross[NativeSourcecodeModule](scalaVersions)
+  trait NativeSourcecodeModule extends SourcecodeMainModule with ScalaNativeModule with SourcecodeModule {
 
-    def scalaNativeVersion = crossScalaNativeVersion
-
-    override def docJar =
-      if (crossScalaVersion.startsWith("2.")) super.docJar
-      else T {
-        val outDir = T.ctx().dest
-        val javadocDir = outDir / "javadoc"
-        os.makeDir.all(javadocDir)
-        mill.api.Result.Success(mill.modules.Jvm.createJar(Agg(javadocDir))(outDir))
-      }
-
-    object test extends SourcecodeTestModule with ScalaNativeModule{
-      def scalaVersion = crossScalaVersion
-      def scalaNativeVersion = crossScalaNativeVersion
-      def offset = os.up
-      def moduleDeps = Seq(NativeSourcecodeModule.this)
-      val crossScalaVersion = NativeSourcecodeModule.this.crossScalaVersion
+    def scalaNativeVersion = "0.5.0"
+    object test extends ScalaNativeTests{
+      // stub to make use of test plumbing but not running a test suite
+      def mainClass = Some("sourcecode.Main")
+      def testFramework = ""
     }
   }
 }
