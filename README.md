@@ -113,16 +113,16 @@ Download
 
 ```scala
 def ivyDeps = Agg(
-  ivy"com.lihaoyi::sourcecode:0.3.1", // Scala-JVM
-  ivy"com.lihaoyi::sourcecode::0.3.1" // Scala.js / Scala Native
+  ivy"com.lihaoyi::sourcecode:0.4.0", // Scala-JVM
+  ivy"com.lihaoyi::sourcecode::0.4.0" // Scala.js / Scala Native
 )
 ```
 
 **sbt**
 
 ```scala
-"com.lihaoyi" %% "sourcecode" % "0.3.1" // Scala-JVM
-"com.lihaoyi" %%% "sourcecode" % "0.3.1" // Scala.js / Scala Native
+"com.lihaoyi" %% "sourcecode" % "0.4.0" // Scala-JVM
+"com.lihaoyi" %%% "sourcecode" % "0.4.0" // Scala.js / Scala Native
 ```
 
 
@@ -644,8 +644,8 @@ in its `.toString` method.
 Version History
 ===============
 
-master
-------
+0.4.0
+-----
 
 * Support for Scala-Native 0.5.0
 * Minimum version of Scala 2 raised to 2.12.x
