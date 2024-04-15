@@ -113,16 +113,16 @@ Download
 
 ```scala
 def ivyDeps = Agg(
-  ivy"com.lihaoyi::sourcecode:0.4.0", // Scala-JVM
-  ivy"com.lihaoyi::sourcecode::0.4.0" // Scala.js / Scala Native
+  ivy"com.lihaoyi::sourcecode:0.4.1", // Scala-JVM
+  ivy"com.lihaoyi::sourcecode::0.4.1" // Scala.js / Scala Native
 )
 ```
 
 **sbt**
 
 ```scala
-"com.lihaoyi" %% "sourcecode" % "0.4.0" // Scala-JVM
-"com.lihaoyi" %%% "sourcecode" % "0.4.0" // Scala.js / Scala Native
+"com.lihaoyi" %% "sourcecode" % "0.4.1" // Scala-JVM
+"com.lihaoyi" %%% "sourcecode" % "0.4.1" // Scala.js / Scala Native
 ```
 
 
@@ -643,6 +643,11 @@ in its `.toString` method.
 
 Version History
 ===============
+
+0.4.1
+-----
+
+* Fix NullPointerException when using fileName under Scala 3 repl ([#153](https://github.com/com-lihaoyi/sourcecode/pull/153))
 
 0.4.0
 -----
