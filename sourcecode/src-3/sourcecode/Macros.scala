@@ -158,7 +158,7 @@ object Macros {
 
   def fileImpl(using Quotes): Expr[sourcecode.File] = {
     import quotes.reflect._
-    val file = quotes.reflect.Position.ofMacroExpansion.sourceFile.jpath.toAbsolutePath.toString
+    val file = quotes.reflect.Position.ofMacroExpansion.sourceFile.path
     '{sourcecode.File(${Expr(file)})}
   }
 
