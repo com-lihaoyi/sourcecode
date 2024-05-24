@@ -113,16 +113,16 @@ Download
 
 ```scala
 def ivyDeps = Agg(
-  ivy"com.lihaoyi::sourcecode:0.4.1", // Scala-JVM
-  ivy"com.lihaoyi::sourcecode::0.4.1" // Scala.js / Scala Native
+  ivy"com.lihaoyi::sourcecode:0.4.2", // Scala-JVM
+  ivy"com.lihaoyi::sourcecode::0.4.2" // Scala.js / Scala Native
 )
 ```
 
 **sbt**
 
 ```scala
-"com.lihaoyi" %% "sourcecode" % "0.4.1" // Scala-JVM
-"com.lihaoyi" %%% "sourcecode" % "0.4.1" // Scala.js / Scala Native
+"com.lihaoyi" %% "sourcecode" % "0.4.2" // Scala-JVM
+"com.lihaoyi" %%% "sourcecode" % "0.4.2" // Scala.js / Scala Native
 ```
 
 
@@ -643,6 +643,12 @@ in its `.toString` method.
 
 Version History
 ===============
+
+0.4.2
+-----
+
+* Fix NullPointerException when using sourcecode.File in Scala 3 repl ([#161](https://github.com/com-lihaoyi/sourcecode/pull/161))
+* Correctly handle backticked macro keyword in Scala 3 ([#163](https://github.com/com-lihaoyi/sourcecode/pull/163))
 
 0.4.1
 -----
