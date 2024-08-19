@@ -73,7 +73,7 @@ object sourcecode extends Module {
   object native extends Cross[NativeSourcecodeModule](scalaVersions)
   trait NativeSourcecodeModule extends SourcecodeMainModule with ScalaNativeModule with SourcecodeModule {
 
-    def scalaNativeVersion = "0.5.0"
+    def scalaNativeVersion = "0.5.5"
     object test extends ScalaNativeTests{
       // stub to make use of test plumbing but not running a test suite
       def mainClass = Some("sourcecode.Main")
