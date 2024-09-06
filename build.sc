@@ -9,7 +9,7 @@ import mill.scalalib.api.ZincWorkerUtil.isScala3
 val dottyCommunityBuildVersion = sys.props.get("dottyVersion").toList
 
 val scalaVersions =
-  "2.12.16" :: "2.13.8" :: "3.3.1" :: dottyCommunityBuildVersion
+  "2.12.20" :: "2.13.8" :: "3.3.1" :: dottyCommunityBuildVersion
 
 trait MimaCheck extends Mima {
   def mimaPreviousVersions = Seq("0.2.4", "0.2.5", "0.2.6", "0.2.7", "0.2.8", "0.3.0", "0.3.1")
