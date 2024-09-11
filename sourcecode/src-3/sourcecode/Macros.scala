@@ -112,7 +112,7 @@ object Macros {
     import quotes.reflect._
     val owner = actualOwner(Symbol.spliceOwner)
     val simpleName = Util.getName(owner)
-    '{Name(${Expr(simpleName)})}
+    '{new Name(${Expr(simpleName)})}
   }
 
   private def adjustName(s: String): String =
@@ -126,7 +126,7 @@ object Macros {
     import quotes.reflect._
     val owner = nonMacroOwner(Symbol.spliceOwner)
     val simpleName = adjustName(Util.getName(owner))
-    '{Name.Machine(${Expr(simpleName)})}
+    '{new Name.Machine(${Expr(simpleName)})}
   }
 
   def fullNameImpl(using Quotes): Expr[FullName] = {
@@ -142,7 +142,7 @@ object Macros {
         .filterNot(Util.isSyntheticName)
         .map(cleanChunk)
         .mkString(".")
-    '{FullName(${Expr(fullName)})}
+    '{new FullName(${Expr(fullName)})}
   }
 
   def fullNameMachineImpl(using Quotes): Expr[FullName.Machine] = {
@@ -153,34 +153,34 @@ object Macros {
       .map(_.stripPrefix("_$").stripSuffix("$")) // meh
       .map(adjustName)
       .mkString(".")
-    '{FullName.Machine(${Expr(fullName)})}
+    '{new FullName.Machine(${Expr(fullName)})}
   }
 
   def fileImpl(using Quotes): Expr[sourcecode.File] = {
     import quotes.reflect._
     val file = quotes.reflect.Position.ofMacroExpansion.sourceFile.path
-    '{sourcecode.File(${Expr(file)})}
+    '{new sourcecode.File(${Expr(file)})}
   }
 
   def fileNameImpl(using Quotes): Expr[sourcecode.FileName] = {
     val name = quotes.reflect.Position.ofMacroExpansion.sourceFile.name
-    '{sourcecode.FileName(${Expr(name)})}
+    '{new sourcecode.FileName(${Expr(name)})}
   }
 
   def lineImpl(using Quotes): Expr[sourcecode.Line] = {
     val line = quotes.reflect.Position.ofMacroExpansion.startLine + 1
-    '{sourcecode.Line(${Expr(line)})}
+    '{new sourcecode.Line(${Expr(line)})}
   }
 
   def enclosingImpl(using Quotes): Expr[Enclosing] = {
     import quotes.reflect._
     val path = enclosing(machine = false)(!Util.isSynthetic(_))
-    '{Enclosing(${Expr(path)})}
+    '{new Enclosing(${Expr(path)})}
   }
 
   def enclosingMachineImpl(using Quotes): Expr[Enclosing.Machine] = {
     val path = enclosing(machine = true)(_ => true)
-    '{Enclosing.Machine(${Expr(path)})}
+    '{new Enclosing.Machine(${Expr(path)})}
   }
 
   def pkgImpl(using Quotes): Expr[Pkg] = {
@@ -189,7 +189,7 @@ object Macros {
       case _ => false
     }
 
-    '{Pkg(${Expr(path)})}
+    '{new Pkg(${Expr(path)})}
   }
 
   def argsImpl(using qctx: Quotes): Expr[Args] = {
@@ -217,21 +217,21 @@ object Macros {
 
     val texts0 = param.map(_.foldRight('{List.empty[Text[_]]}) {
       case (vd @ ValDef(nme, _, _), l) =>
-        '{Text(${Ref(vd.symbol).asExpr}, ${Expr(nme)}) :: $l}
+        '{(new Text(${Ref(vd.symbol).asExpr}, ${Expr(nme)})) :: $l}
     })
     val texts = texts0.foldRight('{List.empty[List[Text[_]]]}) {
       case (l, acc) =>
         '{$l :: $acc}
     }
 
-    '{Args($texts)}
+    '{new Args($texts)}
   }
 
 
   def text[T: Type](v: Expr[T])(using Quotes): Expr[sourcecode.Text[T]] = {
     import quotes.reflect._
     val txt = v.asTerm.pos.sourceCode.get
-    '{sourcecode.Text[T]($v, ${Expr(txt)})}
+    '{new sourcecode.Text[T]($v, ${Expr(txt)})}
   }
 
   sealed trait Chunk
