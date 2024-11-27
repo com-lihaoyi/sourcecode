@@ -133,7 +133,7 @@ object Macros {
         .linesIterator
         .indexWhere(_.contains(linePrefix)) match{
         case -1 => 0
-        case n => n
+        case n => n + 1
       }
     )
 

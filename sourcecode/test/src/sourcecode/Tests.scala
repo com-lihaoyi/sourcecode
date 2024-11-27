@@ -22,6 +22,7 @@ object Tests{
     ManualImplicit()
     TextTests()
     ArgsTests()
+    FileNameOffset.main()
 
     println("================LogExample================")
     logExample()
