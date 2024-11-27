@@ -159,24 +159,27 @@ object Macros {
   }
 
   private val filePrefix = "//SOURCECODE_ORIGINAL_FILE_PATH="
-  private val filePrefixCache = new ConcurrentHashMap[Path, Option[String]]()
-  private def findOriginalFile(jpath: Path): Option[String] = {
-    import collection.JavaConverters._
-    try Files.readAllLines(jpath).asScala.find(_.contains(filePrefix)).map(_.split(filePrefix).last)
-    catch{case _ => None}
+  private val filePrefixCache = new ConcurrentHashMap[Any, Option[String]]()
+  private def findOriginalFile(contents: Option[String]): Option[String] = {
+    contents
+      .iterator
+      .flatMap(_.linesIterator)
+      .find(_.contains(filePrefix))
+      .flatMap(_.split(filePrefix).lastOption)
   }
+
   def fileImpl(using Quotes): Expr[sourcecode.File] = {
     import quotes.reflect._
-    val jpath = quotes.reflect.Position.ofMacroExpansion.sourceFile.jpath
-    val file = filePrefixCache.computeIfAbsent(jpath, findOriginalFile(_))
-      .getOrElse(quotes.reflect.Position.ofMacroExpansion.sourceFile.path)
+    val sourceFile = quotes.reflect.Position.ofMacroExpansion.sourceFile
+    val file = filePrefixCache.computeIfAbsent(sourceFile, _ => findOriginalFile(sourceFile.content))
+      .getOrElse(sourceFile.path)
     '{new sourcecode.File(${Expr(file)})}
   }
 
   def fileNameImpl(using Quotes): Expr[sourcecode.FileName] = {
-    val jpath = quotes.reflect.Position.ofMacroExpansion.sourceFile.jpath
-    val file = filePrefixCache.computeIfAbsent(jpath, findOriginalFile(_))
-      .getOrElse(quotes.reflect.Position.ofMacroExpansion.sourceFile.path)
+    val sourceFile = quotes.reflect.Position.ofMacroExpansion.sourceFile
+    val file = filePrefixCache.computeIfAbsent(sourceFile, _ => findOriginalFile(sourceFile.content))
+      .getOrElse(sourceFile.path)
 
     val name = file.split('/').last
 
@@ -184,20 +187,19 @@ object Macros {
   }
 
   private val linePrefix = "//SOURCECODE_ORIGINAL_CODE_START_MARKER"
-  private val linePrefixCache = new ConcurrentHashMap[Path, Int]()
-  private def findLineNumber(jpath: Path) = {
-    import collection.JavaConverters._
-    println(Files.readAllLines(jpath).asScala.zipWithIndex)
-    try Files.readAllLines(jpath).asScala
+  private val linePrefixCache = new ConcurrentHashMap[Any, Int]()
+  private def findLineNumber(contents: Option[String]) = {
+    contents
+      .iterator
+      .flatMap(_.linesIterator)
       .indexWhere(_.contains(linePrefix)) match {
       case -1 => 0
       case n => n + 1
     }
-    catch { _ => 0 }
   }
   def lineImpl(using Quotes): Expr[sourcecode.Line] = {
-    val jpath = quotes.reflect.Position.ofMacroExpansion.sourceFile.jpath
-    val offset = linePrefixCache.computeIfAbsent(jpath, findLineNumber(_))
+    val sourceFile = quotes.reflect.Position.ofMacroExpansion.sourceFile
+    val offset = linePrefixCache.computeIfAbsent(sourceFile, _ => findLineNumber(sourceFile.content))
     val line = quotes.reflect.Position.ofMacroExpansion.startLine + 1 - offset
     '{new sourcecode.Line(${Expr(line)})}
   }
