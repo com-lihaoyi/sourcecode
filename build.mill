@@ -1,6 +1,4 @@
-//| mill-version: 1.0.0-RC1
-//| mill-jvm-opts: ["-XX:NonProfiledCodeHeapSize=250m", "-XX:ReservedCodeCacheSize=500m", "-Xss10m"]
-//| mill-opts: ["--jobs=0.5C"]
+//| mill-version: 1.0.0-RC1-24-d74b52
 //| mvnDeps:
 //| - com.github.lolgab::mill-mima_mill1.0.0-RC1:0.2.0-M1
 package build
