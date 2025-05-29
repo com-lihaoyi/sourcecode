@@ -1,11 +1,13 @@
+//| mill-version: 1.0.0-RC1
+//| mill-jvm-opts: ["-XX:NonProfiledCodeHeapSize=250m", "-XX:ReservedCodeCacheSize=500m", "-Xss10m"]
+//| mill-opts: ["--jobs=0.5C"]
+//| mvnDeps:
+//| - com.github.lolgab::mill-mima_mill1.0.0-RC1:0.2.0-M1
 package build
-import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version::0.4.0`
-import $ivy.`com.github.lolgab::mill-mima::0.1.0`
 
 import mill._, scalalib._, scalajslib._, scalanativelib._, publish._
-import de.tobiasroeser.mill.vcs.version.VcsVersion
+import mill.main.VcsVersion
 import com.github.lolgab.mill.mima._
-import mill.scalalib.api.ZincWorkerUtil.isScala3
 
 val dottyCommunityBuildVersion = sys.props.get("dottyVersion").toList
 
@@ -16,7 +18,7 @@ trait MimaCheck extends Mima {
   def mimaPreviousVersions = Seq("0.2.4", "0.2.5", "0.2.6", "0.2.7", "0.2.8", "0.3.0", "0.3.1")
 
   def mimaReportBinaryIssues() =
-    if (this.isInstanceOf[ScalaNativeModule] || this.isInstanceOf[ScalaJSModule]) T.command()
+    if (this.isInstanceOf[ScalaNativeModule] || this.isInstanceOf[ScalaJSModule]) Task.Command{}
     else super.mimaReportBinaryIssues()
 }
 
@@ -30,7 +32,7 @@ trait SourcecodeModule extends PublishModule with MimaCheck {
   // Temporary until the next version of Mima gets released with
   // https://github.com/lightbend/mima/issues/693 included in the release.
   def mimaPreviousArtifacts =
-    if(isScala3(crossScalaVersion)) Agg.empty[Dep] else super.mimaPreviousArtifacts()
+    if(crossScalaVersion.startsWith("3.")) Agg.empty[Dep] else super.mimaPreviousArtifacts()
 
   def pomSettings = PomSettings(
     description = artifactName(),
@@ -44,10 +46,10 @@ trait SourcecodeModule extends PublishModule with MimaCheck {
   )
 }
 trait SourcecodeMainModule extends CrossScalaModule with PlatformScalaModule {
-  def compileIvyDeps =
+  def compileMvnDeps =
     if (crossScalaVersion.startsWith("2")) Agg(
-      ivy"org.scala-lang:scala-reflect:${crossScalaVersion}",
-      ivy"org.scala-lang:scala-compiler:${crossScalaVersion}"
+      mvn"org.scala-lang:scala-reflect:${crossScalaVersion}",
+      mvn"org.scala-lang:scala-compiler:${crossScalaVersion}"
     )
     else Agg.empty[Dep]
 }
