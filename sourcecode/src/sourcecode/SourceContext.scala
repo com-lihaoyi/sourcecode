@@ -19,8 +19,8 @@ object FullName extends SourceCompanion[String, FullName](new FullName(_)) with 
   object Machine extends SourceCompanion[String, Machine](new Machine(_)) with FullNameMachineMacros
 }
 
-case class File(value: String, i: Int = 0) extends SourceValue[String]
-object File extends SourceCompanion[String, File](new File(_, 0)) with FileMacros
+case class File(value: String) extends SourceValue[String]
+object File extends SourceCompanion[String, File](new File(_)) with FileMacros
 
 case class FileName(value: String) extends SourceValue[String]
 object FileName extends SourceCompanion[String, FileName](new FileName(_)) with FileNameMacros
