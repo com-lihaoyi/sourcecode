@@ -1,10 +1,10 @@
-//| mill-version: 1.0.0-RC3
+//| mill-version: 1.0.0
 //| mvnDeps:
-//| - com.github.lolgab::mill-mima_mill1.0.0-RC3:0.2.0-M4
+//| - com.github.lolgab::mill-mima_mill1:0.2.0
 package build
 
 import mill._, scalalib._, scalajslib._, scalanativelib._, publish._
-import mill.vcs.VcsVersion
+import mill.util.VcsVersion
 import com.github.lolgab.mill.mima._
 
 val dottyCommunityBuildVersion = sys.props.get("dottyVersion").toList
@@ -30,7 +30,7 @@ trait SourcecodeModule extends PublishModule with MimaCheck {
   // Temporary until the next version of Mima gets released with
   // https://github.com/lightbend/mima/issues/693 included in the release.
   def mimaPreviousArtifacts =
-    if(crossScalaVersion.startsWith("3.")) Agg.empty[Dep] else super.mimaPreviousArtifacts()
+    if(crossScalaVersion.startsWith("3.")) Seq.empty[Dep] else super.mimaPreviousArtifacts()
 
   def pomSettings = PomSettings(
     description = artifactName(),
@@ -45,11 +45,11 @@ trait SourcecodeModule extends PublishModule with MimaCheck {
 }
 trait SourcecodeMainModule extends CrossScalaModule with PlatformScalaModule {
   def compileMvnDeps =
-    if (crossScalaVersion.startsWith("2")) Agg(
+    if (crossScalaVersion.startsWith("2")) Seq(
       mvn"org.scala-lang:scala-reflect:${crossScalaVersion}",
       mvn"org.scala-lang:scala-compiler:${crossScalaVersion}"
     )
-    else Agg.empty[Dep]
+    else Seq.empty[Dep]
 }
 
 object sourcecode extends Module {
