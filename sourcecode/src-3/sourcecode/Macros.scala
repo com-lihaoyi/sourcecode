@@ -181,7 +181,7 @@ object Macros {
     val file = filePrefixCache.computeIfAbsent(sourceFile, _ => findOriginalFile(sourceFile.content))
       .getOrElse(sourceFile.path)
 
-    val name = file.split('/').last
+    val name = file.split(java.io.File.pathSeparatorChar).last
 
     '{new sourcecode.FileName(${Expr(name)})}
   }
