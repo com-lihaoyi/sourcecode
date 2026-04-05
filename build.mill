@@ -65,7 +65,7 @@ object sourcecode extends Module {
   object js extends Cross[JsSourcecodeModule](scalaVersions)
   trait JsSourcecodeModule extends SourcecodeMainModule with ScalaJSModule with SourcecodeModule {
 
-    def scalaJSVersion = "1.17.0"
+    def scalaJSVersion = "1.21.0"
     object test extends ScalaJSTests{
       def testFramework = ""
     }
