@@ -1,4 +1,5 @@
 //| mill-version: 1.0.6
+//| mill-jvm-version: 17
 //| mvnDeps:
 //| - com.github.lolgab::mill-mima_mill1:0.2.0
 package build
@@ -56,9 +57,12 @@ object sourcecode extends Module {
   object jvm extends Cross[JvmSourcecodeModule](scalaVersions)
   trait JvmSourcecodeModule extends SourcecodeMainModule with ScalaModule with SourcecodeModule {
 
-    object test extends ScalaTests{
 
+    object test extends ScalaTests {
       def testFramework = ""
+      def scalacOptions = super.scalacOptions() ++ Seq(
+        s"-Xmacro-settings:sourcecode.relfile.root=${Task.ctx().workspace}"
+      )
     }
   }
 

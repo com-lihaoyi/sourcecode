@@ -22,6 +22,9 @@ object FullName extends SourceCompanion[String, FullName](new FullName(_)) with 
 case class File(value: String) extends SourceValue[String]
 object File extends SourceCompanion[String, File](new File(_)) with FileMacros
 
+case class RelFile(value: String) extends SourceValue[String]
+object RelFile extends SourceCompanion[String, RelFile](new RelFile(_)) with RelFileMacros
+
 case class FileName(value: String) extends SourceValue[String]
 object FileName extends SourceCompanion[String, FileName](new FileName(_)) with FileNameMacros
 
