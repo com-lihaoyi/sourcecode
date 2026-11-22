@@ -185,11 +185,11 @@ object Macros {
   def relFileImpl(using Quotes): Expr[sourcecode.RelFile] = {
     import quotes.reflect._
     val sourceFile = quotes.reflect.Position.ofMacroExpansion.sourceFile
+    val prefix = "sourcecode.relfile.root="
 
     val relBase: Option[String] = try {
       import scala.reflect.Selectable.reflectiveSelectable
 
-      val prefix = "sourcecode.relfile.root="
       // XmacroSettings is @experimental and only accessible in experimental scope
       // therefore, we try to use it reflectively, this works only on JVM
       val settings: List[String] = CompilationInfo.asInstanceOf[ {def XmacroSettings: List[String]}].XmacroSettings
@@ -200,6 +200,11 @@ object Macros {
     } catch {
       case NonFatal(_) => None
     }
+
+    if (relBase.isEmpty) report.warning(
+      s"sourcecode.RelFile: Base path not specified. Make sure to use compiler argument: -Xmacro-settings:${prefix}<path>",
+      Position.ofMacroExpansion
+    )
 
     val file = filePrefixCache.computeIfAbsent(sourceFile, _ => findOriginalFile(sourceFile.content))
       .getOrElse(sourceFile.path)
