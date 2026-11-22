@@ -59,7 +59,7 @@ Overview
 The kinds of compilation-time data that `sourcecode` provides are:
 
 - `sourcecode.File`: full path of the current file where the call occurs. This one results in non-reproducible byte-code, since the absolute code location is stored.
-- `sourcecode.RelFile`: path of the current file where the call occurs, but relativized to a specific locations (given with compiler option `-Xmacro-settings:sourcecode.relfile.root=<path>`). Useful to keep significant source file path which retaining reproducible byte code.  Only works on Scala 3. On Scala 2 it behaves just like `sourcecode.File`.
+- `sourcecode.RelFile`: path of the current file where the call occurs, but relativized to a specific locations (given with compiler option `-Xmacro-settings:sourcecode.relfile.root=<path>`). Useful to keep significant source file path while also retaining reproducible byte code.  Only works on Scala 3. On Scala 2 it behaves just like `sourcecode.File`.
 - `sourcecode.FileName`: name of the current file where the call occurs; less
     verbose than `sourcecode.File` but often enough for debugging purposes
 - `sourcecode.Line`: current line number
