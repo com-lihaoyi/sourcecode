@@ -1,6 +1,7 @@
 //| mill-version: 1.0.6
+//| mill-jvm-version: 17
 //| mvnDeps:
-//| - com.github.lolgab::mill-mima_mill1:0.2.0
+//| - com.github.lolgab::mill-mima_mill1:0.2.2
 package build
 
 import mill._, scalalib._, scalajslib._, scalanativelib._, publish._
@@ -12,25 +13,28 @@ val dottyCommunityBuildVersion = sys.props.get("dottyVersion").toList
 val scalaVersions =
   "2.12.16" :: "2.13.8" :: "3.3.3" :: dottyCommunityBuildVersion
 
-trait MimaCheck extends Mima {
-  def mimaPreviousVersions = Seq("0.2.4", "0.2.5", "0.2.6", "0.2.7", "0.2.8", "0.3.0", "0.3.1")
+trait MimaCheck extends Mima { this: ScalaModule =>
+  def mimaPreviousVersions = {
+    (if (scalaVersion().startsWith("2"))
+      Seq("0.2.4", "0.2.5", "0.2.6")
+    else Seq()) ++ Seq(
+      "0.2.7", "0.2.8",
+      "0.3.0", "0.3.1",
+      "0.4.0", "0.4.1", "0.4.2", "0.4.4"
+    )
+  }
 
   def mimaReportBinaryIssues() =
-    if (this.isInstanceOf[ScalaNativeModule] || this.isInstanceOf[ScalaJSModule]) Task.Command{}
+    if (this.isInstanceOf[ScalaNativeModule] || this.isInstanceOf[ScalaJSModule]) Task.Command {}
     else super.mimaReportBinaryIssues()
 }
 
-trait SourcecodeModule extends PublishModule with MimaCheck {
+trait SourcecodeModule extends PublishModule with MimaCheck { this: ScalaModule =>
   def artifactName = "sourcecode"
 
   def publishVersion = VcsVersion.vcsState().format()
 
   def crossScalaVersion: String
-
-  // Temporary until the next version of Mima gets released with
-  // https://github.com/lightbend/mima/issues/693 included in the release.
-  def mimaPreviousArtifacts =
-    if(crossScalaVersion.startsWith("3.")) Seq.empty[Dep] else super.mimaPreviousArtifacts()
 
   def pomSettings = PomSettings(
     description = artifactName(),
