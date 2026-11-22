@@ -17,6 +17,9 @@ object Implicits {
     val file = implicitly[sourcecode.File]
     assert(file.value.endsWith("/sourcecode/Implicits.scala"))
 
+    val relFile = implicitly[sourcecode.RelFile]
+    assertEquals(relFile.value, "sourceoce/test/src/sourcecode/Implicits.scala")
+
     val fileName = implicitly[sourcecode.FileName]
     assert(fileName.value == "Implicits.scala")
 
