@@ -60,7 +60,6 @@ object sourcecode extends Module {
   object jvm extends Cross[JvmSourcecodeModule](scalaVersions)
   trait JvmSourcecodeModule extends SourcecodeMainModule with ScalaModule with SourcecodeModule {
 
-
     object test extends ScalaTests {
       def testFramework = ""
       def scalacOptions = super.scalacOptions() ++ Seq(
