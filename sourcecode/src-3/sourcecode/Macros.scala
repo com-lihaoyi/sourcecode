@@ -32,12 +32,8 @@ trait FileMacros {
 }
 
 trait RelFileMacros {
-  inline
-
-  implicit def generate: sourcecode.RelFile =
-  ${
-    Macros.relFileImpl
-  }
+  inline implicit def generate: sourcecode.RelFile =
+    ${ Macros.relFileImpl }
 }
 
 trait FileNameMacros {
@@ -220,6 +216,8 @@ object Macros {
         else file
       }
       .getOrElse(file)
+
+    // TODO: print compiler warning/error, if no setting could be found
 
     '{
       new sourcecode.RelFile(${

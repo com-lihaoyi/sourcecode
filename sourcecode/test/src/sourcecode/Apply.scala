@@ -18,7 +18,7 @@ object Apply {
     assert(file.endsWith("/sourcecode/Apply.scala"))
 
     val relFile = sourcecode.RelFile()
-    if(TestUtil.isDotty && TestPlatform.isJvm) {
+    if(TestUtil.isDotty) {
       val relFileExpected = "sourcecode/test/src/sourcecode/Apply.scala"
       assert(relFile == relFileExpected, s"expected $relFileExpected, got $relFile")
     } else {
@@ -47,7 +47,7 @@ object Apply {
         assert(file.endsWith("/sourcecode/Apply.scala"))
 
         val relFile = sourcecode.RelFile()
-        if(TestUtil.isDotty && TestPlatform.isJvm) {
+        if(TestUtil.isDotty) {
           val relFileExpected = "sourcecode/test/src/sourcecode/Apply.scala"
           assert(relFile == relFileExpected, s"expected $relFileExpected, got $relFile")
         } else {
