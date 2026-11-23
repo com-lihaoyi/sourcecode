@@ -105,7 +105,11 @@ object Macros {
   private val filePrefixCache =
     new ConcurrentHashMap[scala.reflect.internal.util.SourceFile, Option[String]]()
   private def findOriginalFile(chars: Array[Char]): Option[String] = {
-    new String(chars).linesIterator.find(_.contains(filePrefix)).map(_.split(filePrefix).last)
+    new String(chars).linesIterator
+      .find(_.contains(filePrefix))
+      .map(_.split(filePrefix).last)
+      // convert to platform separators
+      .map(_.replace("/", separator))
   }
 
   def fileImpl(c: Compat.Context): c.Expr[sourcecode.File] = {
