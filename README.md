@@ -113,17 +113,17 @@ Download
 `sourcecode` is published to Maven Central.
 
 ```scala
-def ivyDeps = Agg(
-  ivy"com.lihaoyi::sourcecode:0.4.2", // Scala-JVM
-  ivy"com.lihaoyi::sourcecode::0.4.2" // Scala.js / Scala Native
+def mvnDeps = Seq(
+  mvn"com.lihaoyi::sourcecode:0.4.5", // Scala-JVM
+  mvn"com.lihaoyi::sourcecode::0.4.5" // Scala.js / Scala Native
 )
 ```
 
 **sbt**
 
 ```scala
-"com.lihaoyi" %% "sourcecode" % "0.4.2" // Scala-JVM
-"com.lihaoyi" %%% "sourcecode" % "0.4.2" // Scala.js / Scala Native
+"com.lihaoyi" %% "sourcecode" % "0.4.5" // Scala-JVM
+"com.lihaoyi" %%% "sourcecode" % "0.4.5" // Scala.js / Scala Native
 ```
 
 
@@ -312,7 +312,7 @@ you will hopefully be able to relate to.
 Use Cases
 =========
 
-At first it might seem strange to make use of these source-level details in
+At first, it might seem strange to make use of these source-level details in
 your program: shouldn't a program's meaning not change under re-formatting and
 re-factoring?
 
@@ -644,6 +644,17 @@ in its `.toString` method.
 
 Version History
 ===============
+
+0.4.5
+-----
+
+* Add `sourcecode.RelFile` to embed a relative source file path ([#204](https://github.com/com-lihaoyi/sourcecode/pull/204))
+
+0.4.4
+-----
+
+* Make `sourcecode.{File,FileName,Line}` magic-comment aware ([#178](https://github.com/com-lihaoyi/sourcecode/pull/178))
+* cache line numbers and positions
 
 0.4.2
 -----
