@@ -66,6 +66,8 @@ object Util{
 
 object Macros {
 
+  private val separator = if(scala.util.Properties.isWin) "\\" else "/"
+
   def nameImpl(c: Compat.Context): c.Expr[Name] = {
     import c.universe._
     var owner = Compat.enclosingOwner(c)
@@ -133,7 +135,7 @@ object Macros {
     val fileName = filePrefixCache
       .computeIfAbsent(c.enclosingPosition.source, source => findOriginalFile(source.content))
       .getOrElse(c.enclosingPosition.source.path)
-      .split(java.io.File.separatorChar).last
+      .split(separator).last
     c.Expr[sourcecode.FileName](q"""${c.prefix}($fileName)""")
   }
 

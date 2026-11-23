@@ -1,6 +1,5 @@
 package sourcecode
 
-
 abstract class SourceValue[T]{
   def value: T
 }
@@ -20,14 +19,18 @@ object FullName extends SourceCompanion[String, FullName](new FullName(_)) with 
 }
 
 case class File(value: String) extends SourceValue[String] {
-  def posix: String = value.replace(java.io.File.separator, "/")
+  def posix: String = value.replace(File.separator, "/")
 }
-object File extends SourceCompanion[String, File](new File(_)) with FileMacros
+object File extends SourceCompanion[String, File](new File(_)) with FileMacros {
+  private val separator = if(scala.util.Properties.isWin) "\\" else "/"
+}
 
 case class RelFile(value: String) extends SourceValue[String] {
-  def posix: String = value.replace(java.io.File.separator, "/")
+  def posix: String = value.replace(RelFile.separator, "/")
 }
-object RelFile extends SourceCompanion[String, RelFile](new RelFile(_)) with RelFileMacros
+object RelFile extends SourceCompanion[String, RelFile](new RelFile(_)) with RelFileMacros {
+  private val separator = if(scala.util.Properties.isWin) "\\" else "/"
+}
 
 case class FileName(value: String) extends SourceValue[String]
 object FileName extends SourceCompanion[String, FileName](new FileName(_)) with FileNameMacros

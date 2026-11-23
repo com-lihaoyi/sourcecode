@@ -95,6 +95,8 @@ object Util{
 
 object Macros {
 
+  private val separator = if(scala.util.Properties.isWin) "\\" else "/"
+
   def findOwner(using Quotes)(owner: quotes.reflect.Symbol, skipIf: quotes.reflect.Symbol => Boolean): quotes.reflect.Symbol = {
     var owner0 = owner
     while(skipIf(owner0)) owner0 = owner0.owner
@@ -198,7 +200,7 @@ object Macros {
         case s if s.startsWith(prefix) => s.stripPrefix(prefix)
       }
         // in case we got a posix path config on Windows
-        .map(_.replace("/", java.io.File.separator))
+        .map(_.replace("/", separator))
     } catch {
       case NonFatal(_) => None
     }
@@ -214,7 +216,7 @@ object Macros {
     val relFile0: Option[String] = relBase
       .map { base =>
         if (base.isEmpty) base
-        else if (!base.endsWith(java.io.File.separator)) base + java.io.File.separator
+        else if (!base.endsWith(separator)) base + separator
         else base
       }
       .flatMap { base =>
@@ -242,7 +244,7 @@ object Macros {
     val file = filePrefixCache.computeIfAbsent(sourceFile, _ => findOriginalFile(sourceFile.content))
       .getOrElse(sourceFile.path)
 
-    val name = file.split(java.io.File.separator).last
+    val name = file.split(separator).last
 
     '{
       new sourcecode.FileName(${
