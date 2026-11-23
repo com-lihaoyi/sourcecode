@@ -19,10 +19,14 @@ object FullName extends SourceCompanion[String, FullName](new FullName(_)) with 
   object Machine extends SourceCompanion[String, Machine](new Machine(_)) with FullNameMachineMacros
 }
 
-case class File(value: String) extends SourceValue[String]
+case class File(value: String) extends SourceValue[String] {
+  def posix: String = value.replace(java.io.File.separator, "/")
+}
 object File extends SourceCompanion[String, File](new File(_)) with FileMacros
 
-case class RelFile(value: String) extends SourceValue[String]
+case class RelFile(value: String) extends SourceValue[String] {
+  def posix: String = value.replace(java.io.File.separator, "/")
+}
 object RelFile extends SourceCompanion[String, RelFile](new RelFile(_)) with RelFileMacros
 
 case class FileName(value: String) extends SourceValue[String]

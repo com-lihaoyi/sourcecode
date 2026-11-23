@@ -3,7 +3,7 @@ package sourcecode
 object Apply {
   def applyRun() = {
     val name = sourcecode.Name()
-    assertEquals(name,"name")
+    assertEquals(name, "name")
 
     val fullName = sourcecode.FullName()
     assertEquals(fullName, "sourcecode.Apply.fullName")
@@ -15,14 +15,14 @@ object Apply {
     assertEquals(pkg, "sourcecode")
 
     val file = sourcecode.File()
-    assert(file.endsWith("/sourcecode/Apply.scala"))
+    assert(posix(file).endsWith("/sourcecode/Apply.scala"))
 
     val relFile = sourcecode.RelFile()
-    if(TestUtil.isScala3) {
+    if (TestUtil.isScala3) {
       val relFileExpected = "sourcecode/test/src/sourcecode/Apply.scala"
-      assertEquals(relFile, relFileExpected)
+      assertEquals(posix(relFile), relFileExpected)
     } else {
-      assert(relFile.endsWith("/sourcecode/Apply.scala"))
+      assert(posix(relFile).endsWith("/sourcecode/Apply.scala"))
     }
 
     val fileName = sourcecode.FileName()
@@ -41,17 +41,17 @@ object Apply {
         assertEquals(name, "name")
 
         val fullName = sourcecode.FullName()
-        assertEquals(fullName,"sourcecode.Apply.Bar.fullName")
+        assertEquals(fullName, "sourcecode.Apply.Bar.fullName")
 
         val file = sourcecode.File()
         assert(file.endsWith("/sourcecode/Apply.scala"))
 
         val relFile = sourcecode.RelFile()
-        if(TestUtil.isScala3) {
+        if (TestUtil.isScala3) {
           val relFileExpected = "sourcecode/test/src/sourcecode/Apply.scala"
-          assertEquals(relFile, relFileExpected)
+          assertEquals(posix(relFile), relFileExpected)
         } else {
-          assert(relFile.endsWith("/sourcecode/Apply.scala"))
+          assert(posix(relFile).endsWith("/sourcecode/Apply.scala"))
         }
 
         val fileName = sourcecode.FileName()
