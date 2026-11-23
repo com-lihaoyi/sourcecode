@@ -25,7 +25,7 @@ jobs:
           echo "temurin:${{ matrix.java }}" > .mill-jvm-version
           echo "/.mill-jvm-version" >> .git/info/exclude
       - name: Run tests
-        run: ./mill -i __.publishArtifacts + __.test.run
+        run: ./mill -i -k __.publishArtifacts + __.test.run
 
   check-binary-compatibility:
     runs-on: ubuntu-latest
@@ -38,7 +38,7 @@ jobs:
           echo "temurin:11" > .mill-jvm-version
           echo "/.mill-jvm-version" >> .git/info/exclude
       - name: Check Binary Compatibility
-        run: ./mill -i __.mimaReportBinaryIssues
+        run: ./mill -i -k __.mimaReportBinaryIssues
 
   publish-sonatype:
     if: github.repository == 'com-lihaoyi/sourcecode' && contains(github.ref, 'refs/tags/')
