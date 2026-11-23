@@ -205,14 +205,13 @@ object Macros {
       case NonFatal(_) => None
     }
 
-    if (relBase.isEmpty) report.warning(
-      s"sourcecode.RelFile: Base path not specified. Make sure to use compiler argument: -Xmacro-settings:${prefix}<path>",
-      Position.ofMacroExpansion
-    )
-
     val file = filePrefixCache.computeIfAbsent(sourceFile, _ => findOriginalFile(sourceFile.content))
       .getOrElse(sourceFile.path)
 
+    if (relBase.isEmpty) report.warning(
+      s"Base path not specified. Using absolute file path '${file}'. Make sure to use compiler argument: -Xmacro-settings:${prefix}<path>",
+      Position.ofMacroExpansion
+    )
     val relFile0: Option[String] = relBase
       .map { base =>
         if (base.isEmpty) base
@@ -225,7 +224,7 @@ object Macros {
       }
 
     if (relFile0.isEmpty) report.warning(
-      s"sourcecode.RelFile: Base path ${relBase.getOrElse("''")} is not an prefix of source file path ${file}",
+      s"Base path ${relBase.getOrElse("''")} is not an prefix of source file path ${file}",
       Position.ofMacroExpansion
     )
 
