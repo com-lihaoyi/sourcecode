@@ -23,6 +23,10 @@ trait FileMacros {
   implicit def generate: sourcecode.File = macro Macros.fileImpl
 }
 
+trait RelFileMacros {
+  implicit def generate: sourcecode.RelFile = macro Macros.relFileImpl
+}
+
 trait FileNameMacros {
   implicit def generate: sourcecode.FileName = macro Macros.fileNameImpl
 }
@@ -110,6 +114,18 @@ object Macros {
       .getOrElse(c.enclosingPosition.source.path)
 
     c.Expr[sourcecode.File](q"""${c.prefix}($file)""")
+  }
+
+  def relFileImpl(c: Compat.Context): c.Expr[sourcecode.RelFile] = {
+    import c.universe._
+
+    val file = filePrefixCache
+      .computeIfAbsent(c.enclosingPosition.source, source => findOriginalFile(source.content))
+      .getOrElse(c.enclosingPosition.source.path)
+
+    // FIXME: currently, we don't support relative file
+
+    c.Expr[sourcecode.RelFile](q"""${c.prefix}($file)""")
   }
 
   def fileNameImpl(c: Compat.Context): c.Expr[sourcecode.FileName] = {

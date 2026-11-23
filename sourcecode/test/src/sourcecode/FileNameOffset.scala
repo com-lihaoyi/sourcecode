@@ -8,6 +8,7 @@ object FileNameOffset {
     assert(sourcecode.Line() == 1)
     assert(sourcecode.Line() == 2)
     assert(sourcecode.File() == "Hello/World.Test")
+    assert(sourcecode.RelFile() == "Hello/World.Test")
     assert(sourcecode.FileName() == "World.Test")
   }
 }

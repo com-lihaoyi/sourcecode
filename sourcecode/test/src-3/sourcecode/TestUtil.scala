@@ -2,6 +2,6 @@ package sourcecode
 
 object TestUtil {
 
-  val isDotty = true
+  val isScala3 = true
 
 }

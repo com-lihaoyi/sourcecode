@@ -18,10 +18,10 @@ jobs:
         java: ['11', '17']
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: ${{ matrix.java }}
+      - name: Select JVM temurin:${{ matrix.java }}
+        run: |
+          echo "temurin:${{ matrix.java }}" > .mill-jvm-version
+          echo "/.mill-jvm-version" >> .git/info/exclude
       - name: Run tests
         run: ./mill -i __.publishArtifacts + __.test.run
 
@@ -31,10 +31,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: 11
+      - name: Select JVM temurin:11
+        run: |
+          echo "temurin:11" > .mill-jvm-version
+          echo "/.mill-jvm-version" >> .git/info/exclude
       - name: Check Binary Compatibility
         run: ./mill -i __.mimaReportBinaryIssues
 
@@ -53,10 +53,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: 11
+      - name: Select JVM temurin:11
+        run: |
+          echo "temurin:11" > .mill-jvm-version
+          echo "/.mill-jvm-version" >> .git/info/exclude
       - name: Publish to Maven Central
         run: ./mill -i mill.scalalib.SonatypeCentralPublishModule/
 

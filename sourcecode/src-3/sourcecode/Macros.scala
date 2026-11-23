@@ -4,6 +4,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.nio.file.{Files, Path}
 import scala.language.implicitConversions
 import scala.quoted.*
+import scala.util.control.NonFatal
 
 trait NameMacros {
   inline implicit def generate: Name =
@@ -28,6 +29,11 @@ trait FullNameMachineMacros {
 trait FileMacros {
   inline implicit def generate: sourcecode.File =
     ${ Macros.fileImpl }
+}
+
+trait RelFileMacros {
+  inline implicit def generate: sourcecode.RelFile =
+    ${ Macros.relFileImpl }
 }
 
 trait FileNameMacros {
@@ -175,6 +181,56 @@ object Macros {
       .getOrElse(sourceFile.path)
     '{new sourcecode.File(${Expr(file)})}
   }
+
+  def relFileImpl(using Quotes): Expr[sourcecode.RelFile] = {
+    import quotes.reflect._
+    val sourceFile = quotes.reflect.Position.ofMacroExpansion.sourceFile
+    val prefix = "sourcecode.relfile.root="
+
+    val relBase: Option[String] = try {
+      import scala.reflect.Selectable.reflectiveSelectable
+
+      // XmacroSettings is @experimental and only accessible in experimental scope
+      // therefore, we try to use it reflectively, this works only on JVM
+      val settings: List[String] = CompilationInfo.asInstanceOf[ {def XmacroSettings: List[String]}].XmacroSettings
+      // Read from compiler arg `-XmacroSettings:sourcecode.relfile.root=<base-path>`
+      settings.collectFirst {
+        case s if s.startsWith(prefix) => s.stripPrefix(prefix)
+      }.orElse(sys.props.get("sourcecode.relfile.root"))
+    } catch {
+      case NonFatal(_) => None
+    }
+
+    if (relBase.isEmpty) report.warning(
+      s"sourcecode.RelFile: Base path not specified. Make sure to use compiler argument: -Xmacro-settings:${prefix}<path>",
+      Position.ofMacroExpansion
+    )
+
+    val file = filePrefixCache.computeIfAbsent(sourceFile, _ => findOriginalFile(sourceFile.content))
+      .getOrElse(sourceFile.path)
+
+    val relFile: String = relBase
+      .map { base => base.replace(java.io.File.separator, "/") }
+      .map { base =>
+        if (base.isEmpty) base
+        else if (base.last != '/') base + "/"
+        else base
+      }
+      .map { base =>
+        if (file.startsWith(base)) file.stripPrefix(base)
+        else file
+      }
+      .getOrElse(file)
+
+    // TODO: print compiler warning/error, if no setting could be found
+
+    '{
+      new sourcecode.RelFile(${
+        Expr(relFile)
+      })
+    }
+  }
+
 
   def fileNameImpl(using Quotes): Expr[sourcecode.FileName] = {
     val sourceFile = quotes.reflect.Position.ofMacroExpansion.sourceFile
