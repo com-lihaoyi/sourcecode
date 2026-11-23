@@ -179,6 +179,7 @@ object Macros {
     val sourceFile = quotes.reflect.Position.ofMacroExpansion.sourceFile
     val file = filePrefixCache.computeIfAbsent(sourceFile, _ => findOriginalFile(sourceFile.content))
       .getOrElse(sourceFile.path)
+      .replace(java.io.File.pathSeparator, "/")
     '{new sourcecode.File(${Expr(file)})}
   }
 
@@ -208,6 +209,7 @@ object Macros {
 
     val file = filePrefixCache.computeIfAbsent(sourceFile, _ => findOriginalFile(sourceFile.content))
       .getOrElse(sourceFile.path)
+      .replace(java.io.File.pathSeparator, "/")
 
     val relFile: String = relBase
       .map { base => base.replace(java.io.File.separator, "/") }
@@ -236,6 +238,7 @@ object Macros {
     val sourceFile = quotes.reflect.Position.ofMacroExpansion.sourceFile
     val file = filePrefixCache.computeIfAbsent(sourceFile, _ => findOriginalFile(sourceFile.content))
       .getOrElse(sourceFile.path)
+      .replace(java.io.File.pathSeparator, "/")
 
     val name = file.split('/').last
 
