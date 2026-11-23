@@ -21,19 +21,14 @@ object Implicits {
     assert(file.posix.endsWith("/sourcecode/Implicits.scala"))
 
     val relFile = implicitly[sourcecode.RelFile]
-    if (TestUtil.isScala3) {
-      assertEquals(posix(relFile.value), "sourcecode/test/src/sourcecode/Implicits.scala")
-      assertEquals(relFile.posix, "sourcecode/test/src/sourcecode/Implicits.scala")
-    } else {
-      assert(posix(relFile.value).endsWith("sourcecode/test/src/sourcecode/Implicits.scala"))
-      assert(relFile.posix.endsWith("sourcecode/test/src/sourcecode/Implicits.scala"))
-    }
+    assertEquals(posix(relFile.value), "sourcecode/test/src/sourcecode/Implicits.scala")
+    assertEquals(relFile.posix, "sourcecode/test/src/sourcecode/Implicits.scala")
 
     val fileName = implicitly[sourcecode.FileName]
     assertEquals(fileName.value, "Implicits.scala")
 
     val line = implicitly[sourcecode.Line]
-    assertEquals(line.value, 35) // Line-sensitive magic number !
+    assertEquals(line.value, 30) // Line-sensitive magic number !
 
     lazy val myLazy = {
       /* Bar used to be a trait, but that ran into the upstream bug
@@ -58,7 +53,7 @@ object Implicits {
         assertEquals(fileName.value, "Implicits.scala")
 
         val line = implicitly[sourcecode.Line]
-        assertEquals(line.value, 60) // Line-sensitive magic number !
+        assertEquals(line.value, 55) // Line-sensitive magic number !
 
         val enclosing = implicitly[sourcecode.Enclosing]
         assert(

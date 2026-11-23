@@ -211,7 +211,7 @@ object Macros {
       .getOrElse(sourceFile.path)
 
     if (relBase.isEmpty) report.warning(
-      s"Base path not specified. Using absolute file path '${file}'. Make sure to use compiler argument: -Xmacro-settings:${prefix}<path>",
+      s"Base path not specified. Using path '${file}' as-is. Make sure to use compiler argument: -Xmacro-settings:${prefix}<path>",
       Position.ofMacroExpansion
     )
     val relFile0: Option[String] = relBase
@@ -226,7 +226,7 @@ object Macros {
       }
 
     if (relFile0.isEmpty) report.warning(
-      s"Base path ${relBase.getOrElse("''")} is not an prefix of source file path ${file}",
+      s"Base path ${relBase.getOrElse("''")} is not a prefix of source file path ${file}",
       Position.ofMacroExpansion
     )
 
