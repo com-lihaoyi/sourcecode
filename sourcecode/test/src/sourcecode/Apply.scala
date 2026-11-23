@@ -46,7 +46,7 @@ object Apply {
         assertEquals(fullName, "sourcecode.Apply.Bar.fullName")
 
         val file = sourcecode.File()
-        assert(file.endsWith("/sourcecode/Apply.scala"))
+        assert(posix(file).endsWith("/sourcecode/Apply.scala"))
 
         val relFile = sourcecode.RelFile()
         if (TestUtil.isScala3) {
