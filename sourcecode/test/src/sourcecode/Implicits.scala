@@ -58,7 +58,7 @@ object Implicits {
         assertEquals(fileName.value, "Implicits.scala")
 
         val line = implicitly[sourcecode.Line]
-        assertEquals(line.value, 59) // Line-sensitive magic number !
+        assertEquals(line.value, 60) // Line-sensitive magic number !
 
         val enclosing = implicitly[sourcecode.Enclosing]
         assert(
