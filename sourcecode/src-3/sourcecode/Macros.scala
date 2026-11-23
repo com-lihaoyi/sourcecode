@@ -244,7 +244,7 @@ object Macros {
     val file = filePrefixCache.computeIfAbsent(sourceFile, _ => findOriginalFile(sourceFile.content))
       .getOrElse(sourceFile.path)
 
-    val name = file.split(separator).last
+    val name = file.split("\\Q" + separator + "\\E").last
 
     '{
       new sourcecode.FileName(${

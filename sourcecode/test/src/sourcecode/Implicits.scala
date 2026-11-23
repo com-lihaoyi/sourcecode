@@ -15,13 +15,16 @@ object Implicits {
     assertEquals(pkg.value, "sourcecode")
 
     val file = implicitly[sourcecode.File]
-    assert(file.value.endsWith("/sourcecode/Implicits.scala"))
+    assert(posix(file.value).endsWith("/sourcecode/Implicits.scala"))
+    assert(file.posix.endsWith("/sourcecode/Implicits.scala"))
 
     val relFile = implicitly[sourcecode.RelFile]
     if (TestUtil.isScala3) {
-      assertEquals(relFile.value, "sourcecode/test/src/sourcecode/Implicits.scala")
+      assertEquals(posix(relFile.value), "sourcecode/test/src/sourcecode/Implicits.scala")
+      assertEquals(relFile.posix, "sourcecode/test/src/sourcecode/Implicits.scala")
     } else {
-      assert(relFile.value.endsWith("sourcecode/test/src/sourcecode/Implicits.scala"))
+      assert(posix(relFile.value).endsWith("sourcecode/test/src/sourcecode/Implicits.scala"))
+      assert(relFile.posix.endsWith("sourcecode/test/src/sourcecode/Implicits.scala"))
     }
 
     val fileName = implicitly[sourcecode.FileName]
