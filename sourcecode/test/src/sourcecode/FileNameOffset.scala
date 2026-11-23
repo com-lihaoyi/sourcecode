@@ -1,5 +1,7 @@
 package sourcecode
 
+import sourcecode.PlatformUtil.posix
+
 object FileNameOffset {
   def main() = {
     //SOURCECODE_ORIGINAL_FILE_PATH=Hello/World.Test
