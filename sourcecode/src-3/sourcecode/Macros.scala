@@ -95,6 +95,8 @@ object Util{
 
 object Macros {
 
+  private val separator = java.io.File.separator
+
   def findOwner(using Quotes)(owner: quotes.reflect.Symbol, skipIf: quotes.reflect.Symbol => Boolean): quotes.reflect.Symbol = {
     var owner0 = owner
     while(skipIf(owner0)) owner0 = owner0.owner
@@ -172,6 +174,8 @@ object Macros {
       .flatMap(_.linesIterator)
       .find(_.contains(filePrefix))
       .flatMap(_.split(filePrefix).lastOption)
+      // convert to platform separators
+      .map(_.replace("/", separator))
   }
 
   def fileImpl(using Quotes): Expr[sourcecode.File] = {
@@ -196,33 +200,37 @@ object Macros {
       // Read from compiler arg `-XmacroSettings:sourcecode.relfile.root=<base-path>`
       settings.collectFirst {
         case s if s.startsWith(prefix) => s.stripPrefix(prefix)
-      }.orElse(sys.props.get("sourcecode.relfile.root"))
+      }
+        // in case we got a posix path config on Windows
+        .map(_.replace("/", separator))
     } catch {
       case NonFatal(_) => None
     }
 
-    if (relBase.isEmpty) report.warning(
-      s"sourcecode.RelFile: Base path not specified. Make sure to use compiler argument: -Xmacro-settings:${prefix}<path>",
-      Position.ofMacroExpansion
-    )
-
     val file = filePrefixCache.computeIfAbsent(sourceFile, _ => findOriginalFile(sourceFile.content))
       .getOrElse(sourceFile.path)
 
-    val relFile: String = relBase
-      .map { base => base.replace(java.io.File.separator, "/") }
+    if (relBase.isEmpty) report.warning(
+      s"Base path not specified. Using absolute file path '${file}'. Make sure to use compiler argument: -Xmacro-settings:${prefix}<path>",
+      Position.ofMacroExpansion
+    )
+    val relFile0: Option[String] = relBase
       .map { base =>
         if (base.isEmpty) base
-        else if (base.last != '/') base + "/"
+        else if (!base.endsWith(separator)) base + separator
         else base
       }
-      .map { base =>
-        if (file.startsWith(base)) file.stripPrefix(base)
-        else file
+      .flatMap { base =>
+        if (file.startsWith(base)) Some(file.stripPrefix(base))
+        else None
       }
-      .getOrElse(file)
 
-    // TODO: print compiler warning/error, if no setting could be found
+    if (relFile0.isEmpty) report.warning(
+      s"Base path ${relBase.getOrElse("''")} is not an prefix of source file path ${file}",
+      Position.ofMacroExpansion
+    )
+
+    val relFile = relFile0.getOrElse(file)
 
     '{
       new sourcecode.RelFile(${
@@ -237,13 +245,18 @@ object Macros {
     val file = filePrefixCache.computeIfAbsent(sourceFile, _ => findOriginalFile(sourceFile.content))
       .getOrElse(sourceFile.path)
 
-    val name = file.split('/').last
+    val name = file.split("\\Q" + separator + "\\E").last
 
-    '{new sourcecode.FileName(${Expr(name)})}
+    '{
+      new sourcecode.FileName(${
+        Expr(name)
+      })
+    }
   }
 
   private val linePrefix = "//SOURCECODE_ORIGINAL_CODE_START_MARKER"
   private val linePrefixCache = new ConcurrentHashMap[Any, Int]()
+
   private def findLineNumber(contents: Option[String]) = {
     contents
       .iterator

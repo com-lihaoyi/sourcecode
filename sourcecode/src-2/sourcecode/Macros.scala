@@ -66,6 +66,8 @@ object Util{
 
 object Macros {
 
+  private val separator = java.io.File.separator
+
   def nameImpl(c: Compat.Context): c.Expr[Name] = {
     import c.universe._
     var owner = Compat.enclosingOwner(c)
@@ -103,7 +105,11 @@ object Macros {
   private val filePrefixCache =
     new ConcurrentHashMap[scala.reflect.internal.util.SourceFile, Option[String]]()
   private def findOriginalFile(chars: Array[Char]): Option[String] = {
-    new String(chars).linesIterator.find(_.contains(filePrefix)).map(_.split(filePrefix).last)
+    new String(chars).linesIterator
+      .find(_.contains(filePrefix))
+      .map(_.split(filePrefix).last)
+      // convert to platform separators
+      .map(_.replace("/", separator))
   }
 
   def fileImpl(c: Compat.Context): c.Expr[sourcecode.File] = {
@@ -133,7 +139,7 @@ object Macros {
     val fileName = filePrefixCache
       .computeIfAbsent(c.enclosingPosition.source, source => findOriginalFile(source.content))
       .getOrElse(c.enclosingPosition.source.path)
-      .split('/').last
+      .split("\\Q" + separator + "\\E").last
     c.Expr[sourcecode.FileName](q"""${c.prefix}($fileName)""")
   }
 

@@ -13,18 +13,34 @@ on:
 jobs:
   test:
     strategy:
+      fail-fast: false
       matrix:
         os: ['ubuntu-latest', 'windows-latest']
         java: ['11', '17']
     runs-on: ${{ matrix.os }}
     steps:
+
+      # work around an clang version mismatch, https://github.com/actions/runner-images/issues/15367
+      - name: Select Visual Studio bundled Clang (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $clangBin = "C:\Program Files\Microsoft Visual Studio\18\Enterprise\VC\Tools\Llvm\x64\bin"
+          "$clangBin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Verify compiler (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          where.exe clang
+          clang --version
+
       - uses: actions/checkout@v4
       - name: Select JVM temurin:${{ matrix.java }}
         run: |
           echo "temurin:${{ matrix.java }}" > .mill-jvm-version
           echo "/.mill-jvm-version" >> .git/info/exclude
       - name: Run tests
-        run: ./mill -i __.publishArtifacts + __.test.run
+        run: ./mill -i -k __.publishArtifacts + __.test.run
 
   check-binary-compatibility:
     runs-on: ubuntu-latest
@@ -37,7 +53,7 @@ jobs:
           echo "temurin:11" > .mill-jvm-version
           echo "/.mill-jvm-version" >> .git/info/exclude
       - name: Check Binary Compatibility
-        run: ./mill -i __.mimaReportBinaryIssues
+        run: ./mill -i -k __.mimaReportBinaryIssues
 
   publish-sonatype:
     if: github.repository == 'com-lihaoyi/sourcecode' && contains(github.ref, 'refs/tags/')
@@ -53,6 +69,21 @@ jobs:
       LC_ALL: "en_US.UTF-8"
 
     steps:
+
+      # work around an clang version mismatch, https://github.com/actions/runner-images/issues/15367
+      - name: Select Visual Studio bundled Clang (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $clangBin = "C:\Program Files\Microsoft Visual Studio\18\Enterprise\VC\Tools\Llvm\x64\bin"
+          "$clangBin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Verify compiler (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          where.exe clang
+          clang --version
+
       - uses: actions/checkout@v3
       - name: Select JVM temurin:11
         run: |
