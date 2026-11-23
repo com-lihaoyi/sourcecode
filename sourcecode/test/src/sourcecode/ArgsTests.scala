@@ -8,7 +8,7 @@ object ArgsTests {
     def debug(implicit arguments: sourcecode.Args): Unit = args = arguments.value.map(_.map(t => t.source -> t.value))
 
     def check(expected: Seq[Seq[(String, Any)]]): Unit =
-      assert(args == expected, s"Expected: $expected, got: $args")
+      assertEquals(args, expected)
 
     def foo(p1: String, p2: Long, p3: Boolean)(foo: String, bar: String): Unit = {
       debug

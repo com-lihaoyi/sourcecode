@@ -3,16 +3,16 @@ package sourcecode
 object Implicits {
   def implicitRun() = {
     val name = implicitly[sourcecode.Name]
-    assert(name.value == "name")
+    assertEquals(name.value, "name")
 
     val fullName = implicitly[sourcecode.FullName]
-    assert(fullName.value == "sourcecode.Implicits.fullName")
+    assertEquals(fullName.value, "sourcecode.Implicits.fullName")
 
     val enclosing = implicitly[sourcecode.Enclosing]
-    assert(enclosing.value == "sourcecode.Implicits.implicitRun enclosing")
+    assertEquals(enclosing.value, "sourcecode.Implicits.implicitRun enclosing")
 
     val pkg = implicitly[sourcecode.Pkg]
-    assert(pkg.value == "sourcecode")
+    assertEquals(pkg.value, "sourcecode")
 
     val file = implicitly[sourcecode.File]
     assert(file.value.endsWith("/sourcecode/Implicits.scala"))
@@ -25,10 +25,10 @@ object Implicits {
     }
 
     val fileName = implicitly[sourcecode.FileName]
-    assert(fileName.value == "Implicits.scala")
+    assertEquals(fileName.value, "Implicits.scala")
 
     val line = implicitly[sourcecode.Line]
-    assert(line.value == 30) // Line-sensitive magic number !
+    assertEquals(line.value, 30) // Line-sensitive magic number !
 
     lazy val myLazy = {
       /* Bar used to be a trait, but that ran into the upstream bug
@@ -37,7 +37,7 @@ object Implicits {
        */
       abstract class Bar {
         val name = implicitly[sourcecode.Name]
-        assert(name.value == "name")
+        assertEquals(name.value, "name")
 
         val fullName = implicitly[sourcecode.FullName]
         assert(
@@ -49,7 +49,7 @@ object Implicits {
         assert(file.value.endsWith("/sourcecode/Implicits.scala"))
 
         val fileName = implicitly[sourcecode.FileName]
-        assert(fileName.value == "Implicits.scala")
+        assertEquals(fileName.value, "Implicits.scala")
 
         val line = implicitly[sourcecode.Line]
         assert(line.value == 54)
