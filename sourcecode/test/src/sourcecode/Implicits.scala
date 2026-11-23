@@ -17,25 +17,32 @@ object Implicits {
     val file = implicitly[sourcecode.File]
     assert(file.value.endsWith("/sourcecode/Implicits.scala"))
 
+    val relFile = implicitly[sourcecode.RelFile]
+    if (TestUtil.isScala3) {
+      assertEquals(relFile.value, "sourcecode/test/src/sourcecode/Implicits.scala")
+    } else {
+      assert(relFile.value.endsWith("sourcecode/test/src/sourcecode/Implicits.scala"))
+    }
+
     val fileName = implicitly[sourcecode.FileName]
     assert(fileName.value == "Implicits.scala")
 
     val line = implicitly[sourcecode.Line]
-    assert(line.value == 23)
+    assert(line.value == 30) // Line-sensitive magic number !
 
     lazy val myLazy = {
       /* Bar used to be a trait, but that ran into the upstream bug
        * https://github.com/scala-js/scala-js/issues/3918 in Scala.js 1.0.0-RC2
        * and Scala 2.12+. We use an abstract class as a workaround.
        */
-      abstract class Bar{
+      abstract class Bar {
         val name = implicitly[sourcecode.Name]
         assert(name.value == "name")
 
         val fullName = implicitly[sourcecode.FullName]
         assert(
           fullName.value == "sourcecode.Implicits.Bar.fullName" ||
-          fullName.value == "sourcecode.Implicits._$Bar.fullName"  // Dotty
+            fullName.value == "sourcecode.Implicits._$Bar.fullName" // Dotty
         )
 
         val file = implicitly[sourcecode.File]
@@ -45,16 +52,16 @@ object Implicits {
         assert(fileName.value == "Implicits.scala")
 
         val line = implicitly[sourcecode.Line]
-        assert(line.value == 47)
+        assert(line.value == 54)
 
         val enclosing = implicitly[sourcecode.Enclosing]
         assert(
           enclosing.value == "sourcecode.Implicits.implicitRun myLazy$lzy Bar#enclosing" ||
-          enclosing.value == "sourcecode.Implicits.implicitRun myLazy Bar#enclosing" || // encoding changed in Scala 2.12
-          enclosing.value == "sourcecode.Implicits.implicitRun myLazy Bar.enclosing"  // Dotty
+            enclosing.value == "sourcecode.Implicits.implicitRun myLazy Bar#enclosing" || // encoding changed in Scala 2.12
+            enclosing.value == "sourcecode.Implicits.implicitRun myLazy Bar.enclosing" // Dotty
         )
       }
-      val b = new Bar{}
+      val b = new Bar {}
     }
     myLazy
   }

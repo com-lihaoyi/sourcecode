@@ -60,9 +60,11 @@ object sourcecode extends Module {
   object jvm extends Cross[JvmSourcecodeModule](scalaVersions)
   trait JvmSourcecodeModule extends SourcecodeMainModule with ScalaModule with SourcecodeModule {
 
-    object test extends ScalaTests{
-
+    object test extends ScalaTests {
       def testFramework = ""
+      def scalacOptions = super.scalacOptions() ++ Seq(
+        s"-Xmacro-settings:sourcecode.relfile.root=${Task.ctx().workspace}"
+      )
     }
   }
 
@@ -72,6 +74,9 @@ object sourcecode extends Module {
     def scalaJSVersion = "1.17.0"
     object test extends ScalaJSTests{
       def testFramework = ""
+      def scalacOptions = super.scalacOptions() ++ Seq(
+        s"-Xmacro-settings:sourcecode.relfile.root=${Task.ctx().workspace}"
+      )
     }
   }
 
@@ -83,6 +88,9 @@ object sourcecode extends Module {
       // stub to make use of test plumbing but not running a test suite
       def mainClass = Some("sourcecode.Main")
       def testFramework = ""
+      def scalacOptions = super.scalacOptions() ++ Seq(
+        s"-Xmacro-settings:sourcecode.relfile.root=${Task.ctx().workspace}"
+      )
     }
   }
 }
