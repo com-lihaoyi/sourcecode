@@ -49,6 +49,7 @@ trait PkgMacros {
 
 trait TextMacros {
   implicit def generate[T](v: T): Text[T] = macro Macros.text[T]
+
   def apply[T](v: T): Text[T] = macro Macros.text[T]
 }
 
@@ -56,11 +57,13 @@ trait ArgsMacros {
   implicit def generate: Args = macro Macros.argsImpl
 }
 
-object Util{
+object Util {
   def isSynthetic(c: Compat.Context)(s: c.Symbol) = isSyntheticName(getName(c)(s))
+
   def isSyntheticName(name: String) = {
     name == "<init>" || (name.startsWith("<local ") && name.endsWith(">")) || name == "$anonfun"
   }
+
   def getName(c: Compat.Context)(s: c.Symbol) = s.name.decoded.toString.trim
 }
 
@@ -71,7 +74,7 @@ object Macros {
   def nameImpl(c: Compat.Context): c.Expr[Name] = {
     import c.universe._
     var owner = Compat.enclosingOwner(c)
-    while(Util.isSynthetic(c)(owner)) owner = owner.owner
+    while (Util.isSynthetic(c)(owner)) owner = owner.owner
     val simpleName = Util.getName(c)(owner)
     c.Expr[sourcecode.Name](q"""${c.prefix}($simpleName)""")
   }
@@ -104,6 +107,7 @@ object Macros {
   private val filePrefix = "//SOURCECODE_ORIGINAL_FILE_PATH="
   private val filePrefixCache =
     new ConcurrentHashMap[scala.reflect.internal.util.SourceFile, Option[String]]()
+
   private def findOriginalFile(chars: Array[Char]): Option[String] = {
     new String(chars).linesIterator
       .find(_.contains(filePrefix))
@@ -124,14 +128,41 @@ object Macros {
 
   def relFileImpl(c: Compat.Context): c.Expr[sourcecode.RelFile] = {
     import c.universe._
+    val prefix = "sourcecode.relfile.root="
+    val relBase = c.settings.collectFirst {
+        case s if s.startsWith(prefix) => s.stripPrefix(prefix)
+      }
+      // in case we got a posix path config on Windows
+      .map(_.replace("/", separator))
 
     val file = filePrefixCache
       .computeIfAbsent(c.enclosingPosition.source, source => findOriginalFile(source.content))
       .getOrElse(c.enclosingPosition.source.path)
 
-    // FIXME: currently, we don't support relative file
+    if (relBase.isEmpty) c.warning(
+      c.enclosingPosition,
+      s"Base path not specified. Using path '${file}' as-is. Make sure to use compiler argument: -Xmacro-settings:${prefix}<path>"
+    )
 
-    c.Expr[sourcecode.RelFile](q"""${c.prefix}($file)""")
+    val relFile0: Option[String] = relBase
+      .map { base =>
+        if (base.isEmpty) base
+        else if (!base.endsWith(separator)) base + separator
+        else base
+      }
+      .flatMap { base =>
+        if (file.startsWith(base)) Some(file.stripPrefix(base))
+        else None
+      }
+
+    if (relFile0.isEmpty) c.warning(
+      c.enclosingPosition,
+      s"Base path ${relBase.getOrElse("''")} is not a prefix of source file path ${file}"
+    )
+
+    val relFile = relFile0.getOrElse(file)
+
+    c.Expr[sourcecode.RelFile](q"""${c.prefix}($relFile)""")
   }
 
   def fileNameImpl(c: Compat.Context): c.Expr[sourcecode.FileName] = {
@@ -146,14 +177,14 @@ object Macros {
   private val linePrefix = "//SOURCECODE_ORIGINAL_CODE_START_MARKER"
   private val linePrefixCache =
     new ConcurrentHashMap[scala.reflect.internal.util.SourceFile, Int]()
-  
+
   def lineImpl(c: Compat.Context): c.Expr[sourcecode.Line] = {
     import c.universe._
     val offset = linePrefixCache.computeIfAbsent(
       c.enclosingPosition.source,
       source => new String(source.content)
         .linesIterator
-        .indexWhere(_.contains(linePrefix)) match{
+        .indexWhere(_.contains(linePrefix)) match {
         case -1 => 0
         case n => n + 1
       }
@@ -198,15 +229,24 @@ object Macros {
     val tree = q"""${c.prefix}(${v.tree}, $txt)"""
     c.Expr[sourcecode.Text[T]](tree)
   }
+
   sealed trait Chunk
-  object Chunk{
+
+  object Chunk {
     case class Pkg(name: String) extends Chunk
+
     case class Obj(name: String) extends Chunk
+
     case class Cls(name: String) extends Chunk
+
     case class Trt(name: String) extends Chunk
+
     case class Val(name: String) extends Chunk
+
     case class Var(name: String) extends Chunk
+
     case class Lzy(name: String) extends Chunk
+
     case class Def(name: String) extends Chunk
 
   }
@@ -216,7 +256,7 @@ object Macros {
     import c.universe._
     var current = Compat.enclosingOwner(c)
     var path = List.empty[Chunk]
-    while(current != NoSymbol && current.toString != "package <root>"){
+    while (current != NoSymbol && current.toString != "package <root>") {
       if (filter(current)) {
 
         val chunk = current match {
@@ -234,7 +274,7 @@ object Macros {
       }
       current = current.owner
     }
-    val renderedPath = path.map{
+    val renderedPath = path.map {
       case Chunk.Pkg(s) => s + "."
       case Chunk.Obj(s) => s + "."
       case Chunk.Cls(s) => s + "#"

@@ -20,18 +20,14 @@ object Apply {
     assert(posix(file).endsWith("/sourcecode/Apply.scala"))
 
     val relFile = sourcecode.RelFile()
-    if (TestUtil.isScala3) {
-      val relFileExpected = "sourcecode/test/src/sourcecode/Apply.scala"
-      assertEquals(posix(relFile), relFileExpected)
-    } else {
-      assert(posix(relFile).endsWith("/sourcecode/Apply.scala"))
-    }
+    val relFileExpected = "sourcecode/test/src/sourcecode/Apply.scala"
+    assertEquals(posix(relFile), relFileExpected)
 
     val fileName = sourcecode.FileName()
     assertEquals(fileName, "Apply.scala")
 
     val line = sourcecode.Line()
-    assertEquals(line, 33) // Line-sensitive magic number !
+    assertEquals(line, 29) // Line-sensitive magic number !
 
     lazy val myLazy = {
       /* Bar used to be a trait, but that ran into the upstream bug
@@ -49,18 +45,14 @@ object Apply {
         assert(posix(file).endsWith("/sourcecode/Apply.scala"))
 
         val relFile = sourcecode.RelFile()
-        if (TestUtil.isScala3) {
-          val relFileExpected = "sourcecode/test/src/sourcecode/Apply.scala"
-          assertEquals(posix(relFile), relFileExpected)
-        } else {
-          assert(posix(relFile).endsWith("/sourcecode/Apply.scala"))
-        }
+        val relFileExpected = "sourcecode/test/src/sourcecode/Apply.scala"
+        assertEquals(posix(relFile), relFileExpected)
 
         val fileName = sourcecode.FileName()
         assertEquals(fileName, "Apply.scala")
 
         val line = sourcecode.Line()
-        assertEquals(line, 62) // Line-sensitive magic number !
+        assertEquals(line, 54) // Line-sensitive magic number !
 
         val enclosing = sourcecode.Enclosing()
         assert(
