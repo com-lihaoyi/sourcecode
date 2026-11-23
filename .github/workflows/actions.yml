@@ -27,7 +27,6 @@ jobs:
         run: |
           $clangBin = "C:\Program Files\Microsoft Visual Studio\18\Enterprise\VC\Tools\Llvm\x64\bin"
           "$clangBin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
       - name: Verify compiler (Windows)
         if: matrix.os == 'windows-latest'
         shell: pwsh
@@ -70,6 +69,21 @@ jobs:
       LC_ALL: "en_US.UTF-8"
 
     steps:
+
+      # work around an clang version mismatch, https://github.com/actions/runner-images/issues/15367
+      - name: Select Visual Studio bundled Clang (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $clangBin = "C:\Program Files\Microsoft Visual Studio\18\Enterprise\VC\Tools\Llvm\x64\bin"
+          "$clangBin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Verify compiler (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          where.exe clang
+          clang --version
+
       - uses: actions/checkout@v3
       - name: Select JVM temurin:11
         run: |
