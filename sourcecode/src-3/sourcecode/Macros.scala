@@ -174,6 +174,8 @@ object Macros {
       .flatMap(_.linesIterator)
       .find(_.contains(filePrefix))
       .flatMap(_.split(filePrefix).lastOption)
+      // convert to platform separators
+      .map(_.replace("/", separator))
   }
 
   def fileImpl(using Quotes): Expr[sourcecode.File] = {
