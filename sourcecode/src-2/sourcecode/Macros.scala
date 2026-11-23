@@ -66,7 +66,7 @@ object Util{
 
 object Macros {
 
-  private val separator = if(scala.util.Properties.isWin) "\\" else "/"
+  private val separator = java.io.File.separator
 
   def nameImpl(c: Compat.Context): c.Expr[Name] = {
     import c.universe._

@@ -1,5 +1,7 @@
 package sourcecode
 
+import sourcecode.PlatformUtil.posix
+
 object Implicits {
   def implicitRun() = {
     val name = implicitly[sourcecode.Name]
@@ -31,7 +33,7 @@ object Implicits {
     assertEquals(fileName.value, "Implicits.scala")
 
     val line = implicitly[sourcecode.Line]
-    assertEquals(line.value, 30) // Line-sensitive magic number !
+    assertEquals(line.value, 35) // Line-sensitive magic number !
 
     lazy val myLazy = {
       /* Bar used to be a trait, but that ran into the upstream bug
@@ -55,7 +57,7 @@ object Implicits {
         assertEquals(fileName.value, "Implicits.scala")
 
         val line = implicitly[sourcecode.Line]
-        assert(line.value == 54)
+        assertEquals(line.value, 59) // Line-sensitive magic number !
 
         val enclosing = implicitly[sourcecode.Enclosing]
         assert(

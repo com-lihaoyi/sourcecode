@@ -95,7 +95,7 @@ object Util{
 
 object Macros {
 
-  private val separator = if(scala.util.Properties.isWin) "\\" else "/"
+  private val separator = java.io.File.separator
 
   def findOwner(using Quotes)(owner: quotes.reflect.Symbol, skipIf: quotes.reflect.Symbol => Boolean): quotes.reflect.Symbol = {
     var owner0 = owner

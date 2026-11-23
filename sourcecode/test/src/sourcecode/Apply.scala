@@ -1,5 +1,7 @@
 package sourcecode
 
+import sourcecode.PlatformUtil.posix
+
 object Apply {
   def applyRun() = {
     val name = sourcecode.Name()
@@ -29,7 +31,7 @@ object Apply {
     assertEquals(fileName, "Apply.scala")
 
     val line = sourcecode.Line()
-    assertEquals(line, 31) // Line-sensitive magic number !
+    assertEquals(line, 33) // Line-sensitive magic number !
 
     lazy val myLazy = {
       /* Bar used to be a trait, but that ran into the upstream bug
@@ -58,7 +60,7 @@ object Apply {
         assertEquals(fileName, "Apply.scala")
 
         val line = sourcecode.Line()
-        assertEquals(line, 60) // Line-sensitive magic number !
+        assertEquals(line, 62) // Line-sensitive magic number !
 
         val enclosing = sourcecode.Enclosing()
         assert(

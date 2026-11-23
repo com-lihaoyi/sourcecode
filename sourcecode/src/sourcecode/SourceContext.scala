@@ -19,18 +19,14 @@ object FullName extends SourceCompanion[String, FullName](new FullName(_)) with 
 }
 
 case class File(value: String) extends SourceValue[String] {
-  def posix: String = value.replace(File.separator, "/")
+  def posix: String = PlatformUtil.posix(value)
 }
-object File extends SourceCompanion[String, File](new File(_)) with FileMacros {
-  private val separator = if(scala.util.Properties.isWin) "\\" else "/"
-}
+object File extends SourceCompanion[String, File](new File(_)) with FileMacros
 
 case class RelFile(value: String) extends SourceValue[String] {
-  def posix: String = value.replace(RelFile.separator, "/")
+  def posix: String = PlatformUtil.posix(value)
 }
-object RelFile extends SourceCompanion[String, RelFile](new RelFile(_)) with RelFileMacros {
-  private val separator = if(scala.util.Properties.isWin) "\\" else "/"
-}
+object RelFile extends SourceCompanion[String, RelFile](new RelFile(_)) with RelFileMacros
 
 case class FileName(value: String) extends SourceValue[String]
 object FileName extends SourceCompanion[String, FileName](new FileName(_)) with FileNameMacros
