@@ -3,16 +3,16 @@ package sourcecode
 object Apply {
   def applyRun() = {
     val name = sourcecode.Name()
-    assert(name == "name")
+    assertEquals(name,"name")
 
     val fullName = sourcecode.FullName()
-    assert(fullName == "sourcecode.Apply.fullName")
+    assertEquals(fullName, "sourcecode.Apply.fullName")
 
     val enclosing = sourcecode.Enclosing()
-    assert(enclosing == "sourcecode.Apply.applyRun enclosing")
+    assertEquals(enclosing, "sourcecode.Apply.applyRun enclosing")
 
     val pkg = sourcecode.Pkg()
-    assert(pkg == "sourcecode")
+    assertEquals(pkg, "sourcecode")
 
     val file = sourcecode.File()
     assert(file.endsWith("/sourcecode/Apply.scala"))
@@ -26,10 +26,10 @@ object Apply {
     }
 
     val fileName = sourcecode.FileName()
-    assert(fileName == "Apply.scala")
+    assertEquals(fileName, "Apply.scala")
 
     val line = sourcecode.Line()
-    assert(line == 31) // Line-sensitive magic number !
+    assertEquals(line, 31) // Line-sensitive magic number !
 
     lazy val myLazy = {
       /* Bar used to be a trait, but that ran into the upstream bug
@@ -38,10 +38,10 @@ object Apply {
        */
       abstract class Bar {
         val name = sourcecode.Name()
-        assert(name == "name")
+        assertEquals(name, "name")
 
         val fullName = sourcecode.FullName()
-        assert(fullName == "sourcecode.Apply.Bar.fullName")
+        assertEquals(fullName,"sourcecode.Apply.Bar.fullName")
 
         val file = sourcecode.File()
         assert(file.endsWith("/sourcecode/Apply.scala"))
@@ -55,10 +55,10 @@ object Apply {
         }
 
         val fileName = sourcecode.FileName()
-        assert(fileName == "Apply.scala")
+        assertEquals(fileName, "Apply.scala")
 
         val line = sourcecode.Line()
-        assert(line == 60) // Line-sensitive magic number !
+        assertEquals(line, 60) // Line-sensitive magic number !
 
         val enclosing = sourcecode.Enclosing()
         assert(

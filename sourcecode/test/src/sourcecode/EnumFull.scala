@@ -12,7 +12,7 @@ object EnumFull {
       val firstItem = value
       val secondItem = value
     }
-    assert(MyEnum.firstItem.toString == "sourcecode.EnumFull.MyEnum.firstItem")
-    assert(MyEnum.secondItem.toString == "sourcecode.EnumFull.MyEnum.secondItem")
+    assertEquals(MyEnum.firstItem.toString, "sourcecode.EnumFull.MyEnum.firstItem")
+    assertEquals(MyEnum.secondItem.toString, "sourcecode.EnumFull.MyEnum.secondItem")
   }
 }

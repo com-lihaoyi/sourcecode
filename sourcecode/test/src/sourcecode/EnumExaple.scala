@@ -12,7 +12,7 @@ object EnumExaple {
       val firstItem = value
       val secondItem = value
     }
-    assert(MyEnum.firstItem.toString == "firstItem")
-    assert(MyEnum.secondItem.toString == "secondItem")
+    assertEquals(MyEnum.firstItem.toString, "firstItem")
+    assertEquals(MyEnum.secondItem.toString, "secondItem")
   }
 }
