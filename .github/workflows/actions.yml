@@ -18,7 +18,7 @@ jobs:
         java: ['11', '17']
     steps:
       - uses: actions/checkout@v4
-      - name: Select JVM
+      - name: Select JVM temurin:${{ matrix.java }}
         run: |
           echo "temurin:${{ matrix.java }}" > .mill-jvm-version
           echo "/.mill-jvm-version" >> .git/info/exclude
@@ -31,7 +31,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Select JVM
+      - name: Select JVM temurin:11
         run: |
           echo "temurin:11" > .mill-jvm-version
           echo "/.mill-jvm-version" >> .git/info/exclude
@@ -53,9 +53,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Select JVM
+      - name: Select JVM temurin:11
         run: |
-          echo "temurin:${{ matrix.java }}" > .mill-jvm-version
+          echo "temurin:11" > .mill-jvm-version
           echo "/.mill-jvm-version" >> .git/info/exclude
       - name: Publish to Maven Central
         run: ./mill -i mill.scalalib.SonatypeCentralPublishModule/
