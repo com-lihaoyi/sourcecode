@@ -114,16 +114,16 @@ Download
 
 ```scala
 def mvnDeps = Seq(
-  mvn"com.lihaoyi::sourcecode:0.4.5", // Scala-JVM
-  mvn"com.lihaoyi::sourcecode::0.4.5" // Scala.js / Scala Native
+  mvn"com.lihaoyi::sourcecode:0.4.6", // Scala-JVM
+  mvn"com.lihaoyi::sourcecode::0.4.6" // Scala.js / Scala Native
 )
 ```
 
 **sbt**
 
 ```scala
-"com.lihaoyi" %% "sourcecode" % "0.4.5" // Scala-JVM
-"com.lihaoyi" %%% "sourcecode" % "0.4.5" // Scala.js / Scala Native
+"com.lihaoyi" %% "sourcecode" % "0.4.6" // Scala-JVM
+"com.lihaoyi" %%% "sourcecode" % "0.4.6" // Scala.js / Scala Native
 ```
 
 
@@ -644,6 +644,12 @@ in its `.toString` method.
 
 Version History
 ===============
+
+0.4.6
+-----
+
+* Properly support Windows, reviewed path separator handling ([#210](https://github.com/com-lihaoyi/sourcecode/pull/210)) 
+* Complete `sourcecode.RelFile` support for Scala 2 ([#212](https://github.com/com-lihaoyi/sourcecode/pull/212))
 
 0.4.5
 -----
